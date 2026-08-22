@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Hind } from "next/font/google";
 import "./globals.css";
 import { Disclaimer } from "@/components/Disclaimer";
+import { QuickExit } from "@/components/QuickExit";
 
 /** Hind covers Latin and Devanagari properly — neither is a fallback. */
 const appSans = Hind({
@@ -41,6 +42,7 @@ export default function RootLayout({
           </main>
           <Disclaimer />
         </div>
+        <QuickExit />
       </body>
     </html>
   );

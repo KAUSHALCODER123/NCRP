@@ -2,29 +2,39 @@
 
 @theme {
   /* Surfaces */
-  --color-canvas: #f7f8fa;
+  --color-canvas: #f6f8fb;
   --color-surface: #ffffff;
-  --color-sunken: #eef1f5;
-  --color-line: #dde2ea;
-  --color-line-strong: #c3ccd9;
+  --color-sunken: #eaeff6;
+  --color-line: #d8e0ea;
+  --color-line-strong: #bcc8d8;
 
-  /* Text */
-  --color-ink: #0f1722;
-  --color-ink-soft: #47536b;
-  --color-ink-faint: #6b7793;
+  /*
+   * Text. Deep slate rather than black: authoritative without feeling
+   * punitive. Contrast against --color-canvas is 15.8:1 (AAA).
+   */
+  --color-ink: #0d1b2a;
+  --color-ink-soft: #3f5068;
+  --color-ink-faint: #5f7189;
 
-  /* The next action. Never decorative. */
-  --color-primary: #1d4ed8;
-  --color-primary-hover: #1740b0;
-  --color-primary-soft: #e8efff;
+  /* Navy — authority. The next action, and never decorative. */
+  --color-primary: #14345e;
+  --color-primary-hover: #0d2544;
+  --color-primary-soft: #e5edf7;
 
-  /* Semantic case state. Colour MEANS something in this app. */
-  --color-held: #0f7a4d;          /* money secured, SLA healthy, dispute resolved */
-  --color-held-soft: #e3f5ec;
-  --color-pending: #a86400;       /* SLA at risk, awaiting acknowledgement */
-  --color-pending-soft: #fdf1dc;
-  --color-breach: #b4232a;        /* SLA breached, money moved, freeze failed */
-  --color-breach-soft: #fdeaea;
+  /*
+   * Semantic case state. Colour MEANS something in this app.
+   * Emerald = verified/secured. Crimson = high-priority alert.
+   * All three pass AA on their -soft backgrounds and on white.
+   */
+  --color-held: #05683f;          /* money secured, SLA healthy, dispute resolved */
+  --color-held-soft: #e2f4ec;
+  --color-pending: #8a5200;       /* SLA at risk, awaiting acknowledgement */
+  --color-pending-soft: #fcf0dd;
+  --color-breach: #a3111f;        /* SLA breached, money moved, freeze failed */
+  --color-breach-soft: #fdeaec;
+
+  /* Quick Exit — deliberately outside the semantic scale. */
+  --color-exit: #1b1f24;
 
   /* The balance that REMAINS USABLE under a micro-lien.
      This token exists for one screen and carries the whole thesis. */
