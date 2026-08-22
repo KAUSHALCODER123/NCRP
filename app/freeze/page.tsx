@@ -10,6 +10,7 @@ import { parseSms, SAMPLE_SMS } from "@/lib/sms-parser";
 import { clearDraft, saveDraft, useDraft } from "@/lib/draft";
 import { useNow } from "@/lib/use-now";
 import { useT } from "@/lib/i18n";
+import { reportSignal } from "@/lib/signal";
 import { formatPaise } from "@/lib/money";
 import { useStore } from "@/lib/store";
 import { planFanOut } from "@/lib/mock/banks";
@@ -156,6 +157,18 @@ export default function FreezePage() {
     useStore.setState((s) => ({
       cases: s.cases.map((x) => (x.id === c.id ? { ...x, freezes } : x)),
     }));
+
+    /*
+     * The identifier the money went to is the only thing worth keeping
+     * beyond this browser: it is what warns the next person and what turns
+     * separate complaints into one investigation. Nothing about the
+     * complainant is sent.
+     */
+    reportSignal({
+      identifier: counterparty || utrCheck.value,
+      scam: "financial",
+      amountPaise: amountCheck.paise ?? 0,
+    });
 
     setCaseId(c.id);
     setStep(3);

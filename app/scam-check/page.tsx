@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import clsx from "clsx";
 import { Button, Card, Chip, Shell, TopBar } from "@/components/ui";
@@ -15,6 +15,7 @@ import {
   SOURCES,
 } from "@/lib/scam-data";
 import type { ClusterHit } from "@/lib/types";
+import { signalCount } from "@/lib/signal";
 
 /**
  * Scam Check.
@@ -33,11 +34,31 @@ import type { ClusterHit } from "@/lib/types";
 export default function ScamCheckPage() {
   const [q, setQ] = useState("");
   const [hit, setHit] = useState<ClusterHit | null>(null);
+  const [live, setLive] = useState(0);
+  const [checked, setChecked] = useState("");
 
   function check(value: string) {
     setQ(value);
     setHit(lookupCluster(value));
+    setChecked(value.trim());
   }
+
+  /*
+   * Answers from what this deployment has actually recorded, on top of the
+   * seeded set. It is the project's own argument made literal: reports made
+   * here become the warning the next person sees.
+   */
+  useEffect(() => {
+    let cancelled = false;
+    // Every write happens in a callback: clearing the count synchronously in
+    // the effect body cascades a render on each change.
+    void (checked ? signalCount(checked) : Promise.resolve(0)).then((n) => {
+      if (!cancelled) setLive(n);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [checked]);
 
   return (
     <>
@@ -57,11 +78,14 @@ export default function ScamCheckPage() {
             <p className="text-[18px] font-semibold text-ink">
               Check a UPI ID, number or link
             </p>
-            <Chip>Demo data</Chip>
+            <Chip>{live > 0 ? "Seeded + live" : "Demo data"}</Chip>
           </div>
           <p className="mt-1.5 text-[16px] text-ink-soft">
-            This prototype searches a small seeded set, not real complaints. On
-            the live system it would query the reports already held by I4C.
+            This searches a small seeded set, plus anything reported through
+            this site. Reports here are stored without any personal detail —
+            only the identifier, so it becomes the warning the next person
+            sees. On the live system it would query the reports already held
+            by I4C.
           </p>
 
           <form
@@ -103,7 +127,7 @@ export default function ScamCheckPage() {
             ))}
           </div>
 
-          {hit ? <Result hit={hit} /> : null}
+          {hit ? <Result hit={hit} live={live} /> : null}
         </Card>
 
         {/* ---------------- Real services ---------------- */}
@@ -296,9 +320,11 @@ function Bar({
   );
 }
 
-function Result({ hit }: { hit: ClusterHit }) {
-  const risky = hit.reports > 0;
-  const high = hit.risk === "high";
+function Result({ hit, live }: { hit: ClusterHit; live: number }) {
+  const reports = hit.reports + live;
+  const risky = reports > 0;
+  // Seeded high-risk, or enough real reports here to be worth warning about.
+  const high = hit.risk === "high" || live >= 3;
 
   return (
     <div
@@ -321,7 +347,7 @@ function Result({ hit }: { hit: ClusterHit }) {
       {risky ? (
         <>
           <p className="mt-3 text-[17px] text-ink">
-            <strong className="data">{hit.reports}</strong> reports ·{" "}
+            <strong className="data">{reports}</strong> reports ·{" "}
             <strong className="data">
               {formatPaise(hit.totalReportedPaise)}
             </strong>{" "}

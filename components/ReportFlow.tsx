@@ -10,6 +10,7 @@ import type { KindConfig } from "@/lib/report-kinds";
 import { useT, type Key } from "@/lib/i18n";
 import { identify, detectedKey } from "@/lib/identify";
 import { lookupCluster } from "@/lib/mock/clusters";
+import { reportSignal, signalCount } from "@/lib/signal";
 
 /**
  * The non-financial report.
@@ -59,6 +60,7 @@ export function ReportFlow({ config }: { config: KindConfig }) {
   const [where, setWhere] = useState("");
   const [detail, setDetail] = useState("");
   const [phase, setPhase] = useState<Phase>("triage");
+  const [liveReports, setLiveReports] = useState(0);
   const [sent, setSent] = useState(0);
   const [caseId] = useState(makeCaseId);
   const [token] = useState(makeToken);
@@ -71,8 +73,36 @@ export function ReportFlow({ config }: { config: KindConfig }) {
    * so the dispatch list is built from the identifier, not fixed in advance.
    */
   const identified = identify(where);
+
+  useEffect(() => {
+    const value = identified.value;
+    let cancelled = false;
+
+    /*
+     * Debounced, and every write happens in a callback rather than in the
+     * effect body — clearing the count synchronously on each keystroke would
+     * cascade a render per character typed.
+     */
+    const timer = setTimeout(() => {
+      if (!value || value.length < 4) {
+        setLiveReports(0);
+        return;
+      }
+      void signalCount(value).then((n) => {
+        if (!cancelled) setLiveReports(n);
+      });
+    }, 400);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [identified.value]);
+
   const targets = [...identified.extraTargets, ...config.targets];
-  const known = identified.value ? lookupCluster(identified.value) : null;
+  // Seeded demo data plus whatever this deployment has actually recorded.
+  const seeded = identified.value ? lookupCluster(identified.value) : null;
+  const reports = (seeded?.reports ?? 0) + liveReports;
 
   /* Dispatch, shown as it happens — the analogue of the freeze receipt. */
   useEffect(() => {
@@ -265,10 +295,10 @@ export function ReportFlow({ config }: { config: KindConfig }) {
                   </p>
                 ) : null}
 
-                {known && known.reports > 0 ? (
+                {reports > 0 ? (
                   <div className="mt-3 rounded-[10px] border border-tertiary-border bg-tertiary-soft p-4">
                     <p className="text-[16px] font-semibold text-ink">
-                      {t("rp.alreadyReported")} — {known.reports}
+                      {t("rp.alreadyReported")} — {reports}
                     </p>
                     <p className="mt-1 text-[16px] text-ink-soft">
                       {t("rp.alreadyReportedSub")}
@@ -308,7 +338,13 @@ export function ReportFlow({ config }: { config: KindConfig }) {
                     !where.trim() ||
                     (situation === "other" && detail.trim().length < 20)
                   }
-                  onClick={() => setPhase("acting")}
+                  onClick={() => {
+                    reportSignal({
+                      identifier: identified.value,
+                      scam: config.kind,
+                    });
+                    setPhase("acting");
+                  }}
                 >
                   {rk("raceLabel", config.raceLabel)} →
                 </Button>
