@@ -7,7 +7,7 @@ import {
   type AssistantReply,
 } from "@/lib/assistant";
 import { guard } from "@/lib/rate-limit";
-import { askOpenAI } from "@/lib/openai";
+import { askAI } from "@/lib/ai";
 
 /**
  * The assistant endpoint.
@@ -55,8 +55,9 @@ export async function POST(request: Request) {
     return Response.json(local, { headers: gate.headers });
   }
 
-  const raw = await askOpenAI({
-    messages: [{ role: "system", content: SYSTEM_PROMPT }, ...turns],
+  const raw = await askAI({
+    system: SYSTEM_PROMPT,
+    messages: turns.map((m) => ({ role: m.role, text: m.content })),
     maxTokens: 260,
     temperature: 0.3,
     timeoutMs: TIMEOUT_MS,

@@ -27,7 +27,7 @@
 
 | # | Artefact | Status | Notes |
 |---|---|---|---|
-| 1 | Live public browser URL | ⬜ | Vercel. Must open in a browser — no app downloads |
+| 1 | Live public browser URL | ⬜ | Vercel. Must open in a browser — no app downloads. Set `GEMINI_API_KEY` in the project env vars, or the AI features quietly run offline |
 | 2 | Video, **max 2:00** | ⬜ | 1 min using it as a citizen · 1 min how it was built |
 | 3 | Summary, **exactly 250 words** | ⬜ | Count it twice |
 | 4 | Partner email | ✅ | Blank — solo |

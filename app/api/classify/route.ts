@@ -1,7 +1,7 @@
 import { classifyLocally, isValidClassification } from "@/lib/classify";
 import type { Classification } from "@/lib/types";
 import { guard } from "@/lib/rate-limit";
-import { askOpenAI } from "@/lib/openai";
+import { askAI } from "@/lib/ai";
 
 /**
  * Free text (typed or spoken, any language) -> category, statute, routing.
@@ -49,13 +49,11 @@ export async function POST(request: Request) {
   const fallback = classifyLocally(text);
   if (!text.trim()) return Response.json(fallback, { headers: gate.headers });
 
-  const raw = await askOpenAI({
-    messages: [
-      { role: "system", content: SYSTEM },
-      { role: "user", content: text },
-    ],
+  const raw = await askAI({
+    system: SYSTEM,
+    messages: [{ role: "user", text }],
     maxTokens: 300,
-    jsonObject: true,
+    json: true,
     timeoutMs: TIMEOUT_MS,
   });
   if (!raw) return Response.json(fallback, { headers: gate.headers });

@@ -15,7 +15,7 @@
  */
 
 import { guard } from "@/lib/rate-limit";
-import { askOpenAI } from "@/lib/openai";
+import { askAI } from "@/lib/ai";
 
 export const dynamic = "force-dynamic";
 
@@ -56,19 +56,11 @@ export async function POST(request: Request) {
     return Response.json(empty, { headers: gate.headers });
   }
 
-  const text = await askOpenAI({
-    vision: true,
+  const text = await askAI({
+    image: dataUrl,
+    messages: [{ role: "user", text: PROMPT }],
     maxTokens: 900,
     timeoutMs: TIMEOUT_MS,
-    messages: [
-      {
-        role: "user",
-        content: [
-          { type: "text", text: PROMPT },
-          { type: "image_url", image_url: { url: dataUrl, detail: "high" } },
-        ],
-      },
-    ],
   });
 
   return Response.json(

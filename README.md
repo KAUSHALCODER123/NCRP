@@ -44,13 +44,25 @@ npm install
 npm run dev
 ```
 
-Optional — for live AI intake classification, create `.env.local`:
+Optional — for live AI features (the assistant, intake classification and
+receipt OCR), create `.env.local` with either provider, or both:
 
 ```
-OPENAI_API_KEY=...
+GEMINI_API_KEY=...     # tried first
+OPENAI_API_KEY=...     # used if Gemini is unavailable
 ```
 
-Without a key the app falls back to deterministic classification. The demo works either way.
+Both are optional. Without a key the app answers from a deterministic
+classifier built on the same scam library the model is briefed on, so every
+flow still works — the demo does not depend on a model being reachable.
+
+Model choice is the cheapest tier of each provider (`gemini-*-flash-lite`,
+`gpt-5-nano`), since every call is a short classification or a two-to-four
+sentence reply. Override with `GEMINI_MODEL` or `OPENAI_CHAT_MODEL`.
+
+When both providers fail, one line is logged server-side naming the reason.
+Silent degradation is easy to miss here precisely because the offline answers
+are good.
 
 ---
 
