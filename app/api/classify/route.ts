@@ -1,6 +1,7 @@
 import { classifyLocally, isValidClassification } from "@/lib/classify";
 import type { Classification } from "@/lib/types";
 import { guard } from "@/lib/rate-limit";
+import { askOpenAI } from "@/lib/openai";
 
 /**
  * Free text (typed or spoken, any language) -> category, statute, routing.
@@ -46,50 +47,27 @@ export async function POST(request: Request) {
   }
 
   const fallback = classifyLocally(text);
-  const key = process.env.OPENAI_API_KEY;
+  if (!text.trim()) return Response.json(fallback, { headers: gate.headers });
 
-  if (!key || !text.trim()) {
-    return Response.json(fallback, { headers: gate.headers });
-  }
-
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+  const raw = await askOpenAI({
+    messages: [
+      { role: "system", content: SYSTEM },
+      { role: "user", content: text },
+    ],
+    maxTokens: 300,
+    jsonObject: true,
+    timeoutMs: TIMEOUT_MS,
+  });
+  if (!raw) return Response.json(fallback, { headers: gate.headers });
 
   try {
-    const res = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      signal: controller.signal,
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${key}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        temperature: 0,
-        response_format: { type: "json_object" },
-        messages: [
-          { role: "system", content: SYSTEM },
-          { role: "user", content: text },
-        ],
-      }),
-    });
-
-    if (!res.ok) return Response.json(fallback, { headers: gate.headers });
-
-    const data = (await res.json()) as {
-      choices?: { message?: { content?: string } }[];
-    };
-    const raw = data.choices?.[0]?.message?.content;
-    if (!raw) return Response.json(fallback, { headers: gate.headers });
-
     const parsed: unknown = JSON.parse(raw);
-    if (!isValidClassification(parsed)) return Response.json(fallback, { headers: gate.headers });
-
+    if (!isValidClassification(parsed)) {
+      return Response.json(fallback, { headers: gate.headers });
+    }
     const out: Classification = { ...parsed, fallback: false };
     return Response.json(out, { headers: gate.headers });
   } catch {
     return Response.json(fallback, { headers: gate.headers });
-  } finally {
-    clearTimeout(timer);
   }
 }

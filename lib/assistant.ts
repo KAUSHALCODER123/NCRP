@@ -49,6 +49,10 @@ ${SAFETY_RULES.map((r) => `- ${r}`).join("\n")}
 - Never claim to be the police, a bank, or a government service. Sahaay is a student proof of concept and files no real complaint.
 - For a real incident, the free national helpline is 1930 and the official portal is cybercrime.gov.in. Say so whenever it matters.
 
+SCOPE — you answer about cyber fraud and online crime in India, and nothing else.
+If someone asks about anything unrelated — code, homework, recipes, general knowledge, translation, entertainment, other government services, medical or financial advice — decline in one sentence and offer what you do cover. Do not answer partially, do not answer "just this once", and do not answer a general question because it was wrapped in a cybercrime framing.
+The line is drawn generously in the person's favour: anything about a scam, a suspicious message, money that has gone, an account, a threat, a police contact, or how reporting works IS in scope, whether or not it names a crime.
+
 HOW TO REPLY:
 - 2 to 4 short sentences. No lists unless asked. No preamble.
 - Reply in the same language the person wrote in. Indian languages are expected.
@@ -114,6 +118,35 @@ function matchScam(text: string): Scam | null {
 }
 
 /**
+ * Clearly-unrelated requests, for the offline path.
+ *
+ * Deliberately an allow-list of things that are obviously NOT cybercrime,
+ * rather than an attempt to detect what is. The asymmetry is on purpose: a
+ * regex cannot judge topic across seven languages, and wrongly refusing a
+ * frightened person because their wording did not match a pattern is far worse
+ * than answering something slightly off-topic. So the offline path only
+ * declines when it is confident, and the model — which can read any language —
+ * enforces the scope properly.
+ */
+const CLEARLY_OFF_TOPIC = new RegExp(
+  [
+    // "write me a poem", "generate a script"
+    String.raw`(write|generate|create|compose|summari[sz]e)\s+(me\s+)?(an?\s+)?`
+      + String.raw`(code|program|script|essay|poem|song|story|blog|article|email|resume|cv)`,
+    // general knowledge, entertainment, schoolwork
+    String.raw`(recipe|cricket|football|movie|lyrics|homework|assignment|horoscope|joke)`,
+    String.raw`(capital of|who is the president|prime minister of|translate this)`,
+    // programming help
+    String.raw`(python|javascript|typescript|java|sql|react|leetcode)`,
+  ].join("|"),
+  "i",
+);
+
+export function isClearlyOffTopic(text: string): boolean {
+  return CLEARLY_OFF_TOPIC.test(text);
+}
+
+/**
  * Answers without the model.
  *
  * This is not a degraded path — it is what runs when the key is missing, the
@@ -122,6 +155,21 @@ function matchScam(text: string): Scam | null {
  */
 export function answerLocally(text: string): AssistantReply {
   const scam = matchScam(text);
+
+  // Scope check runs after nothing — except that a live attack always wins,
+  // because someone typing "they are on the phone right now" must never be
+  // met with a refusal on a technicality.
+  if (!LIVE_ATTACK.test(text) && isClearlyOffTopic(text) && !scam) {
+    return {
+      fallback: true,
+      text:
+        "I only help with cyber fraud and online crime — scams, suspicious messages, money that has gone, or how reporting works. Ask me about any of those and I will help properly.",
+      actions: [
+        { label: "Report money lost", href: "/freeze" },
+        { label: "Check a UPI ID or number", href: "/scam-check" },
+      ],
+    };
+  }
 
   if (LIVE_ATTACK.test(text)) {
     return {
@@ -197,7 +245,7 @@ export function asksForSecret(text: string): boolean {
     `(share|send|tell|give|enter|provide|reveal|confirm)\s+(?:me\s+|us\s+)?(?:your\s+|the\s+|an?\s+)?(${SECRET})`,
     "gi",
   );
-  const NEGATED = /(never|not|non|don'?t|do not|no one|nobody|avoid|refuse|without)/i;
+  const NEGATED = /(never|not|non|don'?t|do not|no one|nobody|avoid|refuse|without)/i;
 
   for (const m of text.matchAll(ask)) {
     const i = m.index ?? 0;

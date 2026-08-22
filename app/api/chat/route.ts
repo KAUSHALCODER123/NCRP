@@ -7,6 +7,7 @@ import {
   type AssistantReply,
 } from "@/lib/assistant";
 import { guard } from "@/lib/rate-limit";
+import { askOpenAI } from "@/lib/openai";
 
 /**
  * The assistant endpoint.
@@ -50,58 +51,33 @@ export async function POST(request: Request) {
   const gate = guard(request, "classify", local);
   if (gate.refusal) return gate.refusal;
 
-  const key = process.env.OPENAI_API_KEY;
-  if (!key || !latest.trim()) {
+  if (!latest.trim()) {
     return Response.json(local, { headers: gate.headers });
   }
 
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+  const raw = await askOpenAI({
+    messages: [{ role: "system", content: SYSTEM_PROMPT }, ...turns],
+    maxTokens: 260,
+    temperature: 0.3,
+    timeoutMs: TIMEOUT_MS,
+  });
 
-  try {
-    const res = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      signal: controller.signal,
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${key}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        temperature: 0.3,
-        max_tokens: 260,
-        messages: [{ role: "system", content: SYSTEM_PROMPT }, ...turns],
-      }),
-    });
+  if (!raw) return Response.json(local, { headers: gate.headers });
 
-    if (!res.ok) return Response.json(local, { headers: gate.headers });
-
-    const data = (await res.json()) as {
-      choices?: { message?: { content?: string } }[];
-    };
-    const raw = data.choices?.[0]?.message?.content?.trim();
-    if (!raw) return Response.json(local, { headers: gate.headers });
-
-    /*
-     * Last line of defence. If a reply ever asks for a secret, we discard it
-     * and use the local answer instead — a model regression must not be able
-     * to turn this into the thing it warns people about.
-     */
-    if (/\b(your|the)\s+(otp|pin|cvv|password|passcode)\b/i.test(raw)) {
-      const suspicious = /(share|send|tell|give|enter|provide)\b[^.?!]{0,40}\b(otp|pin|cvv|password)/i;
-      if (suspicious.test(raw)) return Response.json(local, { headers: gate.headers });
-    }
-
-    const reply: AssistantReply = {
-      text: stripPaths(raw),
-      actions: extractActions(raw).length ? extractActions(raw) : local.actions,
-      fallback: false,
-      urgent: local.urgent,
-    };
-    return Response.json(reply, { headers: gate.headers });
-  } catch {
+  /*
+   * Last line of defence. A reply that solicits a secret is discarded, and the
+   * check is negation-aware — "never share your OTP" is the most important
+   * sentence this assistant can say, and a naive check would throw it away.
+   */
+  if (asksForSecret(raw)) {
     return Response.json(local, { headers: gate.headers });
-  } finally {
-    clearTimeout(timer);
   }
+
+  const reply: AssistantReply = {
+    text: stripPaths(raw),
+    actions: extractActions(raw).length ? extractActions(raw) : local.actions,
+    fallback: false,
+    urgent: local.urgent,
+  };
+  return Response.json(reply, { headers: gate.headers });
 }

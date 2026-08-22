@@ -15,6 +15,7 @@
  */
 
 import { guard } from "@/lib/rate-limit";
+import { askOpenAI } from "@/lib/openai";
 
 export const dynamic = "force-dynamic";
 
@@ -39,9 +40,6 @@ export async function POST(request: Request) {
   const gate = guard(request, "ocr", empty);
   if (gate.refusal) return gate.refusal;
 
-  const key = process.env.OPENAI_API_KEY;
-  if (!key) return Response.json(empty, { headers: gate.headers });
-
   let dataUrl = "";
   try {
     const body = (await request.json()) as { image?: string };
@@ -50,47 +48,31 @@ export async function POST(request: Request) {
     return Response.json(empty, { headers: gate.headers });
   }
 
-  if (!dataUrl.startsWith("data:image/")) return Response.json(empty, { headers: gate.headers });
-  // base64 is ~4/3 of the byte size; guard before spending a request.
-  if (dataUrl.length > MAX_BYTES * 1.4) return Response.json(empty, { headers: gate.headers });
-
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
-
-  try {
-    const res = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      signal: controller.signal,
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${key}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        temperature: 0,
-        max_tokens: 900,
-        messages: [
-          {
-            role: "user",
-            content: [
-              { type: "text", text: PROMPT },
-              { type: "image_url", image_url: { url: dataUrl, detail: "high" } },
-            ],
-          },
-        ],
-      }),
-    });
-
-    if (!res.ok) return Response.json(empty, { headers: gate.headers });
-
-    const data = (await res.json()) as {
-      choices?: { message?: { content?: string } }[];
-    };
-    const text = data.choices?.[0]?.message?.content ?? "";
-    return Response.json({ text, ok: Boolean(text.trim()) }, { headers: gate.headers });
-  } catch {
+  if (!dataUrl.startsWith("data:image/")) {
     return Response.json(empty, { headers: gate.headers });
-  } finally {
-    clearTimeout(timer);
   }
+  // base64 is ~4/3 of the byte size; guard before spending a request.
+  if (dataUrl.length > MAX_BYTES * 1.4) {
+    return Response.json(empty, { headers: gate.headers });
+  }
+
+  const text = await askOpenAI({
+    vision: true,
+    maxTokens: 900,
+    timeoutMs: TIMEOUT_MS,
+    messages: [
+      {
+        role: "user",
+        content: [
+          { type: "text", text: PROMPT },
+          { type: "image_url", image_url: { url: dataUrl, detail: "high" } },
+        ],
+      },
+    ],
+  });
+
+  return Response.json(
+    { text: text ?? "", ok: Boolean(text?.trim()) },
+    { headers: gate.headers },
+  );
 }

@@ -122,3 +122,56 @@ test.describe("assistant panel", () => {
     expect(overlap).toBeLessThan(0);
   });
 });
+
+test.describe("scope is restricted to cybercrime", () => {
+  const OFF_TOPIC = [
+    "write me a python script to sort a list",
+    "what is the capital of France",
+    "give me a recipe for biryani",
+    "write an essay about climate change",
+    "who won the cricket match yesterday",
+  ];
+
+  for (const q of OFF_TOPIC) {
+    test(`declines: ${q.slice(0, 34)}`, async ({ request }) => {
+      const r = await request.post("/api/chat", {
+        headers: { "x-forwarded-for": "198.51.100.20" },
+        data: { messages: [{ role: "user", content: q }] },
+      });
+      const text = ((await r.json()).text as string).toLowerCase();
+      expect(text).toMatch(
+        /only help|only answer|cannot help with|can't help with|not something i|out of scope|stick to|cyber/,
+      );
+      // And it must not have actually answered the question.
+      expect(text).not.toMatch(/paris|def |function |preheat|marinate/);
+    });
+  }
+
+  test("an in-scope question is still answered fully", async ({ request }) => {
+    const r = await request.post("/api/chat", {
+      headers: { "x-forwarded-for": "198.51.100.21" },
+      data: {
+        messages: [
+          { role: "user", content: "I got a WhatsApp saying my KYC expired and to click a link" },
+        ],
+      },
+    });
+    const text = (await r.json()).text as string;
+    expect(text.length).toBeGreaterThan(40);
+    expect(text.toLowerCase()).not.toMatch(/only help with|out of scope/);
+  });
+
+  test("a distress message is never refused on a technicality", async ({ request }) => {
+    const r = await request.post("/api/chat", {
+      headers: { "x-forwarded-for": "198.51.100.22" },
+      data: {
+        messages: [
+          { role: "user", content: "please help me they are on the phone right now" },
+        ],
+      },
+    });
+    const text = ((await r.json()).text as string).toLowerCase();
+    expect(text).toMatch(/hang up|disconnect|end the call/);
+    expect(text).not.toMatch(/only help with|out of scope/);
+  });
+});

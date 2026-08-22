@@ -152,6 +152,29 @@ test.describe("public tools", () => {
     await expect(page.getByText(/not.*the same as safe/i)).toBeVisible();
   });
 
+  test("the seeded lookup is labelled, and real services are offered", async ({ page }) => {
+    await page.goto("/scam-check");
+    // The demo database must never pass itself off as real complaint data.
+    await expect(page.getByText(/Demo data/i).first()).toBeVisible();
+    await expect(page.getByText(/not real complaints/i)).toBeVisible();
+
+    // Services that genuinely perform a lookup today.
+    for (const name of ["Chakshu", "TAFCOP", "CEIR"]) {
+      await expect(page.getByText(name, { exact: false }).first()).toBeVisible();
+    }
+    await expect(
+      page.locator('a[href^="https://sancharsaathi.gov.in"]').first(),
+    ).toBeVisible();
+  });
+
+  test("figures carry a source, and red flags need no database", async ({ page }) => {
+    await page.goto("/scam-check");
+    await expect(page.getByText(/₹22,495 cr/)).toBeVisible();
+    await expect(page.getByText(/Ministry of Home Affairs/i).first()).toBeVisible();
+    await expect(page.getByText(/Six signs that settle it/i)).toBeVisible();
+    await expect(page.getByText(/UPI PIN to receive money/i)).toBeVisible();
+  });
+
   test("officer verification distinguishes real from fake", async ({ page }) => {
     await page.goto("/verify-officer");
     const code = page.getByLabel(/6-digit code/i);
