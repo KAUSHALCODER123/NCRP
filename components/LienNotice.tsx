@@ -62,7 +62,7 @@ export function LienNotice({ lienId }: { lienId: string }) {
           {lien.liftedAt ? "✅ Hold lifted" : "⚠ Hold placed"}
         </Chip>
 
-        <h1 className="mt-4 text-[28px] font-bold leading-tight text-ink sm:text-[32px]">
+        <h1 className="font-display mt-4 text-[28px] font-bold leading-tight text-ink sm:text-[32px]">
           {lien.liftedAt
             ? "Your money has been released"
             : "A small amount of your money is on hold"}
@@ -75,7 +75,7 @@ export function LienNotice({ lienId }: { lienId: string }) {
               <p className="text-[15px] font-medium text-ink-faint">On hold</p>
               <p
                 className={clsx(
-                  "tnum text-[32px] font-bold leading-none",
+                  "data text-[32px] font-bold leading-none",
                   lien.liftedAt ? "text-ink-faint line-through" : "text-pending",
                 )}
               >
@@ -89,7 +89,7 @@ export function LienNotice({ lienId }: { lienId: string }) {
               <p className="text-[15px] font-medium text-ink-faint">
                 Still yours to use
               </p>
-              <p className="tnum text-[32px] font-bold leading-none text-available">
+              <p className="data text-[32px] font-bold leading-none text-available">
                 {formatPaise(lien.balancePaise)}
               </p>
               <p className="mt-1 text-[15px] text-ink-faint">
@@ -289,7 +289,7 @@ function DisputeProgress({
             Digitally signed by {d.noc.issuedBy} and sent straight to your bank
             over an API. No branch visit. No travel to another state. No paper.
           </p>
-          <p className="tnum mt-3 break-all rounded-lg bg-surface p-3 text-[14px] text-ink-faint">
+          <p className="data mt-3 break-all rounded-lg bg-surface p-3 text-[14px] text-ink-faint">
             {d.noc.id} · {d.noc.signature}
           </p>
         </Card>

@@ -42,10 +42,10 @@ export default function DashboardPage() {
       <Shell>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h1 className="text-[28px] font-bold leading-tight text-ink sm:text-[32px]">
+            <h1 className="font-display text-[28px] font-bold leading-tight text-ink sm:text-[32px]">
               {persona?.name ?? email}
             </h1>
-            <p className="tnum mt-1 text-[16px] text-ink-faint">{email}</p>
+            <p className="data mt-1 text-[16px] text-ink-faint">{email}</p>
           </div>
           <button
             type="button"
@@ -80,7 +80,7 @@ export default function DashboardPage() {
                     {formatPaise(l.balancePaise)} of your balance is unaffected
                     and fully usable.
                   </p>
-                  <p className="tnum mt-2 text-[15px] text-ink-faint">
+                  <p className="data mt-2 text-[15px] text-ink-faint">
                     {l.accountMask} · {l.institutionName}
                   </p>
                 </Link>
@@ -111,7 +111,7 @@ export default function DashboardPage() {
                   className="block rounded-card border border-line bg-surface p-5 transition-colors hover:border-line-strong hover:bg-sunken"
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span className="tnum text-[16px] font-semibold text-ink-soft">
+                    <span className="data text-[16px] font-semibold text-ink-soft">
                       {c.id}
                     </span>
                     <Chip tone={c.status === "closed" ? "held" : "primary"}>

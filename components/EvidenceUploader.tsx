@@ -287,7 +287,7 @@ export function EvidenceUploader({
                   {(f.bytes / 1024).toFixed(0)} KB
                 </span>
               </div>
-              <p className="tnum mt-1 break-all text-[14px] text-ink-faint">
+              <p className="data mt-1 break-all text-[14px] text-ink-faint">
                 SHA-256 {f.sha256.slice(0, 24)}…
               </p>
               {f.stripped.length ? (
@@ -339,7 +339,7 @@ function CandidateRow({
         className="mt-1.5 h-5 w-5 accent-[var(--color-primary)]"
       />
       <span className="min-w-0">
-        <span className="tnum block break-all text-[17px] font-bold text-ink">
+        <span className="data block break-all text-[17px] font-bold text-ink">
           {c.value}
         </span>
         <span className="block text-[15px] text-ink-soft">
@@ -355,7 +355,7 @@ function Detected({ label, value }: { label: string; value: string | null }) {
   return (
     <div className="flex flex-wrap items-baseline gap-x-2">
       <dt className="w-[92px] shrink-0 text-ink-faint">{label}</dt>
-      <dd className="tnum min-w-0 flex-1 font-semibold text-ink">
+      <dd className="data min-w-0 flex-1 font-semibold text-ink">
         {value ?? <span className="font-normal text-ink-faint">not found</span>}
       </dd>
       {value ? <span className="text-[15px] text-held">✓ auto</span> : null}

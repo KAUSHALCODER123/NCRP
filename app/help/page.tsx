@@ -24,7 +24,7 @@ export default function HelpPage() {
     <>
       <TopBar back={{ href: "/", label: "Home" }} />
       <Shell>
-        <h1 className="text-[30px] font-bold leading-tight text-ink sm:text-[34px]">
+        <h1 className="font-display text-[30px] font-bold leading-tight text-ink sm:text-[34px]">
           Help
         </h1>
         <p className="mt-3 text-ink-soft">
@@ -63,7 +63,7 @@ export default function HelpPage() {
 
         {FAQ.map((group) => (
           <section key={group.id} id={group.id} className="mt-10 scroll-mt-6">
-            <h2 className="text-[24px] font-bold leading-tight text-ink">
+            <h2 className="font-display text-[24px] font-bold leading-tight text-ink">
               {group.title}
             </h2>
             <p className="mt-1 text-[16px] text-ink-soft">{group.blurb}</p>
@@ -103,7 +103,7 @@ export default function HelpPage() {
           </p>
           <p className="mt-1 text-[16px] text-ink-soft">
             For a real incident in India, call{" "}
-            <strong className="tnum text-ink">1930</strong> — it is free, staffed,
+            <strong className="data text-ink">1930</strong> — it is free, staffed,
             and the fastest way to get a bank hold placed. You can also file at{" "}
             <a
               className="font-semibold text-primary underline underline-offset-2"

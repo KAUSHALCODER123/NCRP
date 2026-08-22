@@ -124,9 +124,9 @@ export function OtpPanel({
       </div>
       <p className="mt-1 text-[16px] text-ink-soft">
         We sent a 6-digit code to{" "}
-        <strong className="tnum text-ink">+91 {mobile}</strong>
+        <strong className="data text-ink">+91 {mobile}</strong>
         {channel !== "sms" ? ` by ${channel === "voice" ? "voice call" : "WhatsApp"}` : ""}
-        . Demo code: <strong className="tnum">{DEMO_OTP}</strong>
+        . Demo code: <strong className="data">{DEMO_OTP}</strong>
       </p>
 
       <div className="mt-4 flex gap-2" onPaste={onPaste}>
@@ -147,7 +147,7 @@ export function OtpPanel({
                 boxes.current[i - 1]?.focus();
             }}
             className={clsx(
-              "tnum h-14 w-full min-w-0 rounded-xl border-2 text-center text-[24px] font-bold text-ink focus:outline-none",
+              "data h-14 w-full min-w-0 rounded-xl border-2 text-center text-[24px] font-bold text-ink focus:outline-none",
               error ? "border-breach" : "border-line-strong focus:border-primary",
               locked && "opacity-50",
             )}
@@ -175,7 +175,7 @@ export function OtpPanel({
             </p>
             <p className="mt-1 text-[16px] text-ink-soft">
               Press 1, then enter bridge code{" "}
-              <strong className="tnum text-ink">884-219</strong> to go straight
+              <strong className="data text-ink">884-219</strong> to go straight
               to an operator with your case already open.
             </p>
             <a
@@ -200,7 +200,7 @@ export function OtpPanel({
                 </Button>
               </div>
             ) : (
-              <p className="tnum text-[15px] text-ink-faint">
+              <p className="data text-[15px] text-ink-faint">
                 Didn&apos;t get the SMS? Other ways to receive it appear in{" "}
                 {String(altIn).padStart(2, "0")}s.
               </p>

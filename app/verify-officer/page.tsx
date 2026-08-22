@@ -46,7 +46,7 @@ export default function VerifyOfficerPage() {
     <>
       <TopBar back={{ href: "/", label: "Home" }} />
       <Shell>
-        <h1 className="text-[30px] font-bold leading-tight text-ink sm:text-[34px]">
+        <h1 className="font-display text-[30px] font-bold leading-tight text-ink sm:text-[34px]">
           Is this really the police?
         </h1>
         <p className="mt-3 text-ink-soft">
@@ -67,13 +67,13 @@ export default function VerifyOfficerPage() {
               setResult("idle");
             }}
             placeholder="483921"
-            className="tnum mt-2 w-full rounded-xl border border-line-strong bg-surface p-4 text-[24px] font-bold tracking-[0.2em] text-ink placeholder:font-normal placeholder:tracking-normal placeholder:text-ink-faint focus:border-primary focus:outline-none"
+            className="data mt-2 w-full rounded-xl border border-line-strong bg-surface p-4 text-[24px] font-bold tracking-[0.2em] text-ink placeholder:font-normal placeholder:tracking-normal placeholder:text-ink-faint focus:border-primary focus:outline-none"
           />
           <Button className="mt-3 w-full" onClick={verify} disabled={!code.trim()}>
             Check this officer
           </Button>
           <p className="mt-3 text-[15px] text-ink-faint">
-            Demo codes: <span className="tnum font-semibold">483921</span> is
+            Demo codes: <span className="data font-semibold">483921</span> is
             real, anything else is not.
           </p>
         </Card>
@@ -83,7 +83,7 @@ export default function VerifyOfficerPage() {
             <Chip tone="held">✅ Verified</Chip>
             <p className="mt-3 text-[22px] font-bold text-ink">{hit.officer}</p>
             <p className="text-[17px] text-ink-soft">{hit.station}</p>
-            <p className="tnum mt-3 text-[16px] text-ink-soft">
+            <p className="data mt-3 text-[16px] text-ink-soft">
               Contacting you about your case {hit.caseId}
             </p>
             <p className="mt-4 text-[16px] text-ink-soft">

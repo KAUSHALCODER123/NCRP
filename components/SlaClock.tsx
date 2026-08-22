@@ -43,7 +43,7 @@ export function SlaClock({ sla, compact }: { sla: Sla; compact?: boolean }) {
     return (
       <span
         className={clsx(
-          "tnum text-[15px] font-semibold",
+          "data text-[15px] font-semibold",
           tone === "held" && "text-held",
           tone === "pending" && "text-pending",
           tone === "breach" && "text-breach",
@@ -69,7 +69,7 @@ export function SlaClock({ sla, compact }: { sla: Sla; compact?: boolean }) {
         <p className="text-[17px] font-semibold text-ink">{sla.label}</p>
         <p
           className={clsx(
-            "tnum text-[17px] font-bold",
+            "data text-[17px] font-bold",
             tone === "held" && "text-held",
             tone === "pending" && "text-pending",
             tone === "breach" && "text-breach",

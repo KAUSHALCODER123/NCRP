@@ -275,7 +275,7 @@ export default function FreezePage() {
                   value={incidentId}
                   onChange={(e) => setIncidentId(e.target.value)}
                   placeholder="14-digit acknowledgement number"
-                  className="tnum mt-3 w-full rounded-xl border border-line-strong bg-surface p-4 text-[17px] focus:border-primary focus:outline-none"
+                  className="data mt-3 w-full rounded-xl border border-line-strong bg-surface p-4 text-[17px] focus:border-primary focus:outline-none"
                 />
               ) : null}
               {called1930 === false ? (
@@ -342,7 +342,7 @@ export default function FreezePage() {
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   placeholder="47500"
-                  className="tnum w-full rounded-xl border border-line-strong bg-surface p-4 text-[19px] focus:border-primary focus:outline-none"
+                  className="data w-full rounded-xl border border-line-strong bg-surface p-4 text-[19px] focus:border-primary focus:outline-none"
                 />
               </Field>
               {highSeverity ? (
@@ -403,7 +403,7 @@ export default function FreezePage() {
                   value={utr}
                   onChange={(e) => setUtr(e.target.value)}
                   placeholder="12-digit reference"
-                  className="tnum w-full rounded-xl border border-line-strong bg-surface p-4 text-[17px] focus:border-primary focus:outline-none"
+                  className="data w-full rounded-xl border border-line-strong bg-surface p-4 text-[17px] focus:border-primary focus:outline-none"
                 />
               </Field>
 
@@ -465,7 +465,7 @@ export default function FreezePage() {
                 </p>
                 <p className="mt-1 text-[16px] text-ink-soft">
                   Reference {utrCheck.value} is on case{" "}
-                  <strong className="tnum">{duplicate.id}</strong>. Anything you
+                  <strong className="data">{duplicate.id}</strong>. Anything you
                   add here will be merged into that case rather than starting a
                   second one — duplicate freeze requests slow the bank down.
                 </p>
@@ -478,7 +478,7 @@ export default function FreezePage() {
             <Card>
               <Field label="Your mobile number" error={mobileCheck.error}>
                 <div className="flex gap-2">
-                  <span className="tnum flex min-h-[56px] items-center rounded-xl border border-line-strong bg-sunken px-4 text-[17px] font-semibold text-ink-soft">
+                  <span className="data flex min-h-[56px] items-center rounded-xl border border-line-strong bg-sunken px-4 text-[17px] font-semibold text-ink-soft">
                     +91
                   </span>
                   <input
@@ -487,7 +487,7 @@ export default function FreezePage() {
                     value={mobile}
                     onChange={(e) => setMobile(e.target.value)}
                     placeholder="9876543210"
-                    className="tnum w-full rounded-xl border border-line-strong bg-surface p-4 text-[19px] focus:border-primary focus:outline-none"
+                    className="data w-full rounded-xl border border-line-strong bg-surface p-4 text-[19px] focus:border-primary focus:outline-none"
                   />
                 </div>
               </Field>

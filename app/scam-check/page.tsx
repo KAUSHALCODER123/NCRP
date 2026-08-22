@@ -32,7 +32,7 @@ export default function ScamCheckPage() {
     <>
       <TopBar back={{ href: "/", label: "Home" }} />
       <Shell>
-        <h1 className="text-[30px] font-bold leading-tight text-ink sm:text-[34px]">
+        <h1 className="font-display text-[30px] font-bold leading-tight text-ink sm:text-[34px]">
           Is this a scam?
         </h1>
         <p className="mt-3 text-ink-soft">
@@ -66,7 +66,7 @@ export default function ScamCheckPage() {
               key={c.identifier}
               type="button"
               onClick={() => check(c.identifier)}
-              className="tnum rounded-full border border-line-strong bg-surface px-3 py-1 text-[15px] font-medium text-primary hover:bg-primary-soft"
+              className="data rounded-full border border-line-strong bg-surface px-3 py-1 text-[15px] font-medium text-primary hover:bg-primary-soft"
             >
               {c.identifier}
             </button>
@@ -93,7 +93,7 @@ function Result({ hit }: { hit: ClusterHit }) {
       )}
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="tnum break-all text-[19px] font-bold text-ink">
+        <p className="data break-all text-[19px] font-bold text-ink">
           {hit.identifier}
         </p>
         <Chip tone={high ? "breach" : risky ? "pending" : "neutral"}>
@@ -104,8 +104,8 @@ function Result({ hit }: { hit: ClusterHit }) {
       {risky ? (
         <>
           <p className="mt-3 text-[17px] text-ink">
-            <strong className="tnum">{hit.reports}</strong> fraud reports ·{" "}
-            <strong className="tnum">
+            <strong className="data">{hit.reports}</strong> fraud reports ·{" "}
+            <strong className="data">
               {formatPaise(hit.totalReportedPaise)}
             </strong>{" "}
             reported lost

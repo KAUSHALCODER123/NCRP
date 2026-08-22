@@ -84,7 +84,7 @@ export default async function AudiencePage({
     <>
       <TopBar back={{ href: "/learn", label: "Learning Corner" }} />
       <Shell>
-        <h1 className="text-[30px] font-bold leading-tight text-ink sm:text-[34px]">
+        <h1 className="font-display text-[30px] font-bold leading-tight text-ink sm:text-[34px]">
           {g.title}
         </h1>
         <p className="mt-3 text-[18px] text-ink-soft">{g.lede}</p>

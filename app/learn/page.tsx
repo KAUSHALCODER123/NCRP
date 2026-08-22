@@ -28,7 +28,7 @@ export default function LearnPage() {
     <>
       <TopBar back={{ href: "/", label: "Home" }} />
       <Shell>
-        <h1 className="text-[30px] font-bold leading-tight text-ink sm:text-[34px]">
+        <h1 className="font-display text-[30px] font-bold leading-tight text-ink sm:text-[34px]">
           Learning Corner
         </h1>
         <p className="mt-3 text-ink-soft">
@@ -39,7 +39,7 @@ export default function LearnPage() {
         {/* Live, because the data exists. */}
         <section className="mt-8">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h2 className="text-[22px] font-bold text-ink">
+            <h2 className="font-display text-[22px] font-bold text-ink">
               Being reported right now
             </h2>
             <span className="text-[15px] text-ink-faint">
@@ -54,7 +54,7 @@ export default function LearnPage() {
                 className="flex flex-wrap items-center justify-between gap-3 rounded-card border border-line bg-surface p-4"
               >
                 <div className="min-w-0">
-                  <p className="tnum break-all text-[17px] font-semibold text-ink">
+                  <p className="data break-all text-[17px] font-semibold text-ink">
                     {c.identifier}
                   </p>
                   <p className="text-[15px] text-ink-soft">
@@ -78,7 +78,7 @@ export default function LearnPage() {
 
         {/* Audience routing */}
         <section className="mt-10">
-          <h2 className="text-[22px] font-bold text-ink">Who is this for?</h2>
+          <h2 className="font-display text-[22px] font-bold text-ink">Who is this for?</h2>
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             {AUDIENCES.filter((a) => a.id !== "everyone").map((a) => (
               <Link
@@ -95,7 +95,7 @@ export default function LearnPage() {
 
         {/* The library */}
         <section className="mt-10">
-          <h2 className="text-[22px] font-bold text-ink">
+          <h2 className="font-display text-[22px] font-bold text-ink">
             Every scam, as it actually sounds
           </h2>
           <div className="mt-3 space-y-3">

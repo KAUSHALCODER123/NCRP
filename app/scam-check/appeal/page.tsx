@@ -16,7 +16,7 @@ export default function AppealPage() {
     <>
       <TopBar back={{ href: "/scam-check", label: "Back" }} />
       <Shell>
-        <h1 className="text-[28px] font-bold leading-tight text-ink sm:text-[32px]">
+        <h1 className="font-display text-[28px] font-bold leading-tight text-ink sm:text-[32px]">
           This is my account and it&apos;s been wrongly flagged
         </h1>
         <p className="mt-3 text-ink-soft">

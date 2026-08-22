@@ -70,7 +70,7 @@ export default async function ReportPage({
     <>
       <TopBar back={{ href: "/", label: "Back" }} />
       <Shell>
-        <h1 className="text-[28px] font-bold leading-tight text-ink sm:text-[32px]">
+        <h1 className="font-display text-[28px] font-bold leading-tight text-ink sm:text-[32px]">
           {k.title}
         </h1>
         <p className="mt-3 text-ink-soft">{k.lede}</p>

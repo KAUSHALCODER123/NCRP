@@ -37,7 +37,7 @@ export default async function ScamPage({
     <>
       <TopBar back={{ href: "/learn", label: "Learning Corner" }} />
       <Shell>
-        <h1 className="text-[30px] font-bold leading-tight text-ink sm:text-[34px]">
+        <h1 className="font-display text-[30px] font-bold leading-tight text-ink sm:text-[34px]">
           {s.name}
         </h1>
         <p className="mt-3 text-[19px] text-ink-soft">{s.oneLine}</p>

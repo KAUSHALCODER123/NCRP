@@ -71,7 +71,7 @@ export function Button({
   className?: string;
 }) {
   const base =
-    "inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl px-6 text-[18px] font-semibold transition-colors disabled:opacity-45 disabled:cursor-not-allowed";
+    "inline-flex min-h-[54px] items-center justify-center gap-2 rounded-lg px-6 text-[17px] font-semibold transition-colors disabled:opacity-45 disabled:cursor-not-allowed";
   const variants = {
     primary: "bg-primary text-white hover:bg-primary-hover",
     secondary: "border border-line-strong bg-surface text-ink hover:bg-sunken",
@@ -109,7 +109,7 @@ export function PageHeader({
           {eyebrow}
         </p>
       ) : null}
-      <h1 className="text-[30px] font-bold leading-tight text-ink sm:text-[36px]">
+      <h1 className="font-display text-[30px] font-bold leading-tight text-ink sm:text-[36px]">
         {title}
       </h1>
       {sub ? <p className="mt-3 max-w-2xl text-ink-soft">{sub}</p> : null}
@@ -127,8 +127,8 @@ export function Shell({
   return (
     <div
       className={clsx(
-        "mx-auto w-full px-5 py-8 sm:py-12",
-        width === "md" ? "max-w-2xl" : "max-w-4xl",
+        "mx-auto w-full px-5 py-8 sm:py-10",
+        width === "md" ? "max-w-3xl" : "max-w-5xl",
       )}
     >
       {children}
@@ -137,29 +137,16 @@ export function Shell({
 }
 
 export function TopBar({ back }: { back?: { href: string; label: string } }) {
+  // The site header is global now; this is just an in-page back affordance.
+  if (!back) return null;
   return (
-    <div className="border-b border-line bg-surface">
-      <div className="mx-auto flex max-w-4xl items-center justify-between gap-4 px-5 py-3">
-        <Link href="/" className="flex items-center gap-2 font-bold text-ink">
-          <ShieldMark />
-          Sahaay
-        </Link>
-        {back ? (
-          <Link
-            href={back.href}
-            className="text-[16px] font-semibold text-primary hover:underline"
-          >
-            {back.label}
-          </Link>
-        ) : (
-          <Link
-            href="/login"
-            className="text-[16px] font-semibold text-primary hover:underline"
-          >
-            Demo logins
-          </Link>
-        )}
-      </div>
+    <div className="mx-auto w-full max-w-6xl px-5 pt-6">
+      <Link
+        href={back.href}
+        className="inline-flex items-center gap-1.5 text-[15px] font-semibold text-primary hover:underline"
+      >
+        <span aria-hidden="true">←</span> {back.label}
+      </Link>
     </div>
   );
 }
@@ -204,7 +191,7 @@ export function Stat({
   return (
     <div>
       <p className="text-[15px] font-medium text-ink-faint">{label}</p>
-      <p className={clsx("tnum text-[26px] font-bold leading-tight", color)}>
+      <p className={clsx("data text-[28px] font-semibold leading-tight", color)}>
         {value}
       </p>
       {hint ? <p className="mt-0.5 text-[15px] text-ink-faint">{hint}</p> : null}

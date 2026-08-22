@@ -93,7 +93,7 @@ export function CaseTracker({ caseId }: { caseId: string }) {
       <TopBar back={{ href: "/dashboard", label: "My cases" }} />
       <Shell>
         <div className="flex flex-wrap items-center gap-3">
-          <span className="tnum text-[16px] font-semibold text-ink-soft">
+          <span className="data text-[16px] font-semibold text-ink-soft">
             {kase.id}
           </span>
           {kase.firNumber ? (
@@ -102,7 +102,7 @@ export function CaseTracker({ caseId }: { caseId: string }) {
           {kase.status === "closed" ? <Chip tone="held">Closed</Chip> : null}
         </div>
 
-        <h1 className="mt-3 text-[28px] font-bold leading-tight text-ink sm:text-[32px]">
+        <h1 className="font-display mt-3 text-[28px] font-bold leading-tight text-ink sm:text-[32px]">
           {kase.status === "closed"
             ? "Your money came back"
             : "Here's exactly where your case is"}
@@ -288,7 +288,7 @@ export function CaseTracker({ caseId }: { caseId: string }) {
                 {e.detail ? (
                   <p className="mt-0.5 text-[16px] text-ink-soft">{e.detail}</p>
                 ) : null}
-                <p className="tnum mt-1 text-[14px] text-ink-faint">
+                <p className="data mt-1 text-[14px] text-ink-faint">
                   {new Date(e.at).toLocaleString("en-IN", {
                     day: "2-digit",
                     month: "short",

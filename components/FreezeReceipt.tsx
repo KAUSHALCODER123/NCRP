@@ -201,12 +201,12 @@ export function FreezeReceipt({ caseId }: { caseId: string }) {
       <Shell>
         <div className="flex flex-wrap items-center gap-3">
           <Chip tone="held">✅ Case open</Chip>
-          <span className="tnum text-[16px] font-semibold text-ink-soft">
+          <span className="data text-[16px] font-semibold text-ink-soft">
             {kase.id}
           </span>
         </div>
 
-        <h1 className="mt-4 text-[30px] font-bold leading-tight text-ink sm:text-[34px]">
+        <h1 className="font-display mt-4 text-[30px] font-bold leading-tight text-ink sm:text-[34px]">
           We&apos;re holding your money
         </h1>
         <p className="mt-3 text-ink-soft">
@@ -221,7 +221,7 @@ export function FreezeReceipt({ caseId }: { caseId: string }) {
               <p className="text-[15px] font-medium text-ink-faint">
                 Time since you tapped
               </p>
-              <p className="tnum text-[34px] font-bold leading-none text-ink">
+              <p className="data text-[34px] font-bold leading-none text-ink">
                 {clock(elapsed)}
               </p>
               <p className="mt-1 text-[15px] text-ink-faint">
@@ -234,7 +234,7 @@ export function FreezeReceipt({ caseId }: { caseId: string }) {
               </p>
               <p
                 className={clsx(
-                  "tnum text-[34px] font-bold leading-none",
+                  "data text-[34px] font-bold leading-none",
                   heldTotal > 0 ? "text-held" : "text-ink-faint",
                 )}
               >
@@ -352,7 +352,7 @@ function AckRow({ f }: { f: FreezeRequest }) {
         ) : (
           <span
             className={clsx(
-              "tnum text-[17px] font-bold",
+              "data text-[17px] font-bold",
               tone === "held" && "text-held",
               tone === "breach" && "text-breach",
               tone === "neutral" && "text-ink-soft",

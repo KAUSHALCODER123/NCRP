@@ -22,7 +22,7 @@ export default function LoginPage() {
     <>
       <TopBar back={{ href: "/", label: "Home" }} />
       <Shell>
-        <h1 className="text-[30px] font-bold leading-tight text-ink sm:text-[34px]">
+        <h1 className="font-display text-[30px] font-bold leading-tight text-ink sm:text-[34px]">
           Demo logins
         </h1>
         <p className="mt-3 text-ink-soft">
@@ -51,7 +51,7 @@ export default function LoginPage() {
                 </Chip>
               </div>
               <p className="mt-1 text-[16px] text-ink-soft">{p.blurb}</p>
-              <p className="tnum mt-2 text-[15px] font-medium text-ink-faint">
+              <p className="data mt-2 text-[15px] font-medium text-ink-faint">
                 {p.email}
               </p>
             </button>
