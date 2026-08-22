@@ -48,9 +48,17 @@ Optional — for live AI features (the assistant, intake classification and
 receipt OCR), create `.env.local` with either provider, or both:
 
 ```
-GEMINI_API_KEY=...     # tried first
-OPENAI_API_KEY=...     # used if Gemini is unavailable
+GEMINI_API_KEY=...       # tried first
+NVIDIA_API_KEY=...       # NVIDIA NIM
+OPENROUTER_API_KEY=...   # free tier
+OPENAI_API_KEY=...       # last
 ```
+
+Gemini leads because this product answers in seven Indian languages and its
+flash-lite tier handles Indic scripts markedly better than the small open
+models behind the others. OpenAI is last despite being the most capable: an
+exhausted account returns 429, and spending a round-trip on that before
+reaching a provider that can answer costs time while someone is waiting.
 
 Both are optional. Without a key the app answers from a deterministic
 classifier built on the same scam library the model is briefed on, so every

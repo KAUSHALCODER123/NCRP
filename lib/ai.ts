@@ -1,7 +1,8 @@
 /**
  * Model access, provider-agnostic.
  *
- * PROVIDERS. Gemini, then OpenAI, then NVIDIA NIM — whichever has a key.
+ * PROVIDERS. Gemini, then NVIDIA NIM, then OpenRouter, then OpenAI —
+ * whichever has a key.
  * Several rather than one because this project has already lost its AI
  * features to an exhausted quota, and the failure was invisible: the offline
  * answers are good enough that nothing looked broken.
@@ -320,17 +321,21 @@ export async function askAI(opts: AskOptions): Promise<string | null> {
   const errors: string[] = [];
 
   try {
+    /*
+     * Order: Gemini, NVIDIA, OpenRouter, OpenAI.
+     *
+     * Gemini leads because this product answers in seven Indian languages and
+     * its flash-lite tier handles Indic scripts markedly better than the small
+     * open models behind the others.
+     *
+     * OpenAI is last despite being the most capable of the four, because its
+     * credit is exhausted: putting it earlier spends a round-trip on a
+     * guaranteed 429 before reaching a provider that can actually answer, and
+     * this chain runs while someone is waiting. It stays in the list so that
+     * topping up the account silently restores it.
+     */
     const providers = [
       () => askGemini(opts, controller.signal),
-      () =>
-        askOpenAICompatible(
-          "openai",
-          "https://api.openai.com/v1/chat/completions",
-          process.env.OPENAI_API_KEY,
-          openaiChain(opts),
-          opts,
-          controller.signal,
-        ),
       () =>
         askOpenAICompatible(
           "nvidia",
@@ -348,6 +353,15 @@ export async function askAI(opts: AskOptions): Promise<string | null> {
           process.env.OPENROUTER_MODEL
             ? [process.env.OPENROUTER_MODEL]
             : OR_TEXT,
+          opts,
+          controller.signal,
+        ),
+      () =>
+        askOpenAICompatible(
+          "openai",
+          "https://api.openai.com/v1/chat/completions",
+          process.env.OPENAI_API_KEY,
+          openaiChain(opts),
           opts,
           controller.signal,
         ),
