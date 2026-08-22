@@ -187,7 +187,7 @@ export function CaseIntake({ kase }: { kase: Case }) {
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-wrap gap-x-2">
-      <dt className="w-[110px] shrink-0 font-medium text-ink-faint">{label}</dt>
+      <dt className="w-full shrink-0 font-medium text-ink-faint sm:w-[110px]">{label}</dt>
       <dd className="min-w-0 flex-1 font-semibold text-ink">{value}</dd>
     </div>
   );

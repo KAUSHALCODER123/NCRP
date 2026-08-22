@@ -329,7 +329,7 @@ function AckRow({ f }: { f: FreezeRequest }) {
   return (
     <li
       className={clsx(
-        "flex items-center justify-between gap-4 rounded-card border bg-surface p-4",
+        "flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 rounded-card border bg-surface p-4",
         !pending && "ack-in",
         tone === "held" && "border-held/30 bg-held-soft",
         tone === "breach" && "border-breach/30 bg-breach-soft",

@@ -131,8 +131,8 @@ export function CaseTracker({ caseId }: { caseId: string }) {
         </Card>
 
         {/* Progress rail */}
-        <div className="mt-6 overflow-x-auto">
-          <ol className="flex min-w-[560px] items-center gap-1">
+        <div className="-mx-5 mt-6 overflow-x-auto px-5 pb-1">
+          <ol className="flex min-w-[520px] items-center gap-1 sm:min-w-0">
             {RAIL.map((s, i) => {
               const state = i < idx ? "done" : i === idx ? "current" : "todo";
               return (

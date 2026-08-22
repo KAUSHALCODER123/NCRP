@@ -14,11 +14,12 @@ import clsx from "clsx";
  *   · why holds fail         — money leaves a hop before we reach it
  *   · who gets hurt by it    — the person at the last hop did nothing wrong
  *
- * Drawn once on the hero, and reused on the lien notice with `youAre` set,
- * so an innocent account holder can see exactly where they landed and why.
+ * Built mobile-first: a vertical rail on phones, a horizontal one from 640px.
+ * Connectors are borders rather than background gradients, so a dashed line
+ * reads correctly in both directions without duplicating markup.
  *
- * The line is data, not decoration: hop distance is uniform because hops are
- * discrete events, and colour is the same semantic scale used everywhere else.
+ * The line is data, not decoration — solid where the money was caught,
+ * dashed where it kept moving.
  */
 
 export interface Hop {
@@ -46,61 +47,53 @@ export function MoneyTrail({
     if (!animate) return;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const timers = hops.map((_, i) =>
-      setTimeout(() => setShown(i + 1), reduced ? 0 : 700 + i * 850),
+      setTimeout(() => setShown(i + 1), reduced ? 0 : 650 + i * 800),
     );
     return () => timers.forEach(clearTimeout);
-    // Hop count is what drives the sequence; the array identity is not stable
-    // across renders and re-running on it would restart the animation.
+    // Hop count drives the sequence; the array identity is not stable across
+    // renders and re-running on it would restart the animation.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [animate, hops.length]);
 
   return (
-    <ol
-      className={clsx(
-        "flex flex-col gap-0 sm:flex-row sm:gap-0",
-        className,
-      )}
-      aria-label="Where the money went"
-    >
+    <ol className={clsx("sm:flex", className)} aria-label="Where the money went">
       {hops.map((h, i) => {
         const on = i < shown;
+        const last = i === hops.length - 1;
         return (
           <li
             key={h.label + i}
-            className="relative flex flex-1 gap-4 sm:block"
+            className="relative flex gap-3.5 sm:block sm:min-w-0 sm:flex-1 sm:gap-0"
           >
-            {/* Connector: vertical on mobile, horizontal on wider screens */}
-            <div className="flex flex-col items-center sm:absolute sm:left-0 sm:top-[9px] sm:h-0.5 sm:w-full sm:flex-row">
-              {i > 0 ? (
-                <span
-                  className={clsx(
-                    "hidden h-0.5 origin-left transition-transform duration-700 ease-out sm:block sm:w-1/2",
-                    on ? "scale-x-100" : "scale-x-0",
-                    dashFor(hops[i - 1].state),
-                  )}
-                />
-              ) : (
-                <span className="hidden sm:block sm:w-1/2" />
-              )}
-              <span className="hidden sm:block sm:w-1/2" />
-            </div>
+            {/* Horizontal connector (640px+): joins this node to the next. */}
+            {!last ? (
+              <span
+                aria-hidden="true"
+                className={clsx(
+                  "hidden sm:absolute sm:left-[22px] sm:right-1 sm:top-[10px] sm:block sm:origin-left sm:border-t-2 sm:transition-transform sm:duration-700 sm:ease-out",
+                  on ? "sm:scale-x-100" : "sm:scale-x-0",
+                  edgeFor(h.state),
+                )}
+              />
+            ) : null}
 
-            {/* Node */}
-            <div className="flex flex-col items-center sm:block">
+            {/* Node + vertical connector (under 640px) */}
+            <div className="flex shrink-0 flex-col items-center sm:block">
               <span
                 className={clsx(
-                  "relative z-10 mt-1 block h-5 w-5 shrink-0 rounded-full border-[3px] transition-all duration-500 sm:mt-0",
-                  on ? "opacity-100 scale-100" : "opacity-25 scale-75",
+                  "relative z-10 block h-[18px] w-[18px] shrink-0 rounded-full border-[3px] transition-all duration-500 sm:h-5 sm:w-5",
+                  on ? "scale-100 opacity-100" : "scale-75 opacity-25",
                   nodeFor(h.state),
                   h.state === "pending" && on && "pulse-ring",
                 )}
               />
-              {i < hops.length - 1 ? (
+              {!last ? (
                 <span
+                  aria-hidden="true"
                   className={clsx(
-                    "w-0.5 flex-1 origin-top transition-transform duration-700 sm:hidden",
+                    "mt-1 w-0 flex-1 origin-top border-l-2 transition-transform duration-700 sm:hidden",
                     on ? "scale-y-100" : "scale-y-0",
-                    dashFor(h.state),
+                    edgeFor(h.state),
                   )}
                 />
               ) : null}
@@ -108,20 +101,21 @@ export function MoneyTrail({
 
             <div
               className={clsx(
-                "pb-7 transition-opacity duration-500 sm:pb-0 sm:pr-5 sm:pt-3",
+                "min-w-0 pb-7 transition-opacity duration-500 sm:pb-0 sm:pr-4 sm:pt-3.5",
+                last && "pb-0",
                 on ? "opacity-100" : "opacity-0",
               )}
             >
               <p className="eyebrow !text-[11px]">
                 {i === 0 ? "Taken from" : `Hop ${i}`}
               </p>
-              <p className="mt-1 text-[16px] font-semibold leading-snug text-[color:inherit]">
+              <p className="mt-1 text-[16px] font-semibold leading-snug">
                 {h.label}
               </p>
               {h.amount ? (
                 <p
                   className={clsx(
-                    "data mt-0.5 text-[15px] font-semibold",
+                    "data mt-0.5 break-words text-[15px] font-semibold",
                     textFor(h.state),
                   )}
                 >
@@ -148,36 +142,39 @@ export function MoneyTrail({
 
 function nodeFor(s: Hop["state"]) {
   switch (s) {
-    case "source":
-      return "border-current bg-transparent";
     case "held":
-      return "border-[var(--color-held)] bg-[var(--color-held)]";
+      return "border-secondary bg-secondary";
     case "moved":
-      return "border-[var(--color-breach)] bg-transparent";
+      return "border-critical bg-transparent";
     case "innocent":
-      return "border-[var(--color-pending)] bg-[var(--color-pending)]";
+      return "border-tertiary bg-tertiary";
     default:
       return "border-current bg-transparent";
   }
 }
 
-/** A solid line means the money was caught; dashed means it kept going. */
-function dashFor(s: Hop["state"]) {
-  return s === "held"
-    ? "bg-[var(--color-held)]"
-    : s === "moved"
-      ? "bg-[repeating-linear-gradient(90deg,currentColor_0_6px,transparent_6px_11px)] sm:bg-[repeating-linear-gradient(90deg,currentColor_0_6px,transparent_6px_11px)]"
-      : "bg-current opacity-40";
+/** Solid means the money was caught here; dashed means it kept going. */
+function edgeFor(s: Hop["state"]) {
+  switch (s) {
+    case "held":
+      return "border-secondary border-solid";
+    case "moved":
+      return "border-critical border-dashed";
+    case "innocent":
+      return "border-tertiary border-solid";
+    default:
+      return "border-current border-solid opacity-40";
+  }
 }
 
 function textFor(s: Hop["state"]) {
   switch (s) {
     case "held":
-      return "text-[var(--color-held)]";
+      return "text-secondary-text";
     case "moved":
-      return "text-[var(--color-breach)]";
+      return "text-critical-text";
     case "innocent":
-      return "text-[var(--color-pending)]";
+      return "text-tertiary-text";
     default:
       return "";
   }

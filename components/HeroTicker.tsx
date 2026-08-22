@@ -91,7 +91,7 @@ export function HeroTicker() {
       <div className="p-5 sm:p-6">
         <p className="eyebrow">The message you already have</p>
         <p className="mt-2.5 rounded-[10px] border border-line bg-sunken p-4 text-[14px] leading-relaxed text-ink-soft">
-          <span className="data">{SMS.slice(0, typed)}</span>
+          <span className="data break-words">{SMS.slice(0, typed)}</span>
           <span
             className={clsx(
               "ml-0.5 inline-block h-[15px] w-[7px] translate-y-[2px] bg-ink-faint",
@@ -100,7 +100,7 @@ export function HeroTicker() {
           />
         </p>
 
-        <div className="mt-7 flex items-center justify-between gap-3">
+        <div className="mt-7 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
           <p className="eyebrow">Where that money went</p>
           <span className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-ink-faint">
             <IconClock className="h-4 w-4" />

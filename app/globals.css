@@ -95,6 +95,9 @@
   --font-sans: var(--font-plex-sans), var(--font-gu), var(--font-ta), var(--font-te), var(--font-kn), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-plex-mono), ui-monospace, monospace;
 
+  /* Small phones (360px class) genuinely differ from 400px+ devices. */
+  --breakpoint-xs: 400px;
+
   --radius-card: 14px;
   --radius-field: 10px;
 }
@@ -388,7 +391,16 @@ html {
   line-height: 1.72;
 }
 
+/* No page may scroll sideways. Long unbroken tokens — a UTR, a UPI handle,
+   a SHA-256 — are the usual culprit on a 360px screen, so they wrap by
+   default and opt out only where a value must stay intact. */
+html, body {
+  max-width: 100%;
+  overflow-x: clip;
+}
+
 body {
+  overflow-wrap: break-word;
   background: var(--color-canvas);
   color: var(--color-ink);
   font-family: var(--font-sans);
@@ -460,6 +472,14 @@ h1, h2, h3 {
   50%, 95% { opacity: 0; }
 }
 .caret { animation: caret 1.1s step-end infinite; }
+
+/* Room for the floating Quick Exit button, plus the iOS home indicator. */
+body {
+  padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
+}
+@media (min-width: 640px) {
+  body { padding-bottom: env(safe-area-inset-bottom, 0px); }
+}
 
 .rule {
   height: 1px;

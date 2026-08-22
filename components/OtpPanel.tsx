@@ -129,7 +129,7 @@ export function OtpPanel({
         . Demo code: <strong className="data">{DEMO_OTP}</strong>
       </p>
 
-      <div className="mt-4 flex gap-2" onPaste={onPaste}>
+      <div className="mt-4 flex gap-1.5 sm:gap-2" onPaste={onPaste}>
         {digits.map((d, i) => (
           <input
             key={i}
@@ -147,7 +147,7 @@ export function OtpPanel({
                 boxes.current[i - 1]?.focus();
             }}
             className={clsx(
-              "data h-14 w-full min-w-0 rounded-xl border-2 text-center text-[24px] font-bold text-ink focus:outline-none",
+              "data h-[52px] w-full min-w-0 rounded-[10px] border-2 text-center text-[20px] font-bold text-ink focus:outline-none sm:h-14 sm:text-[24px]",
               error ? "border-breach" : "border-line-strong focus:border-primary",
               locked && "opacity-50",
             )}

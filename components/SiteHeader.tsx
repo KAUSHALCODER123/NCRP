@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import clsx from "clsx";
 import { IconPhone } from "@/components/icons";
+import { Wordmark } from "@/components/Logo";
 import { LOCALES, setLocale, useLocale, useT, type Locale } from "@/lib/i18n";
 import { setContrast, setScale, setTheme, usePrefs } from "@/lib/prefs";
 
@@ -39,8 +40,8 @@ export function SiteHeader() {
     <header>
       {/* Identity bar */}
       <div className="bg-primary text-white">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-5 py-1.5">
-          <p className="text-[13px] leading-tight">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-4 py-1.5 sm:px-5">
+          <p className="hidden text-[13px] leading-tight sm:block">
             {t("hdr.notGov")}
           </p>
           <div className="flex items-center gap-1">
@@ -52,27 +53,29 @@ export function SiteHeader() {
               role="group"
               aria-labelledby="a11y-label"
             >
-              <A11yBtn
-                onClick={() => setScale("")}
-                active={scale === ""}
-                label="Normal text size"
-              >
-                A
-              </A11yBtn>
-              <A11yBtn
-                onClick={() => setScale("lg")}
-                active={scale === "lg"}
-                label="Larger text"
-              >
-                A+
-              </A11yBtn>
-              <A11yBtn
-                onClick={() => setScale("xl")}
-                active={scale === "xl"}
-                label="Largest text"
-              >
-                A++
-              </A11yBtn>
+              <span className="hidden items-center gap-0.5 sm:flex">
+                <A11yBtn
+                  onClick={() => setScale("")}
+                  active={scale === ""}
+                  label="Normal text size"
+                >
+                  A
+                </A11yBtn>
+                <A11yBtn
+                  onClick={() => setScale("lg")}
+                  active={scale === "lg"}
+                  label="Larger text"
+                >
+                  A+
+                </A11yBtn>
+                <A11yBtn
+                  onClick={() => setScale("xl")}
+                  active={scale === "xl"}
+                  label="Largest text"
+                >
+                  A++
+                </A11yBtn>
+              </span>
               <A11yBtn
                 onClick={() => setContrast(!contrast)}
                 active={contrast}
@@ -81,7 +84,7 @@ export function SiteHeader() {
                 ◐
               </A11yBtn>
             </div>
-            <span className="mx-1 h-4 w-px bg-white/25" aria-hidden="true" />
+            <span className="mx-0.5 hidden h-4 w-px bg-white/25 sm:block" aria-hidden="true" />
             <ThemeToggle theme={theme} />
             <span className="mx-1 h-4 w-px bg-white/25" aria-hidden="true" />
             <LanguagePicker locale={locale} label={t("hdr.language")} />
@@ -91,18 +94,10 @@ export function SiteHeader() {
 
       {/* Brand + nav */}
       <div className="sticky top-0 z-40 border-b border-line bg-surface/95 backdrop-blur">
-        <div className="mx-auto max-w-6xl px-5">
-          <div className="flex items-center justify-between gap-4 py-3">
-            <Link href="/" className="flex items-center gap-3">
-              <Mark />
-              <span>
-                <span className="block font-display text-[21px] font-bold leading-none text-ink">
-                  Sahaay
-                </span>
-                <span className="block text-[13px] leading-tight text-ink-faint">
-                  Cyber crime reporting
-                </span>
-              </span>
+        <div className="mx-auto max-w-6xl px-4 sm:px-5">
+          <div className="flex items-center justify-between gap-3 py-2.5 sm:py-3">
+            <Link href="/" className="press flex items-center">
+              <Wordmark />
             </Link>
 
             <div className="flex items-center gap-2">
@@ -243,28 +238,5 @@ function ThemeToggle({ theme }: { theme: "" | "light" | "dark" }) {
         </button>
       ))}
     </div>
-  );
-}
-
-function Mark() {
-  return (
-    <svg
-      viewBox="0 0 40 40"
-      aria-hidden="true"
-      className="h-9 w-9 shrink-0"
-      fill="none"
-    >
-      <path
-        d="M20 3 6 8.6v9.7c0 8.2 5.6 15.4 14 18.3 8.4-2.9 14-10.1 14-18.3V8.6Z"
-        fill="var(--color-primary)"
-      />
-      <path
-        d="m13.6 19.8 4.3 4.4 8.3-8.6"
-        stroke="#fff"
-        strokeWidth="3.1"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
   );
 }
