@@ -1,69 +1,144 @@
-import Image from "next/image";
+import Link from "next/link";
+import { Shell, ShieldMark } from "@/components/ui";
+
+/**
+ * Screen 1 — "What happened?"
+ *
+ * No login. No category tree. No jurisdiction question.
+ * The real portal opens with an abstract taxonomy split; a panicking victim
+ * does not know whether a "digital arrest" call is impersonation, extortion
+ * or financial fraud. So we don't ask.
+ */
+
+const OPTIONS = [
+  {
+    href: "/freeze",
+    emoji: "💸",
+    title: "I lost money",
+    sub: "Money left my account. Every minute counts.",
+    urgent: true,
+  },
+  {
+    href: "/report/harassment",
+    emoji: "😨",
+    title: "Someone is threatening or blackmailing me",
+    sub: "Including photos, videos or messages being used against you.",
+  },
+  {
+    href: "/report/impersonation",
+    emoji: "🎭",
+    title: "Someone is pretending to be me",
+    sub: "A fake profile, or my name used to cheat others.",
+  },
+  {
+    href: "/report/account",
+    emoji: "🔒",
+    title: "My account was hacked",
+    sub: "Email, social media, or banking access taken over.",
+  },
+  {
+    href: "/scam-check",
+    emoji: "🔍",
+    title: "I got a suspicious message — is this a scam?",
+    sub: "Check a UPI ID, number or link before you pay anything.",
+  },
+  {
+    href: "/verify-officer",
+    emoji: "👮",
+    title: "Someone says they are the police",
+    sub: "Check whether an officer contacting you is real.",
+  },
+];
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <>
+      <div className="border-b border-line bg-surface">
+        <div className="mx-auto flex max-w-2xl items-center justify-between gap-4 px-5 py-3">
+          <span className="flex items-center gap-2 font-bold text-ink">
+            <ShieldMark />
+            Sahaay
+          </span>
+          <Link
+            href="/login"
+            className="text-[16px] font-semibold text-primary hover:underline"
           >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            Demo logins
+          </Link>
         </div>
-      </main>
-    </div>
+      </div>
+
+      <Shell>
+        <h1 className="text-[32px] font-bold leading-tight text-ink sm:text-[38px]">
+          What happened?
+        </h1>
+        <p className="mt-3 text-ink-soft">
+          Tap the closest one. You don&apos;t need an account, and you
+          don&apos;t need to know what the crime is called.
+        </p>
+
+        <nav className="mt-7 space-y-3">
+          {OPTIONS.map((o) => (
+            <Link
+              key={o.href}
+              href={o.href}
+              className={
+                o.urgent
+                  ? "flex items-start gap-4 rounded-card border-2 border-primary bg-primary-soft p-5 transition-colors hover:bg-primary-soft/70"
+                  : "flex items-start gap-4 rounded-card border border-line bg-surface p-5 transition-colors hover:border-line-strong hover:bg-sunken"
+              }
+            >
+              <span aria-hidden="true" className="text-[28px] leading-none">
+                {o.emoji}
+              </span>
+              <span className="min-w-0">
+                <span className="block text-[20px] font-semibold text-ink">
+                  {o.title}
+                </span>
+                <span className="mt-1 block text-[16px] text-ink-soft">
+                  {o.sub}
+                </span>
+                {o.urgent ? (
+                  <span className="mt-2 inline-block text-[15px] font-semibold text-primary">
+                    Takes about 60 seconds →
+                  </span>
+                ) : null}
+              </span>
+            </Link>
+          ))}
+        </nav>
+
+        <p className="mt-8 rounded-card border border-line bg-sunken p-5 text-[16px] text-ink-soft">
+          <strong className="text-ink">In a hurry?</strong> Start with
+          &ldquo;I lost money&rdquo;. We ask banks to hold your money first and
+          collect the details afterwards — not the other way round.
+        </p>
+
+        <div className="mt-6 grid gap-3 sm:grid-cols-2">
+          <Link
+            href="/learn"
+            className="rounded-card border border-line bg-surface p-4 transition-colors hover:border-line-strong hover:bg-sunken"
+          >
+            <span className="block text-[18px] font-semibold text-ink">
+              Learning Corner
+            </span>
+            <span className="mt-0.5 block text-[16px] text-ink-soft">
+              How each scam actually sounds, and the one tell that gives it away.
+            </span>
+          </Link>
+          <Link
+            href="/help"
+            className="rounded-card border border-line bg-surface p-4 transition-colors hover:border-line-strong hover:bg-sunken"
+          >
+            <span className="block text-[18px] font-semibold text-ink">
+              Help
+            </span>
+            <span className="mt-0.5 block text-[16px] text-ink-soft">
+              What to do first, and what happens after you report.
+            </span>
+          </Link>
+        </div>
+      </Shell>
+    </>
   );
 }

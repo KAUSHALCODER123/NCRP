@@ -57,7 +57,7 @@ Admin console (not judged) · real bank integrations · mobile app (rules forbid
 
 | Layer | Choice | Why |
 |---|---|---|
-| Framework | **Next.js 15 (App Router) + TypeScript** | Vercel deploy is one command; judges open a URL |
+| Framework | **Next.js 16.3.2 (App Router) + TypeScript** | Vercel deploy is one command; judges open a URL. ⚠️ Next 16, not 15 — APIs differ from most references; check `node_modules/next/dist/docs/01-app/` |
 | Styling | **Tailwind + shadcn/ui** | Fast, looks intentional, not templated if we set our own tokens |
 | State | **Zustand** + `localStorage` | No backend needed; survives refresh during judging |
 | "Backend" | **Next route handlers + JSON seed files** | Mock, per the rules. Zero infra |
