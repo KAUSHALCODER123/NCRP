@@ -407,7 +407,9 @@ body {
   /* Shock mode is the default mode: 17px floor, generous leading. */
   font-size: calc(17px * var(--scale));
   line-height: 1.6;
-  transition: background-color 180ms ease, color 180ms ease;
+  /* No transition here on purpose. Switching to high contrast or dark is an
+     accessibility action, and fading into it delays the thing the reader
+     asked for. Theme changes are instant. */
 }
 
 h1, h2, h3 {

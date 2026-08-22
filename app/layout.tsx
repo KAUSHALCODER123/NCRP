@@ -12,6 +12,7 @@ import "./globals.css";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { QuickExit } from "@/components/QuickExit";
+import Script from "next/script";
 import { PREFS_SCRIPT } from "@/lib/prefs";
 
 /* Display — institutional authority, used with restraint. */
@@ -88,11 +89,14 @@ export default function RootLayout({
       lang="en"
       className={`${plexSerif.variable} ${plexSans.variable} ${plexMono.variable} ${notoGu.variable} ${notoTa.variable} ${notoTe.variable} ${notoKn.variable}`}
     >
-      <head>
-        {/* Applies saved text-scale and contrast before first paint. */}
-        <script dangerouslySetInnerHTML={{ __html: PREFS_SCRIPT }} />
-      </head>
       <body className="min-h-dvh antialiased">
+        {/* Applies saved theme, text scale and language before first paint.
+            next/script with beforeInteractive is the sanctioned way to do
+            this; a bare <script> in the tree is treated as a React child and
+            logs an error. */}
+        <Script id="prefs" strategy="beforeInteractive">
+          {PREFS_SCRIPT}
+        </Script>
         <a
           href="#main"
           className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-white"

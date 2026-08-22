@@ -1,5 +1,6 @@
 import { classifyLocally, isValidClassification } from "@/lib/classify";
 import type { Classification } from "@/lib/types";
+import { guard } from "@/lib/rate-limit";
 
 /**
  * Free text (typed or spoken, any language) -> category, statute, routing.
@@ -30,6 +31,13 @@ The complaint may be in any Indian language. Reply in English.`;
 
 export async function POST(request: Request) {
   let text = "";
+
+  /* Over budget: return the deterministic classification rather than an
+     error. The citizen still gets a working form; only the model call is
+     withheld. */
+  const gate = guard(request, "classify", classifyLocally(""));
+  if (gate.refusal) return gate.refusal;
+
   try {
     const body = (await request.json()) as { text?: string };
     text = (body.text ?? "").slice(0, 4000);
@@ -41,7 +49,7 @@ export async function POST(request: Request) {
   const key = process.env.OPENAI_API_KEY;
 
   if (!key || !text.trim()) {
-    return Response.json(fallback);
+    return Response.json(fallback, { headers: gate.headers });
   }
 
   const controller = new AbortController();
@@ -66,21 +74,21 @@ export async function POST(request: Request) {
       }),
     });
 
-    if (!res.ok) return Response.json(fallback);
+    if (!res.ok) return Response.json(fallback, { headers: gate.headers });
 
     const data = (await res.json()) as {
       choices?: { message?: { content?: string } }[];
     };
     const raw = data.choices?.[0]?.message?.content;
-    if (!raw) return Response.json(fallback);
+    if (!raw) return Response.json(fallback, { headers: gate.headers });
 
     const parsed: unknown = JSON.parse(raw);
-    if (!isValidClassification(parsed)) return Response.json(fallback);
+    if (!isValidClassification(parsed)) return Response.json(fallback, { headers: gate.headers });
 
     const out: Classification = { ...parsed, fallback: false };
-    return Response.json(out);
+    return Response.json(out, { headers: gate.headers });
   } catch {
-    return Response.json(fallback);
+    return Response.json(fallback, { headers: gate.headers });
   } finally {
     clearTimeout(timer);
   }

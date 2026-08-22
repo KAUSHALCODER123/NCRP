@@ -1,4 +1,5 @@
 import { INSTITUTIONS } from "@/lib/mock/banks";
+import { guard } from "@/lib/rate-limit";
 
 /**
  * Server-Sent Events: bank acknowledgements arriving one at a time.
@@ -32,6 +33,12 @@ function sse(event: string, data: unknown) {
 }
 
 export async function GET(request: Request) {
+  /* Each stream holds a connection open for seconds. The client has a local
+     simulation fallback, so refusing here degrades the animation, never the
+     case itself. */
+  const gate = guard(request, "stream", { error: "rate_limited" });
+  if (gate.refusal) return gate.refusal;
+
   const url = new URL(request.url);
   const amountPaise = Number(url.searchParams.get("amount") ?? "0");
   const raw = url.searchParams.get("insts") ?? "";
@@ -171,6 +178,7 @@ export async function GET(request: Request) {
 
   return new Response(stream, {
     headers: {
+      ...gate.headers,
       "Content-Type": "text/event-stream; charset=utf-8",
       "Cache-Control": "no-cache, no-transform",
       Connection: "keep-alive",

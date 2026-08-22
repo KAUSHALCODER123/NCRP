@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import clsx from "clsx";
 import type { Sla } from "@/lib/types";
 import { readSla } from "@/lib/sla";
 import { humanDuration } from "@/lib/money";
+import { useNow } from "@/lib/use-now";
 
 /**
  * A running SLA clock.
@@ -14,14 +14,18 @@ import { humanDuration } from "@/lib/money";
  * what turns existing policy into an enforced promise.
  */
 export function SlaClock({ sla, compact }: { sla: Sla; compact?: boolean }) {
-  const [, tick] = useState(0);
-
-  useEffect(() => {
-    const t = setInterval(() => tick((n) => n + 1), 1000);
-    return () => clearInterval(t);
-  }, []);
-
-  const r = readSla(sla);
+  /*
+   * The clock reads from the shared tick store, which reports 0 during server
+   * rendering and on the first client paint. Deriving the countdown from a
+   * fresh Date() here instead meant the server and the client rendered
+   * different numbers, and React discarded and rebuilt the tree on every
+   * page that shows an SLA.
+   */
+  const now = useNow();
+  const settled = now > 0;
+  // Before hydration, read against the SLA's own start so the value is
+  // deterministic and the server and client agree.
+  const r = readSla(sla, settled ? new Date(now) : new Date(sla.startedAt));
 
   const tone =
     r.state === "met"
@@ -32,8 +36,9 @@ export function SlaClock({ sla, compact }: { sla: Sla; compact?: boolean }) {
           ? "pending"
           : "neutral";
 
-  const text =
-    r.state === "met"
+  const text = !settled
+    ? "—"
+    : r.state === "met"
       ? "Completed"
       : r.state === "breached"
         ? `Overdue by ${humanDuration(-r.remainingMs)}`
@@ -89,7 +94,7 @@ export function SlaClock({ sla, compact }: { sla: Sla; compact?: boolean }) {
             tone === "breach" && "bg-breach",
             tone === "neutral" && "bg-primary",
           )}
-          style={{ width: `${Math.round(r.fraction * 100)}%` }}
+          style={{ width: settled ? `${Math.round(r.fraction * 100)}%` : "0%" }}
         />
       </div>
 

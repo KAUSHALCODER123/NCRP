@@ -130,15 +130,12 @@ export function checkAmount(rupees: string): FieldCheck & { paise?: number } {
   if (Number.isNaN(n)) return { ok: false, error: "Enter the amount in numbers" };
   if (n <= 0) return { ok: false, error: "The amount must be more than zero" };
 
-  const paise = Math.round(n * 100);
-  return {
-    ok: true,
-    paise,
-    warn:
-      paise >= HIGH_SEVERITY_PAISE
-        ? "High severity — an e-Zero FIR is registered automatically at this amount"
-        : undefined,
-  };
+  /*
+   * No high-severity warning here: the freeze form shows a fuller callout for
+   * amounts over a lakh, and saying the same thing twice under one field
+   * makes a citizen think two different things happened.
+   */
+  return { ok: true, paise: Math.round(n * 100) };
 }
 
 /** OTP: exactly 6 digits. */

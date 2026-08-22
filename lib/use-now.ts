@@ -46,3 +46,21 @@ export function useNow(): number {
     () => 0,
   );
 }
+
+/**
+ * True only once the client has hydrated.
+ *
+ * Pages that read the persisted store cannot be server-rendered correctly:
+ * their data lives in localStorage, and the seeded demo timestamps are
+ * generated relative to "now" at module load, so the server and the browser
+ * produce different text. Gating on this is the honest fix — rendering a
+ * placeholder briefly, rather than shipping HTML that React has to throw
+ * away and rebuild.
+ */
+export function useHydrated(): boolean {
+  return useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
+}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { cloneElement, useEffect, useId, useState } from "react";
 import { useRouter } from "next/navigation";
 import clsx from "clsx";
 import { Button, Card, Chip, Shell, TopBar } from "@/components/ui";
@@ -159,10 +159,12 @@ export default function FreezePage() {
     <>
       <TopBar back={{ href: "/", label: "Back" }} />
       <Shell>
+        <h1 className="sr-only">Report financial fraud</h1>
+
         {/* Emergency banner */}
         <div className="rounded-card border-2 border-breach bg-breach-soft p-5">
-          <p className="text-[19px] font-bold text-ink">
-            🚨 Active financial fraud
+          <p className="text-[19px] font-bold text-ink" aria-hidden="true">
+            Active financial fraud
           </p>
           <p className="mt-1 text-[16px] text-ink-soft">
             For unauthorised transfers, UPI scams, card fraud and phishing.
@@ -361,12 +363,12 @@ export default function FreezePage() {
                   placeholder="Start typing…"
                   className="w-full rounded-xl border border-line-strong bg-surface p-4 text-[17px] focus:border-primary focus:outline-none"
                 />
-                <datalist id="banks">
-                  {BANK_DIRECTORY.map((b) => (
-                    <option key={b.id} value={b.name} />
-                  ))}
-                </datalist>
               </Field>
+              <datalist id="banks">
+                {BANK_DIRECTORY.map((b) => (
+                  <option key={b.id} value={b.name} />
+                ))}
+              </datalist>
               {nodal ? (
                 <p className="-mt-2 mb-4 text-[15px] text-held">
                   ✓ Routing to {nodal.name}&apos;s nodal cyber officer
@@ -374,7 +376,10 @@ export default function FreezePage() {
                 </p>
               ) : null}
 
-              <Field label="How was it paid?">
+              <fieldset className="mb-4">
+                <legend className="mb-2 block text-[17px] font-semibold text-ink">
+                  How was it paid?
+                </legend>
                 <div className="flex flex-wrap gap-2">
                   {(["upi", "imps", "neft", "rtgs", "card"] as Rail[]).map((r) => (
                     <button
@@ -392,7 +397,7 @@ export default function FreezePage() {
                     </button>
                   ))}
                 </div>
-              </Field>
+              </fieldset>
 
               <Field
                 label="Transaction reference (UTR)"
@@ -476,21 +481,41 @@ export default function FreezePage() {
             ) : null}
 
             <Card>
-              <Field label="Your mobile number" error={mobileCheck.error}>
+              <div className="mb-4">
+                <label
+                  htmlFor="mobile"
+                  className="mb-2 block text-[17px] font-semibold text-ink"
+                >
+                  Your mobile number
+                </label>
                 <div className="flex gap-2">
-                  <span className="data flex min-h-[56px] items-center rounded-xl border border-line-strong bg-sunken px-4 text-[17px] font-semibold text-ink-soft">
+                  <span
+                    aria-hidden="true"
+                    className="data flex min-h-[56px] items-center rounded-xl border border-line-strong bg-sunken px-4 text-[17px] font-semibold text-ink-soft"
+                  >
                     +91
                   </span>
                   <input
+                    id="mobile"
                     inputMode="numeric"
                     autoComplete="tel"
                     value={mobile}
                     onChange={(e) => setMobile(e.target.value)}
                     placeholder="9876543210"
+                    aria-describedby={mobileCheck.error ? "mobile-msg" : undefined}
                     className="data w-full rounded-xl border border-line-strong bg-surface p-4 text-[19px] focus:border-primary focus:outline-none"
                   />
                 </div>
-              </Field>
+                {mobileCheck.error ? (
+                  <p
+                    id="mobile-msg"
+                    role="alert"
+                    className="mt-1.5 text-[16px] font-semibold text-breach"
+                  >
+                    {mobileCheck.error}
+                  </p>
+                ) : null}
+              </div>
               <p className="text-[16px] text-ink-soft">
                 We verify this <em>while</em> the freeze is going out — not
                 before. Your money is never waiting on an OTP.
@@ -586,14 +611,27 @@ function Field({
   optional,
 }: {
   label: string;
-  children: React.ReactNode;
+  children: React.ReactElement<{ id?: string; "aria-describedby"?: string }>;
   error?: string;
   warn?: string;
   optional?: boolean;
 }) {
+  /*
+   * The label is bound to the control, and any error or hint is bound as its
+   * description. Without this a screen reader announces an unlabelled text
+   * box — and on a form where a mistyped reference silently misroutes a
+   * freeze request, that is not a cosmetic problem.
+   */
+  const id = useId();
+  const msgId = `${id}-msg`;
+  const message = error ?? warn;
+
   return (
     <div className="mb-4">
-      <label className="mb-2 block text-[17px] font-semibold text-ink">
+      <label
+        htmlFor={id}
+        className="mb-2 block text-[17px] font-semibold text-ink"
+      >
         {label}
         {optional ? (
           <span className="ml-2 text-[15px] font-normal text-ink-faint">
@@ -601,12 +639,23 @@ function Field({
           </span>
         ) : null}
       </label>
-      {children}
+      {cloneElement(children, {
+        id,
+        "aria-describedby": message ? msgId : undefined,
+      })}
       {error ? (
-        <p className="mt-1.5 text-[16px] font-semibold text-breach">{error}</p>
+        <p
+          id={msgId}
+          role="alert"
+          className="mt-1.5 text-[16px] font-semibold text-breach"
+        >
+          {error}
+        </p>
       ) : null}
       {!error && warn ? (
-        <p className="mt-1.5 text-[16px] text-pending">{warn}</p>
+        <p id={msgId} className="mt-1.5 text-[16px] text-pending">
+          {warn}
+        </p>
       ) : null}
     </div>
   );

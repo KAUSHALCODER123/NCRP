@@ -7,6 +7,7 @@ import { SlaClock } from "@/components/SlaClock";
 import { MoneyTrail } from "@/components/MoneyTrail";
 import { formatPaise } from "@/lib/money";
 import { useStore } from "@/lib/store";
+import { useHydrated } from "@/lib/use-now";
 import type { Evidence, Lien } from "@/lib/types";
 
 /**
@@ -28,12 +29,17 @@ const DOC_OPTIONS = [
 ];
 
 export function LienNotice({ lienId }: { lienId: string }) {
+  // This page reads client-stored data; SSR cannot be correct for it.
+  const hydrated = useHydrated();
   const lien = useStore((s) => s.liens.find((l) => l.id === lienId));
   const fileDispute = useStore((s) => s.fileDispute);
   const advanceDispute = useStore((s) => s.advanceDispute);
 
   const [picked, setPicked] = useState<string[]>([]);
   const [note, setNote] = useState("");
+
+
+  if (!hydrated) return <Loading />;
 
   if (!lien) {
     return (
@@ -361,5 +367,19 @@ function DisputeProgress({
         </div>
       ) : null}
     </>
+  );
+}
+
+function Loading() {
+  return (
+    <Shell>
+      <div className="animate-pulse space-y-4" aria-hidden="true">
+        <div className="h-6 w-40 rounded bg-sunken" />
+        <div className="h-10 w-3/4 rounded bg-sunken" />
+        <div className="h-32 rounded-card bg-sunken" />
+        <div className="h-24 rounded-card bg-sunken" />
+      </div>
+      <p className="sr-only">Loading your case…</p>
+    </Shell>
   );
 }

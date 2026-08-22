@@ -5,9 +5,12 @@ import Link from "next/link";
 import { Button, Card, Chip, Shell, TopBar } from "@/components/ui";
 import { formatPaise } from "@/lib/money";
 import { useStore } from "@/lib/store";
+import { useHydrated } from "@/lib/use-now";
 import { personaByEmail } from "@/lib/mock/personas";
 
 export default function DashboardPage() {
+  // Reads client-stored data; SSR cannot be correct for it.
+  const hydrated = useHydrated();
   const email = useStore((s) => s.currentEmail);
   /*
    * Select the raw arrays — their identity is stable — and derive here.
@@ -29,12 +32,28 @@ export default function DashboardPage() {
 
   const persona = email ? personaByEmail(email) : null;
 
+  if (!hydrated) {
+    return (
+      <Shell>
+        <div className="animate-pulse space-y-4" aria-hidden="true">
+          <div className="h-9 w-56 rounded bg-sunken" />
+          <div className="h-24 rounded-card bg-sunken" />
+          <div className="h-24 rounded-card bg-sunken" />
+        </div>
+        <p className="sr-only">Loading your cases…</p>
+      </Shell>
+    );
+  }
+
   if (!email) {
     return (
       <>
         <TopBar />
         <Shell>
-          <Card>
+          <h1 className="font-display text-[30px] font-bold text-ink">
+            Your cases
+          </h1>
+          <Card className="mt-6">
             <p className="text-[18px] font-semibold text-ink">
               You&apos;re not signed in.
             </p>

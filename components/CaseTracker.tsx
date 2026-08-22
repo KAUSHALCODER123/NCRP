@@ -7,7 +7,9 @@ import { SlaClock } from "@/components/SlaClock";
 import { CaseIntake } from "@/components/CaseIntake";
 import { formatPaise } from "@/lib/money";
 import { readSla } from "@/lib/sla";
+import { useNow } from "@/lib/use-now";
 import { useStore } from "@/lib/store";
+import { useHydrated } from "@/lib/use-now";
 import { clusterById } from "@/lib/mock/clusters";
 import type { Case, CaseStatus } from "@/lib/types";
 
@@ -51,9 +53,16 @@ function railIndex(c: Case): number {
 }
 
 export function CaseTracker({ caseId }: { caseId: string }) {
+  // This page reads client-stored data; SSR cannot be correct for it.
+  const hydrated = useHydrated();
   const kase = useStore((s) => s.cases.find((c) => c.id === caseId));
   const escalate = useStore((s) => s.escalate);
   const [escalated, setEscalated] = useState(false);
+  // Same reason as SlaClock: 0 until hydrated, so server and client agree.
+  const now = useNow();
+
+
+  if (!hydrated) return <Loading />;
 
   if (!kase) {
     return (
@@ -84,7 +93,8 @@ export function CaseTracker({ caseId }: { caseId: string }) {
   const reported = kase.transaction?.amountPaise ?? 0;
   const idx = railIndex(kase);
   const cluster = clusterById(kase.clusterId);
-  const slaReading = kase.sla ? readSla(kase.sla) : null;
+  const slaReading =
+    kase.sla && now > 0 ? readSla(kase.sla, new Date(now)) : null;
   const canEscalate =
     slaReading && (slaReading.state === "breached" || slaReading.state === "at_risk");
 
@@ -302,5 +312,19 @@ export function CaseTracker({ caseId }: { caseId: string }) {
         </ol>
       </Shell>
     </>
+  );
+}
+
+function Loading() {
+  return (
+    <Shell>
+      <div className="animate-pulse space-y-4" aria-hidden="true">
+        <div className="h-6 w-40 rounded bg-sunken" />
+        <div className="h-10 w-3/4 rounded bg-sunken" />
+        <div className="h-32 rounded-card bg-sunken" />
+        <div className="h-24 rounded-card bg-sunken" />
+      </div>
+      <p className="sr-only">Loading your case…</p>
+    </Shell>
   );
 }

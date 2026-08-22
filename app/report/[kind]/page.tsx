@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { Button, Card, Shell, TopBar } from "@/components/ui";
 
 /**
@@ -48,23 +49,8 @@ export default async function ReportPage({
   const { kind } = await params;
   const k = KINDS[kind];
 
-  if (!k) {
-    return (
-      <>
-        <TopBar back={{ href: "/", label: "Home" }} />
-        <Shell>
-          <Card>
-            <p className="text-[18px] font-semibold text-ink">
-              We don&apos;t have that page.
-            </p>
-            <Button href="/" className="mt-5">
-              Start again
-            </Button>
-          </Card>
-        </Shell>
-      </>
-    );
-  }
+  if (!k) notFound();
+
 
   return (
     <>

@@ -14,6 +14,8 @@
  * manual path, and an OCR outage must never block a report.
  */
 
+import { guard } from "@/lib/rate-limit";
+
 export const dynamic = "force-dynamic";
 
 const TIMEOUT_MS = 12_000;
@@ -31,20 +33,26 @@ Rules:
 export async function POST(request: Request) {
   const empty = { text: "", ok: false as const };
 
+  /* Vision is the most expensive call here. Over budget we return the same
+     empty result an unreadable image produces, so the uploader falls through
+     to manual entry instead of showing a dead end. */
+  const gate = guard(request, "ocr", empty);
+  if (gate.refusal) return gate.refusal;
+
   const key = process.env.OPENAI_API_KEY;
-  if (!key) return Response.json(empty);
+  if (!key) return Response.json(empty, { headers: gate.headers });
 
   let dataUrl = "";
   try {
     const body = (await request.json()) as { image?: string };
     dataUrl = body.image ?? "";
   } catch {
-    return Response.json(empty);
+    return Response.json(empty, { headers: gate.headers });
   }
 
-  if (!dataUrl.startsWith("data:image/")) return Response.json(empty);
+  if (!dataUrl.startsWith("data:image/")) return Response.json(empty, { headers: gate.headers });
   // base64 is ~4/3 of the byte size; guard before spending a request.
-  if (dataUrl.length > MAX_BYTES * 1.4) return Response.json(empty);
+  if (dataUrl.length > MAX_BYTES * 1.4) return Response.json(empty, { headers: gate.headers });
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
@@ -73,15 +81,15 @@ export async function POST(request: Request) {
       }),
     });
 
-    if (!res.ok) return Response.json(empty);
+    if (!res.ok) return Response.json(empty, { headers: gate.headers });
 
     const data = (await res.json()) as {
       choices?: { message?: { content?: string } }[];
     };
     const text = data.choices?.[0]?.message?.content ?? "";
-    return Response.json({ text, ok: Boolean(text.trim()) });
+    return Response.json({ text, ok: Boolean(text.trim()) }, { headers: gate.headers });
   } catch {
-    return Response.json(empty);
+    return Response.json(empty, { headers: gate.headers });
   } finally {
     clearTimeout(timer);
   }

@@ -6,6 +6,7 @@ import { Button, Card, Chip, Shell, TopBar } from "@/components/ui";
 import { clock, formatPaise } from "@/lib/money";
 import { useNow } from "@/lib/use-now";
 import { useStore } from "@/lib/store";
+import { useHydrated } from "@/lib/use-now";
 import { INSTITUTIONS } from "@/lib/mock/banks";
 import { lookupCluster } from "@/lib/mock/clusters";
 import type { FreezeAck, FreezeRequest } from "@/lib/types";
@@ -32,6 +33,8 @@ interface AckPayload {
 }
 
 export function FreezeReceipt({ caseId }: { caseId: string }) {
+  // This page reads client-stored data; SSR cannot be correct for it.
+  const hydrated = useHydrated();
   const kase = useStore((s) => s.cases.find((c) => c.id === caseId));
   const recordFreezeAck = useStore((s) => s.recordFreezeAck);
   const completeFreeze = useStore((s) => s.completeFreeze);
@@ -155,6 +158,17 @@ export function FreezeReceipt({ caseId }: { caseId: string }) {
         es?.close();
         if (!gotAnything) runFallback();
       };
+
+      // A stream that connects but never speaks is indistinguishable, to the
+      // citizen, from one that failed. Give it 3.5s, then do it locally.
+      fallbackTimers.push(
+        setTimeout(() => {
+          if (!gotAnything) {
+            es?.close();
+            runFallback();
+          }
+        }, 3500),
+      );
     } catch {
       runFallback();
     }
@@ -163,9 +177,19 @@ export function FreezeReceipt({ caseId }: { caseId: string }) {
       es?.close();
       fallbackTimers.forEach(clearTimeout);
       fallbackTimers = [];
+      /*
+       * Release the guard on teardown. React invokes effects twice in
+       * development, and a guard that survives cleanup meant the stream was
+       * opened, closed by that cleanup, and then never reopened — leaving
+       * every bank stuck on "Contacting…" forever.
+       */
+      kicked.current = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kase?.id, freezes.length]);
+
+
+  if (!hydrated) return <Loading />;
 
   if (!kase) {
     return (
@@ -368,5 +392,19 @@ function AckRow({ f }: { f: FreezeRequest }) {
         ) : null}
       </div>
     </li>
+  );
+}
+
+function Loading() {
+  return (
+    <Shell>
+      <div className="animate-pulse space-y-4" aria-hidden="true">
+        <div className="h-6 w-40 rounded bg-sunken" />
+        <div className="h-10 w-3/4 rounded bg-sunken" />
+        <div className="h-32 rounded-card bg-sunken" />
+        <div className="h-24 rounded-card bg-sunken" />
+      </div>
+      <p className="sr-only">Loading your case…</p>
+    </Shell>
   );
 }

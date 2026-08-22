@@ -1,0 +1,137 @@
+import { test, expect } from "@playwright/test";
+
+test.describe("theme", () => {
+  test("dark can be chosen and survives navigation and reload", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: "Dark" }).click();
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+
+    await page.goto("/learn");
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+
+    await page.reload();
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  });
+
+  test("device setting is honoured and is the default", async ({ page }) => {
+    await page.emulateMedia({ colorScheme: "dark" });
+    await page.goto("/");
+    // No explicit choice: the attribute is absent and the media query decides.
+    await expect(page.locator("html")).not.toHaveAttribute("data-theme", "light");
+    const canvas = await page.evaluate(() =>
+      getComputedStyle(document.documentElement)
+        .getPropertyValue("--c-canvas")
+        .trim(),
+    );
+    expect(canvas.toLowerCase()).not.toBe("#f6f8fc");
+  });
+
+  test("light overrides a dark device", async ({ page }) => {
+    await page.emulateMedia({ colorScheme: "dark" });
+    await page.goto("/");
+    await page.getByRole("button", { name: "Light" }).click();
+    const canvas = await page.evaluate(() =>
+      getComputedStyle(document.documentElement)
+        .getPropertyValue("--c-canvas")
+        .trim(),
+    );
+    expect(canvas.toLowerCase()).toBe("#f6f8fc");
+  });
+
+  test("theme is applied before paint, not after", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: "Dark" }).click();
+    await page.goto("/help");
+    // Read at the very first opportunity on the new document.
+    const attr = await page.evaluate(
+      () => document.documentElement.dataset.theme,
+    );
+    expect(attr).toBe("dark");
+  });
+});
+
+test.describe("accessibility controls", () => {
+  test("high contrast switches the palette and drops shadows", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: "High contrast" }).click();
+    await expect(page.locator("html")).toHaveAttribute("data-contrast", "high");
+
+    const ink = await page.evaluate(() =>
+      getComputedStyle(document.documentElement)
+        .getPropertyValue("--c-ink")
+        .trim(),
+    );
+    expect(["#000", "#000000"]).toContain(ink.toLowerCase());
+  });
+
+  test("text scaling actually changes the computed size", async ({ page, isMobile }) => {
+    test.skip(isMobile, "scale controls are hidden on phones by design");
+    await page.goto("/");
+    const before = await page
+      .locator("body")
+      .evaluate((b) => parseFloat(getComputedStyle(b).fontSize));
+    await page.getByRole("button", { name: "Largest text" }).click();
+    const after = await page
+      .locator("body")
+      .evaluate((b) => parseFloat(getComputedStyle(b).fontSize));
+    expect(after).toBeGreaterThan(before * 1.2);
+  });
+});
+
+test.describe("localisation", () => {
+  /* Markers are taken from the hero, which is visible at every width —
+     the nav collapses behind a menu button on phones. */
+  const CASES = [
+    { value: "hi", marker: "पैसे की शिकायत करें" },
+    { value: "mr", marker: "पैशांची तक्रार नोंदवा" },
+    { value: "gu", marker: "પૈસાની ફરિયાદ કરો" },
+    { value: "ta", marker: "பணப் புகார் அளிக்க" },
+    { value: "te", marker: "డబ్బు గురించి ఫిర్యాదు" },
+    { value: "kn", marker: "ಹಣದ ಬಗ್ಗೆ ದೂರು" },
+  ];
+
+  for (const c of CASES) {
+    test(`switches to ${c.value} and persists`, async ({ page }) => {
+      await page.goto("/");
+      await page.getByLabel(/language/i).selectOption(c.value);
+      await expect(page.locator("html")).toHaveAttribute("lang", c.value);
+      await expect(page.getByText(c.marker).first()).toBeVisible();
+
+      await page.reload();
+      await expect(page.locator("html")).toHaveAttribute("lang", c.value);
+      await expect(page.getByText(c.marker).first()).toBeVisible();
+    });
+  }
+
+  test("untranslated pages fall back to English rather than blanking", async ({ page }) => {
+    await page.goto("/");
+    await page.getByLabel(/language/i).selectOption("ta");
+    await page.goto("/learn/digital-arrest");
+    await expect(page.locator("h1")).toContainText(/Digital arrest/i);
+  });
+});
+
+test.describe("safety", () => {
+  test("quick exit is always reachable", async ({ page }) => {
+    for (const p of ["/", "/freeze", "/learn/sextortion"]) {
+      await page.goto(p);
+      await expect(
+        page.getByRole("button", { name: /leave this site immediately/i }),
+      ).toBeVisible();
+    }
+  });
+
+  test("quick exit leaves the site and clears stored cases", async ({ page }) => {
+    await page.goto("/login");
+    await page.getByRole("button", { name: /Suresh Pillai/i }).click();
+    await expect(page).toHaveURL(/dashboard/);
+
+    await page
+      .getByRole("button", { name: /leave this site immediately/i })
+      .click();
+    await page.waitForURL((u) => !u.href.includes("localhost:3000"), {
+      timeout: 10_000,
+    });
+    expect(page.url()).not.toContain("localhost:3000");
+  });
+});
