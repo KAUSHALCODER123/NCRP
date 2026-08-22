@@ -86,7 +86,21 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
+    /*
+     * suppressHydrationWarning is correct here rather than a workaround.
+     *
+     * The pre-paint script deliberately mutates this element before React
+     * hydrates — it sets data-theme, data-scale, data-contrast and lang from
+     * localStorage so a reader who needs 128% text or high contrast never sees
+     * a flash of the default. The server cannot know those values, so the
+     * server HTML and the client DOM are always going to differ here, by
+     * design. React's warning is describing the mechanism working.
+     *
+     * It suppresses only this element's own attributes, not its subtree, so a
+     * genuine mismatch anywhere inside still surfaces.
+     */
     <html
+      suppressHydrationWarning
       lang="en"
       className={`${plexSerif.variable} ${plexSans.variable} ${plexMono.variable} ${notoGu.variable} ${notoTa.variable} ${notoTe.variable} ${notoKn.variable}`}
     >

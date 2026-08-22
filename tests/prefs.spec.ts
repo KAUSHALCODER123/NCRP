@@ -135,3 +135,53 @@ test.describe("safety", () => {
     expect(page.url()).not.toContain("localhost:3000");
   });
 });
+
+test.describe("saved preferences do not break hydration", () => {
+  /*
+   * The pre-paint script mutates <html> before React hydrates. Every earlier
+   * route test loaded a page with no preferences set, so the attributes
+   * matched by accident and this whole class of error went unseen.
+   */
+  const PAGES = ["/", "/freeze", "/learn/sextortion", "/stories", "/report/harassment"];
+
+  for (const path of PAGES) {
+    test(`no hydration error with prefs applied: ${path}`, async ({ page, isMobile }) => {
+      const errors: string[] = [];
+      page.on("console", (m) => {
+        if (m.type() === "error") errors.push(m.text());
+      });
+      page.on("pageerror", (e) => errors.push(String(e)));
+
+      // Set every preference the script restores, then load fresh so the
+      // script runs before hydration exactly as it does for a returning user.
+      await page.goto("/");
+      await page.getByRole("button", { name: "Dark" }).click();
+      await page.getByRole("button", { name: "High contrast" }).click();
+      if (!isMobile) {
+        await page.getByRole("button", { name: "Largest text" }).click();
+      }
+      await page.getByLabel(/language/i).selectOption("hi");
+
+      errors.length = 0;
+      await page.goto(path);
+      await page.waitForLoadState("networkidle");
+
+      const hydration = errors.filter((e) => /hydrat/i.test(e));
+      expect(hydration, hydration.join("\n")).toEqual([]);
+      expect(errors, errors.join("\n")).toEqual([]);
+    });
+  }
+
+  test("preferences actually survive the reload they are restored on", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: "Dark" }).click();
+    await page.getByRole("button", { name: "High contrast" }).click();
+    await page.getByLabel(/language/i).selectOption("ta");
+
+    await page.goto("/freeze");
+    const html = page.locator("html");
+    await expect(html).toHaveAttribute("data-theme", "dark");
+    await expect(html).toHaveAttribute("data-contrast", "high");
+    await expect(html).toHaveAttribute("lang", "ta");
+  });
+});
