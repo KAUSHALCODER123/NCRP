@@ -3,19 +3,17 @@
 import { useEffect, useState } from "react";
 import clsx from "clsx";
 import { MoneyTrail, type Hop } from "@/components/MoneyTrail";
+import { IconCheck, IconClock } from "@/components/icons";
 
 /**
- * The hero, and the thesis.
+ * The hero panel — a white, elevated card carrying the product's thesis.
  *
- * A bank SMS arrives — the one artifact every Indian recognises instantly —
- * and then the money trail draws itself along the hops the money actually
- * took. By the fourth hop the viewer has been told the entire argument
- * without a word of marketing copy:
+ * A bank SMS arrives (the artifact every Indian recognises instantly), then
+ * the money trail draws itself along the hops the money actually took. By the
+ * last hop the argument has landed without a line of marketing copy:
  *
  *   money moves in hops · we caught some · some got away ·
  *   and the last person on the line is a shopkeeper who did nothing wrong.
- *
- * That last beat is the one nobody else builds, so it gets the final frame.
  */
 
 const SMS =
@@ -31,7 +29,7 @@ const HOPS: Hop[] = [
   {
     label: "Mule account",
     amount: "₹34,200 held",
-    sub: "Frozen 31 seconds after you tapped",
+    sub: "Frozen 31 seconds in",
     state: "held",
   },
   {
@@ -61,7 +59,6 @@ export function HeroTicker() {
       }, 0);
       return () => clearTimeout(t);
     }
-    // The message arrives the way it actually does: all at once, then read.
     const reveal = setInterval(() => {
       setTyped((n) => {
         if (n >= SMS.length) {
@@ -71,7 +68,7 @@ export function HeroTicker() {
         return Math.min(SMS.length, n + 3);
       });
     }, 16);
-    const start = setTimeout(() => setTrail(true), 1400);
+    const start = setTimeout(() => setTrail(true), 1300);
     return () => {
       clearInterval(reveal);
       clearTimeout(start);
@@ -79,32 +76,52 @@ export function HeroTicker() {
   }, []);
 
   return (
-    <div className="text-on-deep">
-      <p className="eyebrow !text-on-deep/50">The message you already have</p>
-      <p className="mt-2 rounded-lg border border-white/12 bg-white/[0.06] p-4 text-[14px] leading-relaxed">
-        <span className="data">{SMS.slice(0, typed)}</span>
-        <span
+    <div className="overflow-hidden rounded-card border border-line bg-surface shadow-lg">
+      {/* Status strip — a live case, not a screenshot */}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line bg-sunken px-5 py-3">
+        <span className="data text-[13px] font-semibold text-ink-soft">
+          CASE SHY-2026-08-4471
+        </span>
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary-soft px-2.5 py-1 text-[13px] font-semibold text-secondary-text">
+          <IconCheck className="h-3.5 w-3.5" />
+          Open · banks contacted
+        </span>
+      </div>
+
+      <div className="p-5 sm:p-6">
+        <p className="eyebrow">The message you already have</p>
+        <p className="mt-2.5 rounded-[10px] border border-line bg-sunken p-4 text-[14px] leading-relaxed text-ink-soft">
+          <span className="data">{SMS.slice(0, typed)}</span>
+          <span
+            className={clsx(
+              "ml-0.5 inline-block h-[15px] w-[7px] translate-y-[2px] bg-ink-faint",
+              typed >= SMS.length && "caret",
+            )}
+          />
+        </p>
+
+        <div className="mt-7 flex items-center justify-between gap-3">
+          <p className="eyebrow">Where that money went</p>
+          <span className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-ink-faint">
+            <IconClock className="h-4 w-4" />
+            <span className="data">41s</span>
+          </span>
+        </div>
+
+        <MoneyTrail hops={HOPS} animate={trail} className="mt-4" />
+
+        <p
           className={clsx(
-            "ml-0.5 inline-block h-[15px] w-[7px] translate-y-[2px] bg-on-deep/70",
-            typed >= SMS.length && "caret",
+            "mt-2 border-t border-line pt-4 text-[15px] leading-relaxed text-ink-soft transition-opacity duration-700",
+            trail ? "opacity-100" : "opacity-0",
           )}
-        />
-      </p>
-
-      <p className="eyebrow mt-8 !text-on-deep/50">Where that money went</p>
-      <MoneyTrail hops={HOPS} animate={trail} className="mt-4" />
-
-      <p
-        className={clsx(
-          "mt-2 border-t border-white/12 pt-4 text-[15px] leading-relaxed text-on-deep/80 transition-opacity duration-700",
-          trail ? "opacity-100" : "opacity-0",
-        )}
-      >
-        Every portal is built for the first box. This one is also built for the
-        last — because today, a shopkeeper at hop three loses{" "}
-        <span className="font-semibold text-white">his entire account</span>,
-        not ₹5,000.
-      </p>
+        >
+          Every portal is built for the first box. This one is also built for
+          the last — because today a shopkeeper at hop three loses{" "}
+          <strong className="font-semibold text-ink">his entire account</strong>
+          , not ₹5,000.
+        </p>
+      </div>
     </div>
   );
 }

@@ -86,21 +86,35 @@
   --color-exit: var(--c-exit);
   --color-exit-on: var(--c-exit-on);
 
+  --shadow-xs: var(--e-xs);
+  --shadow-sm: var(--e-sm);
+  --shadow-md: var(--e-md);
+  --shadow-lg: var(--e-lg);
+
   --font-display: var(--font-plex-serif), Georgia, serif;
-  --font-sans: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-plex-sans), var(--font-gu), var(--font-ta), var(--font-te), var(--font-kn), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-plex-mono), ui-monospace, monospace;
 
-  --radius-card: 10px;
+  --radius-card: 14px;
+  --radius-field: 10px;
 }
 
 /* ---------------- LIGHT (default) ---------------- */
 :root {
-  --c-canvas: #f4f6fa;
+  --c-canvas: #f6f8fc;
   --c-surface: #ffffff;
   --c-raised: #ffffff;
-  --c-sunken: #e8edf4;
-  --c-line: #d5dde8;
-  --c-line-strong: #b6c3d4;
+  --c-sunken: #eef2f8;
+  --c-line: #e2e8f1;
+  --c-line-strong: #c6d1e0;
+
+  /* Elevation is navy-tinted, never neutral grey — a grey shadow on a
+     cool surface reads as dirt. Kept low and wide: this is a service, not
+     a marketing page. */
+  --e-xs: 0 1px 2px rgba(10, 23, 38, 0.05);
+  --e-sm: 0 1px 3px rgba(10, 23, 38, 0.06), 0 1px 2px rgba(10, 23, 38, 0.04);
+  --e-md: 0 4px 14px rgba(10, 23, 38, 0.07), 0 1px 3px rgba(10, 23, 38, 0.05);
+  --e-lg: 0 16px 40px rgba(10, 23, 38, 0.10), 0 3px 10px rgba(10, 23, 38, 0.05);
 
   --c-ink: #0a1726;        /* 16.2:1 on canvas — AAA */
   --c-ink-soft: #3c4d64;   /*  8.3:1 — AAA */
@@ -197,6 +211,11 @@
 
   --c-exit: #e8eef7;
   --c-exit-on: #0b1220;
+
+  --e-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --e-sm: 0 1px 3px rgba(0, 0, 0, 0.45), 0 1px 2px rgba(0, 0, 0, 0.3);
+  --e-md: 0 4px 14px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(0, 0, 0, 0.35);
+  --e-lg: 0 16px 40px rgba(0, 0, 0, 0.6), 0 3px 10px rgba(0, 0, 0, 0.4);
 }
 
 /* System preference, unless the reader has chosen light explicitly. */
@@ -247,6 +266,11 @@
 
     --c-exit: #e8eef7;
     --c-exit-on: #0b1220;
+
+    --e-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --e-sm: 0 1px 3px rgba(0, 0, 0, 0.45), 0 1px 2px rgba(0, 0, 0, 0.3);
+    --e-md: 0 4px 14px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(0, 0, 0, 0.35);
+    --e-lg: 0 16px 40px rgba(0, 0, 0, 0.6), 0 3px 10px rgba(0, 0, 0, 0.4);
   }
 }
 
@@ -337,6 +361,7 @@
 
 :root[data-contrast="high"] * {
   border-color: currentColor;
+  box-shadow: none !important;
 }
 
 /* ================================================================== */
@@ -353,6 +378,14 @@ html {
 :root[data-theme="dark"] { color-scheme: dark; }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) { color-scheme: dark; }
+}
+
+/* Indic scripts carry taller ascenders and descenders than Latin.
+   A little extra leading stops matras from colliding across lines. */
+:root:lang(gu) body, :root:lang(ta) body,
+:root:lang(te) body, :root:lang(kn) body,
+:root:lang(hi) body, :root:lang(mr) body {
+  line-height: 1.72;
 }
 
 body {
@@ -470,11 +503,13 @@ h1, h2, h3 {
 
 /* Card lift: 1px. Enough to register, not enough to notice. */
 .lift {
-  transition: transform 160ms cubic-bezier(0.2, 0.7, 0.3, 1),
-    border-color 160ms ease, background-color 160ms ease;
+  transition: transform 170ms cubic-bezier(0.2, 0.7, 0.3, 1),
+    box-shadow 170ms ease, border-color 170ms ease, background-color 170ms ease;
+  box-shadow: var(--shadow-sm);
 }
 .lift:hover {
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
 /* A value that just changed. Used when a bank acknowledges and the held

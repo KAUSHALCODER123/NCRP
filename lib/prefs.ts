@@ -99,4 +99,4 @@ export function usePrefs(): Prefs {
 }
 
 /** Runs before paint. Kept tiny and dependency-free on purpose. */
-export const PREFS_SCRIPT = `(function(){try{var d=document.documentElement,s=localStorage.getItem('sahaay-scale'),c=localStorage.getItem('sahaay-contrast'),t=localStorage.getItem('sahaay-theme');if(s)d.dataset.scale=s;if(c==='high')d.dataset.contrast='high';if(t)d.dataset.theme=t;}catch(e){}})();`;
+export const PREFS_SCRIPT = `(function(){try{var d=document.documentElement,s=localStorage.getItem('sahaay-scale'),c=localStorage.getItem('sahaay-contrast'),t=localStorage.getItem('sahaay-theme');if(s)d.dataset.scale=s;if(c==='high')d.dataset.contrast='high';if(t)d.dataset.theme=t;var g=localStorage.getItem('sahaay-lang');if(g)d.lang=g;}catch(e){}})();`;

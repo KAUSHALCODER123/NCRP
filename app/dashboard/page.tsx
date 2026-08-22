@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import Link from "next/link";
 import { Button, Card, Chip, Shell, TopBar } from "@/components/ui";
 import { formatPaise } from "@/lib/money";
@@ -8,13 +9,23 @@ import { personaByEmail } from "@/lib/mock/personas";
 
 export default function DashboardPage() {
   const email = useStore((s) => s.currentEmail);
-  const cases = useStore((s) =>
-    email ? s.cases.filter((c) => c.ownerEmail === email) : [],
-  );
-  const liens = useStore((s) =>
-    email ? s.liens.filter((l) => l.ownerEmail === email) : [],
-  );
+  /*
+   * Select the raw arrays — their identity is stable — and derive here.
+   * Filtering inside the selector returns a fresh array on every read, which
+   * breaks useSyncExternalStore's requirement that a snapshot be cached.
+   */
+  const allCases = useStore((s) => s.cases);
+  const allLiens = useStore((s) => s.liens);
   const logout = useStore((s) => s.logout);
+
+  const cases = useMemo(
+    () => (email ? allCases.filter((c) => c.ownerEmail === email) : []),
+    [allCases, email],
+  );
+  const liens = useMemo(
+    () => (email ? allLiens.filter((l) => l.ownerEmail === email) : []),
+    [allLiens, email],
+  );
 
   const persona = email ? personaByEmail(email) : null;
 

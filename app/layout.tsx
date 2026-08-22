@@ -3,6 +3,10 @@ import {
   IBM_Plex_Sans_Devanagari,
   IBM_Plex_Serif,
   IBM_Plex_Mono,
+  Noto_Sans_Gujarati,
+  Noto_Sans_Tamil,
+  Noto_Sans_Telugu,
+  Noto_Sans_Kannada,
 } from "next/font/google";
 import "./globals.css";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -34,6 +38,36 @@ const plexMono = IBM_Plex_Mono({
   display: "swap",
 });
 
+/* IBM Plex covers Latin and Devanagari (Hindi, Marathi). The other four
+   scripts need their own faces. All four sit in the same font stack, and
+   because next/font emits unicode-range subsets, a browser downloads a
+   file only when that script actually appears on screen — a Hindi reader
+   never pays for Tamil. */
+const notoGu = Noto_Sans_Gujarati({
+  subsets: ["gujarati"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-gu",
+  display: "swap",
+});
+const notoTa = Noto_Sans_Tamil({
+  subsets: ["tamil"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-ta",
+  display: "swap",
+});
+const notoTe = Noto_Sans_Telugu({
+  subsets: ["telugu"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-te",
+  display: "swap",
+});
+const notoKn = Noto_Sans_Kannada({
+  subsets: ["kannada"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-kn",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "Sahaay — report cyber fraud in 60 seconds",
   description:
@@ -52,7 +86,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${plexSerif.variable} ${plexSans.variable} ${plexMono.variable}`}
+      className={`${plexSerif.variable} ${plexSans.variable} ${plexMono.variable} ${notoGu.variable} ${notoTa.variable} ${notoTe.variable} ${notoKn.variable}`}
     >
       <head>
         {/* Applies saved text-scale and contrast before first paint. */}

@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import clsx from "clsx";
+import { IconPhone } from "@/components/icons";
+import { LOCALES, setLocale, useLocale, useT, type Locale } from "@/lib/i18n";
 import { setContrast, setScale, setTheme, usePrefs } from "@/lib/prefs";
 
 /**
@@ -18,30 +20,32 @@ import { setContrast, setScale, setTheme, usePrefs } from "@/lib/prefs";
  */
 
 const NAV = [
-  { href: "/", label: "Home" },
-  { href: "/freeze", label: "Report a crime" },
-  { href: "/dashboard", label: "Track a case" },
-  { href: "/scam-check", label: "Check a suspect" },
-  { href: "/learn", label: "Learning Corner" },
-  { href: "/help", label: "Help" },
-];
+  { href: "/", key: "nav.home" },
+  { href: "/freeze", key: "nav.report" },
+  { href: "/dashboard", key: "nav.track" },
+  { href: "/scam-check", key: "nav.check" },
+  { href: "/learn", key: "nav.learn" },
+  { href: "/help", key: "nav.help" },
+] as const;
 
 export function SiteHeader() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const { scale, contrast, theme } = usePrefs();
+  const locale = useLocale();
+  const t = useT();
 
   return (
     <header>
       {/* Identity bar */}
-      <div className="bg-deep text-on-deep">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-5 py-2">
+      <div className="bg-primary text-white">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-5 py-1.5">
           <p className="text-[13px] leading-tight">
-            A proof of concept · not a Government of India service
+            {t("hdr.notGov")}
           </p>
           <div className="flex items-center gap-1">
             <span className="sr-only" id="a11y-label">
-              Accessibility controls
+              {t("hdr.a11y")}
             </span>
             <div
               className="flex items-center gap-0.5"
@@ -80,18 +84,13 @@ export function SiteHeader() {
             <span className="mx-1 h-4 w-px bg-white/25" aria-hidden="true" />
             <ThemeToggle theme={theme} />
             <span className="mx-1 h-4 w-px bg-white/25" aria-hidden="true" />
-            <button
-              type="button"
-              className="rounded px-2 py-1 text-[13px] font-semibold hover:bg-white/10"
-            >
-              हिन्दी
-            </button>
+            <LanguagePicker locale={locale} label={t("hdr.language")} />
           </div>
         </div>
       </div>
 
       {/* Brand + nav */}
-      <div className="border-b border-line bg-surface">
+      <div className="sticky top-0 z-40 border-b border-line bg-surface/95 backdrop-blur">
         <div className="mx-auto max-w-6xl px-5">
           <div className="flex items-center justify-between gap-4 py-3">
             <Link href="/" className="flex items-center gap-3">
@@ -109,9 +108,9 @@ export function SiteHeader() {
             <div className="flex items-center gap-2">
               <a
                 href="tel:1930"
-                className="hidden items-center gap-2 rounded-lg border border-breach/30 bg-breach-soft px-3 py-2 text-[15px] font-semibold text-breach sm:inline-flex"
+                className="press hidden items-center gap-2 rounded-[10px] border border-critical-border bg-critical-soft px-3.5 py-2 text-[15px] font-semibold text-critical-text sm:inline-flex"
               >
-                <span aria-hidden="true">📞</span>
+                <IconPhone className="h-4 w-4" />
                 <span className="data">1930</span>
               </a>
               <button
@@ -146,11 +145,11 @@ export function SiteHeader() {
                       className={clsx(
                         "press block border-b-2 px-3 py-2.5 text-[15px] font-semibold",
                         active
-                          ? "border-primary text-primary"
+                          ? "border-primary text-primary-text"
                           : "border-transparent text-ink-soft hover:border-line-strong hover:text-ink",
                       )}
                     >
-                      {n.label}
+                      {t(n.key)}
                     </Link>
                   </li>
                 );
@@ -182,11 +181,39 @@ function A11yBtn({
       aria-pressed={active}
       className={clsx(
         "press min-w-[32px] rounded px-2 py-1 text-[13px] font-bold",
-        active ? "bg-white text-deep" : "hover:bg-white/15",
+        active ? "bg-white text-primary" : "hover:bg-white/20",
       )}
     >
       {children}
     </button>
+  );
+}
+
+function LanguagePicker({
+  locale,
+  label,
+}: {
+  locale: Locale;
+  label: string;
+}) {
+  /* A native <select>: it is keyboard accessible for free, opens as a
+     system picker on phones, and stays legible at 128% text scale — all
+     things a custom dropdown would have to re-earn. */
+  return (
+    <label className="flex items-center">
+      <span className="sr-only">{label}</span>
+      <select
+        value={locale}
+        onChange={(e) => setLocale(e.target.value as Locale)}
+        className="cursor-pointer rounded bg-transparent px-1.5 py-1 text-[13px] font-semibold text-white outline-none hover:bg-white/20 focus-visible:bg-white/20"
+      >
+        {LOCALES.map((l) => (
+          <option key={l.id} value={l.id} className="text-ink">
+            {l.native}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }
 
@@ -209,7 +236,7 @@ function ThemeToggle({ theme }: { theme: "" | "light" | "dark" }) {
           aria-pressed={theme === o.id}
           className={clsx(
             "press min-w-[30px] rounded px-1.5 py-1 text-[13px] font-bold",
-            theme === o.id ? "bg-white text-deep" : "hover:bg-white/15",
+            theme === o.id ? "bg-white text-primary" : "hover:bg-white/20",
           )}
         >
           {o.glyph}

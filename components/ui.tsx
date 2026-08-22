@@ -24,7 +24,7 @@ export function Chip({
   return (
     <span
       className={clsx(
-        "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[15px] font-semibold",
+        "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[14px] font-semibold",
         TONE_CHIP[tone],
         className,
       )}
@@ -44,7 +44,7 @@ export function Card({
   return (
     <div
       className={clsx(
-        "rounded-card border border-line bg-surface p-5 sm:p-6",
+        "rounded-card border border-line bg-surface p-5 shadow-sm sm:p-6",
         className,
       )}
     >
@@ -71,11 +71,11 @@ export function Button({
   className?: string;
 }) {
   const base =
-    "press inline-flex min-h-[54px] items-center justify-center gap-2 rounded-lg px-6 text-[17px] font-semibold disabled:opacity-45 disabled:cursor-not-allowed";
+    "press inline-flex min-h-[54px] items-center justify-center gap-2 rounded-[10px] px-6 text-[17px] font-semibold disabled:opacity-45 disabled:cursor-not-allowed";
   const variants = {
-    primary: "bg-primary text-white hover:bg-primary-hover",
-    secondary: "border border-line-strong bg-surface text-ink hover:bg-sunken",
-    ghost: "text-primary hover:bg-primary-soft",
+    primary: "bg-primary text-primary-on shadow-sm hover:bg-primary-hover",
+    secondary: "border border-line-strong bg-surface text-ink shadow-sm hover:bg-sunken",
+    ghost: "text-primary-text hover:bg-primary-soft",
   };
   const cls = clsx(base, variants[variant], className);
 

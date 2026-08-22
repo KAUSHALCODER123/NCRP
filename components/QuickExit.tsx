@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useT } from "@/lib/i18n";
 
 /**
  * Quick Exit — a floating safety switch.
@@ -24,6 +25,7 @@ import { useEffect } from "react";
 const NEUTRAL = "https://www.google.com/search?q=weather+today";
 
 export function QuickExit() {
+  const t = useT();
   useEffect(() => {
     let taps = 0;
     let timer: ReturnType<typeof setTimeout> | null = null;
@@ -53,7 +55,7 @@ export function QuickExit() {
       className="fixed bottom-4 right-4 z-50 inline-flex min-h-[52px] items-center gap-2 rounded-full bg-exit px-5 text-[17px] font-bold text-exit-on shadow-lg press hover:scale-[1.03] focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-white"
     >
       <span aria-hidden="true">✕</span>
-      Quick exit
+      {t("quick.exit")}
     </button>
   );
 }

@@ -1,44 +1,41 @@
+"use client";
+
 import Link from "next/link";
 import { HeroTicker } from "@/components/HeroTicker";
 import { MoneyTrail, type Hop } from "@/components/MoneyTrail";
+import {
+  IconArrow,
+  IconBook,
+  IconCheck,
+  IconLock,
+  IconMask,
+  IconPhone,
+  IconRupee,
+  IconSearch,
+  IconShield,
+  IconUser,
+} from "@/components/icons";
+import { useT } from "@/lib/i18n";
 
 /**
  * Home.
  *
- * Government portals stack every section at equal visual weight, which is why
- * they are hard to use under stress: nothing tells you what matters. Here the
- * hierarchy is two-tier — the emergency owns a deep field at full bleed, and
- * everything below it is a quiet index.
- *
- * The money trail is the one bold element, and it appears exactly twice: once
- * to explain the crime, once to explain the fix. Everything else stays out of
- * its way.
+ * Light field, navy primary, white elevated cards, generous whitespace.
+ * Hierarchy is carried by elevation and scale rather than by a dark band:
+ * the emergency card sits highest, everything else settles beneath it.
  */
 
 const TILES = [
-  {
-    href: "/freeze",
-    kicker: "Money is gone",
-    title: "Financial fraud",
-    body: "UPI, card, net banking or wallet. We contact the banks before we ask you anything else.",
-    meta: "About 60 seconds",
-    primary: true,
-  },
-  {
-    href: "/report/harassment",
-    kicker: "Someone is threatening you",
-    title: "Women & children",
-    body: "Blackmail, intimate images, stalking, or abuse of a child. You can report without giving your name.",
-    meta: "Anonymous option",
-  },
-  {
-    href: "/report/impersonation",
-    kicker: "Something else happened",
-    title: "Other cyber crime",
-    body: "Impersonation, a hacked account, or a fake profile using your name.",
-    meta: "Guided, no jargon",
-  },
-];
+  { href: "/freeze", Icon: IconRupee, title: "tiles.t1", body: "tiles.t1body", meta: "tiles.t1meta", primary: true },
+  { href: "/report/harassment", Icon: IconMask, title: "tiles.t2", body: "tiles.t2body", meta: "tiles.t2meta", primary: false },
+  { href: "/report/impersonation", Icon: IconUser, title: "tiles.t3", body: "tiles.t3body", meta: "tiles.t3meta", primary: false },
+] as const;
+
+const TRUST = [
+  { Icon: IconLock, k: "hero.trust1" },
+  { Icon: IconCheck, k: "hero.trust2" },
+  { Icon: IconShield, k: "hero.trust3" },
+] as const;
 
 /* The same trail, rewritten as it should work. */
 const FIXED: Hop[] = [
@@ -77,192 +74,218 @@ const LEARN = [
 ];
 
 export default function Home() {
+  const t = useT();
   return (
     <>
-      {/* ---------- Tier 1: the emergency ---------- */}
-      <section className="bg-deep">
+      {/* ---------------- Hero ---------------- */}
+      <section className="border-b border-line bg-sunken/60">
         <div className="mx-auto max-w-6xl px-5 py-14 sm:py-20">
-          <div className="max-w-3xl">
-            <p className="eyebrow !text-on-deep/50">
-              National cyber crime reporting · reimagined
-            </p>
-            <h1 className="mt-5 font-display text-[40px] font-bold leading-[1.04] text-white sm:text-[60px]">
-              Your money is still
-              <br />
-              moving. So are we.
-            </h1>
-            <p className="mt-6 max-w-xl text-[18px] leading-relaxed text-on-deep/85">
-              Stolen money is split across accounts within minutes. Every other
-              portal spends those minutes on a form. This one asks the banks to
-              hold your money first and collects the details afterwards.
-            </p>
+          <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-16">
+            <div>
+              <span className="inline-flex items-center gap-2 rounded-full border border-primary-border bg-primary-soft px-3.5 py-1.5 text-[14px] font-semibold text-primary-text">
+                <IconShield className="h-4 w-4" />
+                {t("hero.badge")}
+              </span>
 
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Link
-                href="/freeze"
-                className="press inline-flex min-h-[58px] items-center justify-center rounded-lg bg-white px-7 text-[18px] font-bold text-deep hover:scale-[1.015]"
-              >
-                Report money lost →
-              </Link>
-              <a
-                href="tel:1930"
-                className="press inline-flex min-h-[58px] items-center justify-center gap-2 rounded-lg border border-white/35 px-7 text-[18px] font-semibold text-white hover:bg-white/10"
-              >
-                Call <span className="data">1930</span>
-              </a>
+              <h1 className="mt-6 font-display text-[40px] font-bold leading-[1.06] tracking-tight text-ink sm:text-[54px]">
+                {t("hero.h1a")}
+                <span className="block text-primary-text">{t("hero.h1b")}</span>
+              </h1>
+
+              <p className="mt-6 max-w-xl text-[18px] leading-relaxed text-ink-soft">
+                {t("hero.sub")}
+              </p>
+
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <Link
+                  href="/freeze"
+                  className="press inline-flex min-h-[56px] items-center justify-center gap-2 rounded-[10px] bg-primary px-7 text-[17px] font-semibold text-primary-on shadow-md hover:bg-primary-hover"
+                >
+                  {t("hero.ctaReport")}
+                  <IconArrow className="h-5 w-5" />
+                </Link>
+                <a
+                  href="tel:1930"
+                  className="press inline-flex min-h-[56px] items-center justify-center gap-2 rounded-[10px] border border-line-strong bg-surface px-7 text-[17px] font-semibold text-ink shadow-sm hover:bg-sunken"
+                >
+                  <IconPhone className="h-5 w-5" />
+                  {t("hero.ctaCall")} <span className="data">1930</span>
+                </a>
+              </div>
+
+              <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-2.5">
+                {TRUST.map((item) => (
+                  <li
+                    key={item.k}
+                    className="inline-flex items-center gap-2 text-[15px] text-ink-faint"
+                  >
+                    <item.Icon className="h-4 w-4 text-secondary-text" />
+                    {t(item.k)}
+                  </li>
+                ))}
+              </ul>
             </div>
-          </div>
 
-          {/* The signature, given the full measure */}
-          <div className="mt-14 border-t border-white/12 pt-10">
             <HeroTicker />
           </div>
         </div>
       </section>
 
-      {/* ---------- The three doors ---------- */}
-      <section className="mx-auto max-w-6xl px-5 py-14 sm:py-16">
-        <h2 className="font-display text-[27px] font-bold text-ink sm:text-[32px]">
-          What happened?
-        </h2>
-        <p className="mt-2 max-w-2xl text-ink-soft">
-          Pick the closest one. You don&apos;t need to know what the crime is
-          called, and you will never be asked which district it belongs to.
-        </p>
+      {/* ---------------- The three doors ---------------- */}
+      <section className="mx-auto max-w-6xl px-5 py-16 sm:py-20">
+        <div className="max-w-2xl">
+          <p className="eyebrow">{t("tiles.eyebrow")}</p>
+          <h2 className="mt-3 font-display text-[30px] font-bold tracking-tight text-ink sm:text-[36px]">
+            {t("tiles.h2")}
+          </h2>
+          <p className="mt-3 text-[17px] leading-relaxed text-ink-soft">
+            {t("tiles.sub")}
+          </p>
+        </div>
 
-        <div className="mt-8 grid gap-4 md:grid-cols-3">
-          {TILES.map((t) => (
+        <div className="mt-10 grid gap-5 md:grid-cols-3">
+          {TILES.map((tile) => (
             <Link
-              key={t.href}
-              href={t.href}
+              key={tile.href}
+              href={tile.href}
               className={
-                t.primary
-                  ? "lift flex flex-col rounded-card border-2 border-primary bg-primary-soft p-6 hover:bg-primary-soft/60"
-                  : "lift flex flex-col rounded-card border border-line bg-surface p-6 hover:border-line-strong hover:bg-sunken"
+                tile.primary
+                  ? "lift group flex flex-col rounded-card border-2 border-primary bg-surface p-7"
+                  : "lift group flex flex-col rounded-card border border-line bg-surface p-7 hover:border-line-strong"
               }
             >
-              <p className="eyebrow">{t.kicker}</p>
-              <p className="mt-2 font-display text-[24px] font-bold leading-tight text-ink">
-                {t.title}
+              <span
+                className={
+                  tile.primary
+                    ? "inline-flex h-11 w-11 items-center justify-center rounded-[10px] bg-primary text-primary-on"
+                    : "inline-flex h-11 w-11 items-center justify-center rounded-[10px] bg-primary-soft text-primary-text"
+                }
+              >
+                <tile.Icon className="h-6 w-6" />
+              </span>
+              <p className="mt-5 font-display text-[22px] font-bold leading-tight text-ink">
+                {t(tile.title)}
               </p>
-              <p className="mt-2 flex-1 text-[16px] leading-relaxed text-ink-soft">
-                {t.body}
+              <p className="mt-2.5 flex-1 text-[16px] leading-relaxed text-ink-soft">
+                {t(tile.body)}
               </p>
-              <p className="data mt-5 text-[13px] font-semibold text-primary">
-                {t.meta} →
-              </p>
+              <span className="mt-6 inline-flex items-center gap-2 text-[15px] font-semibold text-primary-text">
+                {t(tile.meta)}
+                <IconArrow className="row-arrow h-4 w-4" />
+              </span>
             </Link>
           ))}
         </div>
       </section>
 
-      {/* ---------- The second victim: the signature, reused ---------- */}
-      <section className="border-y border-line bg-sunken">
-        <div className="mx-auto max-w-6xl px-5 py-14 sm:py-16">
-          <p className="eyebrow">The part nobody counts</p>
-          <h2 className="mt-4 max-w-3xl font-display text-[27px] font-bold leading-tight text-ink sm:text-[34px]">
-            One report currently freezes every account on the line — including
-            the shopkeeper&apos;s.
-          </h2>
-          <p className="mt-4 max-w-2xl text-[17px] leading-relaxed text-ink-soft">
-            He sold a phone and was paid ₹5,000. Three transfers earlier, that
-            money had been stolen. Today his{" "}
-            <strong className="text-ink">entire balance</strong> is frozen with
-            no notice, and getting it back can mean travelling to a police
-            station in another state. It takes months.
-          </p>
-
-          <div className="mt-9 rounded-card border border-line bg-surface p-6 text-ink sm:p-8">
-            <p className="eyebrow">Here, the same trail</p>
-            <MoneyTrail hops={FIXED} animate={false} className="mt-5" />
-            <p className="mt-6 border-t border-line pt-5 text-[17px] leading-relaxed text-ink-soft">
-              We hold the disputed ₹5,000 and leave the other ₹9,95,000 working.
-              He is told the moment it happens, and can clear it from his phone
-              in about two minutes.{" "}
-              <Link
-                href="/lien/LN-2026-08-7741"
-                className="link-draw font-semibold text-primary"
-              >
-                See what he sees →
-              </Link>
+      {/* ---------------- The second victim ---------------- */}
+      <section className="border-y border-line bg-sunken/60">
+        <div className="mx-auto max-w-6xl px-5 py-16 sm:py-20">
+          <div className="max-w-3xl">
+            <p className="eyebrow">The part nobody counts</p>
+            <h2 className="mt-3 font-display text-[30px] font-bold leading-tight tracking-tight text-ink sm:text-[36px]">
+              One report currently freezes every account on the line — including
+              the shopkeeper&apos;s.
+            </h2>
+            <p className="mt-4 text-[17px] leading-relaxed text-ink-soft">
+              He sold a phone and was paid ₹5,000. Three transfers earlier, that
+              money had been stolen. Today his{" "}
+              <strong className="font-semibold text-ink">entire balance</strong>{" "}
+              is frozen with no notice, and getting it back can mean travelling
+              to a police station in another state. It takes months.
             </p>
           </div>
 
-          <p className="mt-8 max-w-2xl text-[17px] leading-relaxed text-ink-soft">
+          <div className="mt-10 rounded-card border border-line bg-surface p-6 shadow-md sm:p-8">
+            <p className="eyebrow">Here, the same trail</p>
+            <MoneyTrail hops={FIXED} animate={false} className="mt-6" />
+            <div className="mt-7 border-t border-line pt-6">
+              <p className="text-[17px] leading-relaxed text-ink-soft">
+                We hold the disputed ₹5,000 and leave the other ₹9,95,000
+                working. He is told the moment it happens, and can clear it from
+                his phone in about two minutes.
+              </p>
+              <Link
+                href="/lien/LN-2026-08-7741"
+                className="press mt-5 inline-flex min-h-[48px] items-center gap-2 rounded-[10px] border border-line-strong bg-surface px-5 text-[16px] font-semibold text-ink shadow-sm hover:bg-sunken"
+              >
+                See what he sees
+                <IconArrow className="h-4 w-4" />
+              </Link>
+            </div>
+          </div>
+
+          <p className="mt-10 max-w-2xl text-[17px] leading-relaxed text-ink-soft">
             Of roughly{" "}
             <span className="data font-semibold text-ink">₹52,969 crore</span>{" "}
             reported stolen, about{" "}
-            <span className="data font-semibold text-breach">2.18%</span> has
-            reached the people it was taken from. That is the number this
+            <span className="data font-semibold text-critical-text">2.18%</span>{" "}
+            has reached the people it was taken from. That is the number this
             rebuild is measured against — not complaints registered.
           </p>
         </div>
       </section>
 
-      {/* ---------- Before it happens ---------- */}
-      <section className="mx-auto max-w-6xl px-5 py-14 sm:py-16">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
+      {/* ---------------- Learning Corner ---------------- */}
+      <section className="mx-auto max-w-6xl px-5 py-16 sm:py-20">
+        <div className="flex flex-wrap items-end justify-between gap-5">
+          <div className="max-w-2xl">
             <p className="eyebrow">Before anything happens to you</p>
-            <h2 className="mt-3 font-display text-[27px] font-bold text-ink sm:text-[32px]">
+            <h2 className="mt-3 font-display text-[30px] font-bold tracking-tight text-ink sm:text-[36px]">
               Learning Corner
             </h2>
+            <p className="mt-3 text-[17px] leading-relaxed text-ink-soft">
+              Each one is the script as it is actually spoken — how the call
+              opens, the words they use, and the single tell that gives it away.
+            </p>
           </div>
           <Link
             href="/learn"
-            className="text-[16px] font-semibold text-primary hover:underline"
+            className="press inline-flex min-h-[48px] items-center gap-2 rounded-[10px] border border-line-strong bg-surface px-5 text-[16px] font-semibold text-ink shadow-sm hover:bg-sunken"
           >
-            All scams and guides →
+            <IconBook className="h-5 w-5" />
+            All scams and guides
           </Link>
         </div>
-        <p className="mt-3 max-w-2xl text-ink-soft">
-          Each one is the script as it is actually spoken — how the call opens,
-          the words they use, and the single tell that gives it away.
-        </p>
 
-        <ul className="mt-8 divide-y divide-line border-y border-line">
+        <div className="mt-10 grid gap-5 sm:grid-cols-2">
           {LEARN.map((l) => (
-            <li key={l.href}>
-              <Link
-                href={l.href}
-                className="group flex flex-wrap items-baseline gap-x-6 gap-y-1 py-5 transition-colors hover:bg-primary-soft/50"
-              >
-                <span className="font-display text-[20px] font-bold text-ink sm:w-[280px]">
+            <Link
+              key={l.href}
+              href={l.href}
+              className="lift group flex items-start gap-4 rounded-card border border-line bg-surface p-6 hover:border-line-strong"
+            >
+              <span className="mt-0.5 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] bg-tertiary-soft text-tertiary-text">
+                <IconBook className="h-5 w-5" />
+              </span>
+              <span className="min-w-0">
+                <span className="block font-display text-[19px] font-bold text-ink">
                   {l.title}
                 </span>
-                <span className="flex-1 text-[16px] text-ink-soft">
+                <span className="mt-1.5 block text-[16px] leading-relaxed text-ink-soft">
                   {l.body}
                 </span>
-                <span
-                  aria-hidden="true"
-                  className="row-arrow text-primary"
-                >
-                  →
-                </span>
-              </Link>
-            </li>
+              </span>
+              <IconArrow className="row-arrow mt-1 h-5 w-5 shrink-0 text-primary-text" />
+            </Link>
           ))}
-        </ul>
+        </div>
 
-        <div className="mt-9 flex flex-wrap gap-3">
-          <Link
-            href="/scam-check"
-            className="inline-flex min-h-[48px] items-center rounded-lg border border-line-strong bg-surface px-5 text-[16px] font-semibold text-ink hover:bg-sunken"
-          >
-            Check a UPI ID before you pay
-          </Link>
-          <Link
-            href="/verify-officer"
-            className="inline-flex min-h-[48px] items-center rounded-lg border border-line-strong bg-surface px-5 text-[16px] font-semibold text-ink hover:bg-sunken"
-          >
-            Verify an officer who called you
-          </Link>
-          <Link
-            href="/login"
-            className="inline-flex min-h-[48px] items-center rounded-lg border border-line-strong bg-surface px-5 text-[16px] font-semibold text-ink hover:bg-sunken"
-          >
-            Demo logins for judges
-          </Link>
+        <div className="mt-10 grid gap-4 sm:grid-cols-3">
+          {[
+            { href: "/scam-check", Icon: IconSearch, label: "Check a UPI ID before you pay" },
+            { href: "/verify-officer", Icon: IconShield, label: "Verify an officer who called you" },
+            { href: "/login", Icon: IconUser, label: "Demo logins for judges" },
+          ].map((q) => (
+            <Link
+              key={q.href}
+              href={q.href}
+              className="press inline-flex min-h-[56px] items-center gap-3 rounded-[10px] border border-line bg-surface px-5 text-[16px] font-semibold text-ink shadow-sm hover:bg-sunken"
+            >
+              <q.Icon className="h-5 w-5 shrink-0 text-primary-text" />
+              {q.label}
+            </Link>
+          ))}
         </div>
       </section>
     </>
