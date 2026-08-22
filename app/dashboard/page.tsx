@@ -6,10 +6,12 @@ import { Button, Card, Chip, Shell, TopBar } from "@/components/ui";
 import { formatPaise } from "@/lib/money";
 import { useStore } from "@/lib/store";
 import { useHydrated } from "@/lib/use-now";
+import { useT } from "@/lib/i18n";
 import { personaByEmail } from "@/lib/mock/personas";
 
 export default function DashboardPage() {
   // Reads client-stored data; SSR cannot be correct for it.
+  const t = useT();
   const hydrated = useHydrated();
   const email = useStore((s) => s.currentEmail);
   /*
@@ -51,14 +53,14 @@ export default function DashboardPage() {
         <TopBar />
         <Shell>
           <h1 className="font-display text-[30px] font-bold text-ink">
-            Your cases
+            {t("db.yourCases")}
           </h1>
           <Card className="mt-6">
             <p className="text-[18px] font-semibold text-ink">
-              You&apos;re not signed in.
+              {t("db.notSignedIn")}
             </p>
             <Button href="/login" className="mt-5">
-              Pick a demo login
+              {t("db.pickLogin")}
             </Button>
           </Card>
         </Shell>
@@ -82,14 +84,14 @@ export default function DashboardPage() {
             onClick={logout}
             className="text-[16px] font-semibold text-primary hover:underline"
           >
-            Sign out
+            {t("db.signOut")}
           </button>
         </div>
 
         {liens.length > 0 ? (
           <>
             <h2 className="mt-8 text-[20px] font-bold text-ink">
-              Holds on your account
+              {t("db.holds")}
             </h2>
             <div className="mt-3 space-y-3">
               {liens.map((l) => (
@@ -103,7 +105,7 @@ export default function DashboardPage() {
                       {formatPaise(l.amountPaise)} on hold
                     </span>
                     <Chip tone={l.liftedAt ? "held" : "pending"}>
-                      {l.liftedAt ? "Lifted" : "Action available"}
+                      {l.liftedAt ? t("db.lifted") : t("db.actionAvailable")}
                     </Chip>
                   </div>
                   <p className="mt-1 text-[16px] text-ink-soft">
@@ -119,15 +121,14 @@ export default function DashboardPage() {
           </>
         ) : null}
 
-        <h2 className="mt-8 text-[20px] font-bold text-ink">Your cases</h2>
+        <h2 className="mt-8 text-[20px] font-bold text-ink">{t("db.yourCases")}</h2>
         {cases.length === 0 ? (
           <Card className="mt-3">
             <p className="text-[17px] text-ink-soft">
-              Nothing filed yet. Try the 60-second report — you&apos;ll see
-              money held before you&apos;ve typed anything else.
+{t("db.nothingFiled")}
             </p>
             <Button href="/freeze" className="mt-4">
-              File a report
+              {t("db.fileReport")}
             </Button>
           </Card>
         ) : (
@@ -145,7 +146,7 @@ export default function DashboardPage() {
                       {c.id}
                     </span>
                     <Chip tone={c.status === "closed" ? "held" : "primary"}>
-                      {c.status === "closed" ? "Money returned" : "Active"}
+                      {c.status === "closed" ? t("db.moneyReturned") : t("db.active")}
                     </Chip>
                   </div>
                   <p className="mt-2 text-[19px] font-semibold text-ink">
@@ -154,7 +155,7 @@ export default function DashboardPage() {
                   <p className="mt-0.5 text-[16px] text-ink-soft">
                     {c.restoration.creditedPaise > 0
                       ? `${formatPaise(c.restoration.creditedPaise)} credited back to you`
-                      : `${formatPaise(held)} held · ${c.assignedOwner ?? "awaiting assignment"}`}
+                      : `${formatPaise(held)} held · ${c.assignedOwner ?? t("db.awaitingAssignment")}`}
                   </p>
                 </Link>
               );

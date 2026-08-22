@@ -78,6 +78,13 @@ export const REPORT_KINDS: Record<ReportKind, KindConfig> = {
         firstAction:
           "This is treated as the highest priority and can be reported entirely anonymously. Do not share or forward the material to anyone, including to show what happened.",
       },
+      {
+        id: "other",
+        label: "Something else",
+        sub: "It does not match anything above.",
+        firstAction:
+          "Describe it in your own words below, in any language. A situation that does not fit the list is not a smaller problem — new methods appear before anyone has a name for them.",
+      },
     ],
     targets: [
       "Instagram / Meta",
@@ -124,6 +131,13 @@ export const REPORT_KINDS: Record<ReportKind, KindConfig> = {
         firstAction:
           "Check what is registered against you: TAFCOP shows every SIM in your name, and it is free.",
       },
+      {
+        id: "other",
+        label: "Something else",
+        sub: "It does not match anything above.",
+        firstAction:
+          "Describe it in your own words below, in any language. If you have a link or a username, that is the single most useful thing you can give us.",
+      },
     ],
     targets: ["Instagram / Meta", "X", "The marketplace or app", "The hosting provider"],
     safety: [
@@ -161,6 +175,13 @@ export const REPORT_KINDS: Record<ReportKind, KindConfig> = {
         sub: "Transactions I did not make, or a device I do not recognise.",
         firstAction:
           "If money has already left, report that first — it is a different and faster path.",
+      },
+      {
+        id: "other",
+        label: "Something else",
+        sub: "It does not match anything above.",
+        firstAction:
+          "Describe it in your own words below. If you can still sign in, change the password now from a device you trust.",
       },
     ],
     targets: ["Google", "Meta", "The bank or payment app", "Your telecom operator"],

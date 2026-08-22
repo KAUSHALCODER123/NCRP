@@ -22,7 +22,7 @@ import { setContrast, setScale, setTheme, usePrefs } from "@/lib/prefs";
 
 const NAV = [
   { href: "/", key: "nav.home" },
-  { href: "/freeze", key: "nav.report" },
+  { href: "/report", key: "nav.report" },
   { href: "/dashboard", key: "nav.track" },
   { href: "/scam-check", key: "nav.check" },
   { href: "/learn", key: "nav.learn" },
@@ -115,7 +115,7 @@ export function SiteHeader() {
                 aria-controls="primary-nav"
                 className="inline-flex min-h-[44px] items-center gap-2 rounded-lg border border-line-strong px-3 text-[15px] font-semibold text-ink md:hidden"
               >
-                {open ? "Close" : "Menu"}
+                {open ? t("hdr.close") : t("hdr.menu")}
               </button>
             </div>
           </div>
@@ -198,6 +198,7 @@ function LanguagePicker({
     <label className="flex items-center">
       <span className="sr-only">{label}</span>
       <select
+        data-testid="language"
         value={locale}
         onChange={(e) => setLocale(e.target.value as Locale)}
         className="cursor-pointer rounded bg-transparent px-1.5 py-1 text-[13px] font-semibold text-white outline-none hover:bg-white/20 focus-visible:bg-white/20"

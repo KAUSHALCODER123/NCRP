@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { Card, Chip, Shell, TopBar } from "@/components/ui";
 import { DEMO_PASSWORD, PERSONAS } from "@/lib/mock/personas";
 import { useStore } from "@/lib/store";
+import { useT } from "@/lib/i18n";
 
 /**
  * Credentials are printed here as well as in the submission form.
@@ -12,6 +13,7 @@ import { useStore } from "@/lib/store";
 export default function LoginPage() {
   const router = useRouter();
   const login = useStore((s) => s.login);
+  const t = useT();
 
   function enter(email: string) {
     login(email);
@@ -23,7 +25,7 @@ export default function LoginPage() {
       <TopBar back={{ href: "/", label: "Home" }} />
       <Shell>
         <h1 className="font-display text-[30px] font-bold leading-tight text-ink sm:text-[34px]">
-          Demo logins
+          {t("lg.h1")}
         </h1>
         <p className="mt-3 text-ink-soft">
           Tap any card to sign in — no password needed here. For the record,
@@ -60,12 +62,10 @@ export default function LoginPage() {
 
         <Card className="mt-6">
           <p className="text-[17px] font-semibold text-ink">
-            Short on time? Start with Suresh.
+            {t("lg.short")}
           </p>
           <p className="mt-1 text-[16px] text-ink-soft">
-            He did nothing wrong and is the person the current system harms
-            invisibly. It&apos;s the part of this project you won&apos;t have
-            seen elsewhere.
+{t("lg.shortSub")}
           </p>
         </Card>
       </Shell>

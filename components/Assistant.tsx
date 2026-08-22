@@ -5,6 +5,7 @@ import Link from "next/link";
 import clsx from "clsx";
 import { IconArrow, IconExit, IconShield } from "@/components/icons";
 import { answerLocally, type Action } from "@/lib/assistant";
+import { useT } from "@/lib/i18n";
 
 /**
  * The assistant panel.
@@ -40,6 +41,7 @@ const GREETING: Msg = {
 };
 
 export function Assistant() {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const [msgs, setMsgs] = useState<Msg[]>([GREETING]);
   const [draft, setDraft] = useState("");
@@ -125,7 +127,7 @@ export function Assistant() {
           className="press fixed bottom-4 left-4 z-40 inline-flex min-h-[52px] items-center gap-2.5 rounded-full border border-line bg-surface px-5 text-[16px] font-semibold text-ink shadow-lg hover:bg-sunken"
         >
           <IconShield className="h-5 w-5 text-primary-text" />
-          Ask for help
+          {t("as.ask")}
         </button>
       ) : null}
 
@@ -141,17 +143,17 @@ export function Assistant() {
               <IconShield className="h-5 w-5 text-primary-text" />
               <span>
                 <span className="block text-[16px] font-semibold leading-tight text-ink">
-                  Sahaay assistant
+                  {t("as.title")}
                 </span>
                 <span className="block text-[13px] leading-tight text-ink-faint">
-                  Not a real officer. Never asks for an OTP.
+                  {t("as.subtitle")}
                 </span>
               </span>
             </span>
             <button
               type="button"
               onClick={() => setOpen(false)}
-              aria-label="Close the assistant"
+              aria-label={t("as.close")}
               className="press rounded-lg p-2 text-ink-soft hover:bg-line"
             >
               <IconExit className="h-5 w-5" />
@@ -205,7 +207,7 @@ export function Assistant() {
 
             {busy ? (
               <p className="mr-auto rounded-card border border-line bg-sunken px-4 py-3 text-[16px] text-ink-faint">
-                Thinking<span className="caret">…</span>
+                {t("as.thinking")}<span className="caret">…</span>
               </p>
             ) : null}
 
@@ -233,7 +235,7 @@ export function Assistant() {
             }}
           >
             <label htmlFor="assistant-input" className="sr-only">
-              Describe what happened
+              {t("as.placeholder")}
             </label>
             <div className="flex items-end gap-2">
               <textarea
@@ -248,13 +250,13 @@ export function Assistant() {
                     send(draft);
                   }
                 }}
-                placeholder="What happened?"
+                placeholder={t("as.placeholder")}
                 className="max-h-28 min-h-[48px] w-full resize-none rounded-[10px] border border-line-strong bg-surface p-3 text-[16px] text-ink placeholder:text-ink-faint focus:border-primary focus:outline-none"
               />
               <button
                 type="submit"
                 disabled={!draft.trim() || busy}
-                aria-label="Send"
+                aria-label={t("as.send")}
                 className="press inline-flex h-[48px] w-[48px] shrink-0 items-center justify-center rounded-[10px] bg-primary text-primary-on disabled:opacity-40"
               >
                 <IconArrow className="h-5 w-5" />

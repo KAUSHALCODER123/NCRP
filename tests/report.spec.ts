@@ -1,4 +1,6 @@
 import { test, expect } from "@playwright/test";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 
 test.describe("harassment report", () => {
   test("safety guidance comes before anything is collected", async ({ page }) => {
@@ -76,18 +78,79 @@ test.describe("other report kinds", () => {
 });
 
 test.describe("the emergency path is localised", () => {
-  const CASES = [
-    { value: "hi", marker: "यह कब हुआ" },
-    { value: "ta", marker: "இது எப்போது நடந்தது" },
-    { value: "kn", marker: "ಇದು ಯಾವಾಗ ನಡೆಯಿತು" },
-  ];
+  /*
+   * Read from the locale files rather than hardcoded. A reworded translation
+   * is not a regression, and a test that breaks on one is testing the wrong
+   * thing — this asserts the app renders the string it actually ships.
+   */
+  const CASES = ["hi", "ta", "kn"].map((value) => ({
+    value,
+    marker: (
+      JSON.parse(
+        readFileSync(join("lib", "i18n", `${value}.json`), "utf8"),
+      ) as Record<string, string>
+    )["fz.step1"],
+  }));
 
   for (const c of CASES) {
     test(`freeze flow in ${c.value}`, async ({ page }) => {
       await page.goto("/");
-      await page.getByLabel(/language/i).selectOption(c.value);
+      await page.getByTestId("language").selectOption(c.value);
       await page.goto("/freeze");
       await expect(page.getByText(c.marker).first()).toBeVisible();
+    });
+  }
+});
+
+test.describe("choosing what kind of crime", () => {
+  test("Report a crime asks the type first, not for a transaction", async ({ page, isMobile }) => {
+    await page.goto("/");
+    if (isMobile) await page.getByRole("button", { name: /^menu$/i }).click();
+    await page.getByRole("link", { name: /report a crime/i }).first().click();
+
+    await expect(page).toHaveURL(/\/report$/);
+    // The old behaviour dropped everyone into the financial form.
+    await expect(page.getByLabel(/Transaction reference/i)).toBeHidden();
+
+    for (const name of [
+      /financial fraud/i,
+      /women/i,
+      /pretending to be you/i,
+      /account was hacked/i,
+    ]) {
+      await expect(page.getByRole("link", { name }).first()).toBeVisible();
+    }
+  });
+
+  test("each choice reaches its own flow", async ({ page }) => {
+    for (const [name, url] of [
+      [/financial fraud/i, /\/freeze$/],
+      [/women/i, /\/report\/harassment$/],
+      [/pretending to be you/i, /\/report\/impersonation$/],
+      [/account was hacked/i, /\/report\/account$/],
+    ] as const) {
+      await page.goto("/report");
+      await page.getByRole("link", { name }).first().click();
+      await expect(page).toHaveURL(url);
+    }
+  });
+});
+
+test.describe("report flows are localised", () => {
+  for (const loc of ["hi", "ta", "kn"]) {
+    test(`harassment flow content in ${loc}`, async ({ page }) => {
+      await page.goto("/");
+      await page.getByTestId("language").selectOption(loc);
+      await page.goto("/report/harassment");
+      await page.waitForLoadState("networkidle");
+
+      const text = await page.locator("main").innerText();
+      // Both the chrome and the flow's own copy must translate — the copy
+      // lives in report-kinds.ts and used to stay English.
+      const latinSentences = text
+        .split("\n")
+        .filter((l) => /^[A-Za-z][A-Za-z ,.'’—-]{35,}$/.test(l.trim()));
+      expect(latinSentences, latinSentences.join("\n")).toEqual([]);
     });
   }
 });

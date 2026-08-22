@@ -16,8 +16,9 @@ import { useT } from "@/lib/i18n";
 
 const GROUPS: { title: string; links: { href: string; label: string }[] }[] = [
   {
-    title: "Report",
+    title: "foot.gReport",
     links: [
+      { href: "/report", label: "Report a crime" },
       { href: "/freeze", label: "Financial fraud" },
       { href: "/report/harassment", label: "Threats or blackmail" },
       { href: "/report/impersonation", label: "Impersonation" },
@@ -25,7 +26,7 @@ const GROUPS: { title: string; links: { href: string; label: string }[] }[] = [
     ],
   },
   {
-    title: "Check",
+    title: "foot.gCheck",
     links: [
       { href: "/scam-check", label: "Check a UPI ID or number" },
       { href: "/verify-officer", label: "Verify an officer" },
@@ -34,7 +35,7 @@ const GROUPS: { title: string; links: { href: string; label: string }[] }[] = [
     ],
   },
   {
-    title: "Learn",
+    title: "foot.gLearn",
     links: [
       { href: "/learn", label: "Learning Corner" },
       { href: "/stories", label: "Survivor stories" },
@@ -44,7 +45,7 @@ const GROUPS: { title: string; links: { href: string; label: string }[] }[] = [
     ],
   },
   {
-    title: "About",
+    title: "foot.gAbout",
     links: [
       { href: "/help", label: "Help and FAQs" },
       { href: "/help#about", label: "What this is" },
@@ -61,7 +62,7 @@ export function SiteFooter() {
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {GROUPS.map((g) => (
             <div key={g.title}>
-              <h2 className="eyebrow">{g.title}</h2>
+              <h2 className="eyebrow">{t(g.title as Parameters<typeof t>[0])}</h2>
               <ul className="mt-3 space-y-2">
                 {g.links.map((l) => (
                   <li key={l.href + l.label}>
@@ -104,7 +105,7 @@ export function SiteFooter() {
             in the project repository.
           </p>
           <p className="mt-3 text-ink-faint">
-            <span className="data">Last updated 22/08/2026</span> · Works in any
+            <span className="data">{t("foot.updated")}</span> · Works in any
             modern browser
           </p>
         </div>

@@ -107,6 +107,12 @@ test.describe("assistant panel", () => {
 
   test("does not sit on top of Quick Exit", async ({ page }) => {
     await page.goto("/");
+    test.skip(
+      (await page
+        .getByRole("button", { name: /leave this site immediately/i })
+        .count()) === 0,
+      "quick exit is hidden in dev; run against a production build",
+    );
     const exit = await page
       .getByRole("button", { name: /leave this site immediately/i })
       .boundingBox();

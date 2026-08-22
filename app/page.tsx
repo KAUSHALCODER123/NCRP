@@ -182,10 +182,9 @@ export default function Home() {
       <section className="border-y border-line bg-sunken/60">
         <div className="mx-auto max-w-6xl px-5 py-16 sm:py-20">
           <div className="max-w-3xl">
-            <p className="eyebrow">The part nobody counts</p>
+            <p className="eyebrow">{t("home.victimEyebrow")}</p>
             <h2 className="mt-3 font-display text-[30px] font-bold leading-tight tracking-tight text-ink sm:text-[36px]">
-              One report currently freezes every account on the line — including
-              the shopkeeper&apos;s.
+  {t("home.victimH2")}
             </h2>
             <p className="mt-4 text-[17px] leading-relaxed text-ink-soft">
               He sold a phone and was paid ₹5,000. Three transfers earlier, that
@@ -197,7 +196,7 @@ export default function Home() {
           </div>
 
           <div className="mt-10 rounded-card border border-line bg-surface p-6 shadow-md sm:p-8">
-            <p className="eyebrow">Here, the same trail</p>
+            <p className="eyebrow">{t("home.trailEyebrow")}</p>
             <MoneyTrail hops={FIXED} animate={false} className="mt-6" />
             <div className="mt-7 border-t border-line pt-6">
               <p className="text-[17px] leading-relaxed text-ink-soft">
@@ -209,7 +208,7 @@ export default function Home() {
                 href="/lien/LN-2026-08-7741"
                 className="press mt-5 inline-flex min-h-[48px] items-center gap-2 rounded-[10px] border border-line-strong bg-surface px-5 text-[16px] font-semibold text-ink shadow-sm hover:bg-sunken"
               >
-                See what he sees
+                {t("home.trailCta")}
                 <IconArrow className="h-4 w-4" />
               </Link>
             </div>
@@ -230,9 +229,9 @@ export default function Home() {
       <section className="mx-auto max-w-6xl px-5 py-16 sm:py-20">
         <div className="flex flex-wrap items-end justify-between gap-5">
           <div className="max-w-2xl">
-            <p className="eyebrow">Before anything happens to you</p>
+            <p className="eyebrow">{t("home.learnEyebrow")}</p>
             <h2 className="mt-3 font-display text-[30px] font-bold tracking-tight text-ink sm:text-[36px]">
-              Learning Corner
+              {t("home.learnH2")}
             </h2>
             <p className="mt-3 text-[17px] leading-relaxed text-ink-soft">
               Each one is the script as it is actually spoken — how the call
@@ -244,7 +243,7 @@ export default function Home() {
             className="press inline-flex min-h-[48px] items-center gap-2 rounded-[10px] border border-line-strong bg-surface px-5 text-[16px] font-semibold text-ink shadow-sm hover:bg-sunken"
           >
             <IconBook className="h-5 w-5" />
-            All scams and guides
+            {t("home.learnAll")}
           </Link>
         </div>
 
@@ -273,9 +272,9 @@ export default function Home() {
 
         <div className="mt-10 grid gap-4 sm:grid-cols-3">
           {[
-            { href: "/scam-check", Icon: IconSearch, label: "Check a UPI ID before you pay" },
-            { href: "/verify-officer", Icon: IconShield, label: "Verify an officer who called you" },
-            { href: "/login", Icon: IconUser, label: "Demo logins for judges" },
+            { href: "/scam-check", Icon: IconSearch, label: "home.quickCheck" },
+            { href: "/verify-officer", Icon: IconShield, label: "home.quickVerify" },
+            { href: "/login", Icon: IconUser, label: "home.quickLogins" },
           ].map((q) => (
             <Link
               key={q.href}
@@ -283,7 +282,7 @@ export default function Home() {
               className="press inline-flex min-h-[56px] items-center gap-3 rounded-[10px] border border-line bg-surface px-5 text-[16px] font-semibold text-ink shadow-sm hover:bg-sunken"
             >
               <q.Icon className="h-5 w-5 shrink-0 text-primary-text" />
-              {q.label}
+              {t(q.label as Parameters<typeof t>[0])}
             </Link>
           ))}
         </div>

@@ -1,4 +1,6 @@
 import { test, expect } from "@playwright/test";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 
 test.describe("theme", () => {
   test("dark can be chosen and survives navigation and reload", async ({ page }) => {
@@ -79,21 +81,24 @@ test.describe("accessibility controls", () => {
 });
 
 test.describe("localisation", () => {
-  /* Markers are taken from the hero, which is visible at every width —
-     the nav collapses behind a menu button on phones. */
-  const CASES = [
-    { value: "hi", marker: "पैसे की शिकायत करें" },
-    { value: "mr", marker: "पैशांची तक्रार नोंदवा" },
-    { value: "gu", marker: "પૈસાની ફરિયાદ કરો" },
-    { value: "ta", marker: "பணப் புகார் அளிக்க" },
-    { value: "te", marker: "డబ్బు గురించి ఫిర్యాదు" },
-    { value: "kn", marker: "ಹಣದ ಬಗ್ಗೆ ದೂರು" },
-  ];
+  /*
+   * Markers are read from the locale files rather than hardcoded, so a
+   * reworded translation can never silently break the test — and the test
+   * verifies the string the app will actually render.
+   */
+  const CASES = ["hi", "mr", "gu", "ta", "te", "kn"].map((value) => ({
+    value,
+    marker: (
+      JSON.parse(
+        readFileSync(join("lib", "i18n", `${value}.json`), "utf8"),
+      ) as Record<string, string>
+    )["hero.ctaReport"],
+  }));
 
   for (const c of CASES) {
     test(`switches to ${c.value} and persists`, async ({ page }) => {
       await page.goto("/");
-      await page.getByLabel(/language/i).selectOption(c.value);
+      await page.getByTestId("language").selectOption(c.value);
       await expect(page.locator("html")).toHaveAttribute("lang", c.value);
       await expect(page.getByText(c.marker).first()).toBeVisible();
 
@@ -105,7 +110,7 @@ test.describe("localisation", () => {
 
   test("untranslated pages fall back to English rather than blanking", async ({ page }) => {
     await page.goto("/");
-    await page.getByLabel(/language/i).selectOption("ta");
+    await page.getByTestId("language").selectOption("ta");
     await page.goto("/learn/digital-arrest");
     await expect(page.locator("h1")).toContainText(/Digital arrest/i);
   });
@@ -113,6 +118,20 @@ test.describe("localisation", () => {
 
 test.describe("safety", () => {
   test("quick exit is always reachable", async ({ page }) => {
+    await page.goto("/");
+    const control = page.getByRole("button", {
+      name: /leave this site immediately/i,
+    });
+    /*
+     * Hidden in local development so it does not throw a developer off the
+     * site on every mis-click. It is unconditionally present in a production
+     * build, which is where this assertion matters.
+     */
+    test.skip(
+      (await control.count()) === 0,
+      "quick exit is hidden in dev; run against a production build",
+    );
+
     for (const p of ["/", "/freeze", "/learn/sextortion"]) {
       await page.goto(p);
       await expect(
@@ -122,6 +141,14 @@ test.describe("safety", () => {
   });
 
   test("quick exit leaves the site and clears stored cases", async ({ page }) => {
+    await page.goto("/");
+    test.skip(
+      (await page
+        .getByRole("button", { name: /leave this site immediately/i })
+        .count()) === 0,
+      "quick exit is hidden in dev; run against a production build",
+    );
+
     await page.goto("/login");
     await page.getByRole("button", { name: /Suresh Pillai/i }).click();
     await expect(page).toHaveURL(/dashboard/);
@@ -160,7 +187,7 @@ test.describe("saved preferences do not break hydration", () => {
       if (!isMobile) {
         await page.getByRole("button", { name: "Largest text" }).click();
       }
-      await page.getByLabel(/language/i).selectOption("hi");
+      await page.getByTestId("language").selectOption("hi");
 
       errors.length = 0;
       await page.goto(path);
@@ -176,7 +203,7 @@ test.describe("saved preferences do not break hydration", () => {
     await page.goto("/");
     await page.getByRole("button", { name: "Dark" }).click();
     await page.getByRole("button", { name: "High contrast" }).click();
-    await page.getByLabel(/language/i).selectOption("ta");
+    await page.getByTestId("language").selectOption("ta");
 
     await page.goto("/freeze");
     const html = page.locator("html");

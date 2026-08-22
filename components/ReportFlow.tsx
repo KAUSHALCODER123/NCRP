@@ -7,6 +7,7 @@ import { IconCheck, IconClock, IconLock, IconShield } from "@/components/icons";
 import { EvidenceUploader } from "@/components/EvidenceUploader";
 import { useHydrated } from "@/lib/use-now";
 import type { KindConfig } from "@/lib/report-kinds";
+import { useT, type Key } from "@/lib/i18n";
 
 /**
  * The non-financial report.
@@ -36,6 +37,19 @@ function makeCaseId() {
 }
 
 export function ReportFlow({ config }: { config: KindConfig }) {
+  const t = useT();
+
+  /*
+   * The flow's own copy lives in lib/report-kinds.ts so a reader of that file
+   * sees real sentences rather than key names. Translations layer on top by
+   * key, and fall back to the English already in the config when a key is
+   * missing — so a gap shows the original sentence, never a blank.
+   */
+  const rk = (suffix: string, fallback: string) => {
+    const key = `rk.${config.kind}.${suffix}` as Key;
+    const value = t(key);
+    return value === key ? fallback : value;
+  };
   const hydrated = useHydrated();
 
   const [situation, setSituation] = useState<string | null>(null);
@@ -82,10 +96,10 @@ export function ReportFlow({ config }: { config: KindConfig }) {
       <TopBar back={{ href: "/", label: "Back" }} />
       <Shell>
         <h1 className="font-display text-[30px] font-bold leading-tight text-ink sm:text-[35px]">
-          {config.title}
+          {rk("title", config.title)}
         </h1>
         <p className="mt-3 text-[18px] leading-relaxed text-ink-soft">
-          {config.lede}
+          {rk("lede", config.lede)}
         </p>
 
         {/* Safety, before anything is collected. */}
@@ -94,15 +108,15 @@ export function ReportFlow({ config }: { config: KindConfig }) {
             <IconShield className="h-5 w-5" />
           </span>
           <p className="mt-3.5 text-[17px] font-semibold text-ink">
-            Before you start
+            {t("rp.beforeStart")}
           </p>
           <ul className="mt-2.5 space-y-2 text-[16px] leading-relaxed text-ink-soft">
-            {config.safety.map((s) => (
-              <li key={s} className="flex gap-2.5">
+            {config.safety.map((line, i) => (
+              <li key={line} className="flex gap-2.5">
                 <span aria-hidden="true" className="text-primary-text">
                   •
                 </span>
-                <span>{s}</span>
+                <span>{rk(`safety.${i}`, line)}</span>
               </li>
             ))}
           </ul>
@@ -113,7 +127,7 @@ export function ReportFlow({ config }: { config: KindConfig }) {
             {/* 1. What is happening */}
             <section className="mt-8">
               <h2 className="font-display text-[22px] font-bold text-ink">
-                What is happening?
+                {t("rp.whatHappening")}
               </h2>
               <div className="mt-4 space-y-3">
                 {config.situations.map((s) => (
@@ -130,10 +144,10 @@ export function ReportFlow({ config }: { config: KindConfig }) {
                     )}
                   >
                     <span className="block text-[18px] font-semibold text-ink">
-                      {s.label}
+                      {rk(`s.${s.id}.label`, s.label)}
                     </span>
                     <span className="mt-1 block text-[16px] text-ink-soft">
-                      {s.sub}
+                      {rk(`s.${s.id}.sub`, s.sub)}
                     </span>
                   </button>
                 ))}
@@ -143,9 +157,9 @@ export function ReportFlow({ config }: { config: KindConfig }) {
             {/* The one thing to do right now, before any form. */}
             {chosen ? (
               <Card className="mt-5 border-tertiary-border bg-tertiary-soft">
-                <p className="eyebrow">Do this first</p>
+                <p className="eyebrow">{t("rp.doFirst")}</p>
                 <p className="mt-2 text-[17px] leading-relaxed text-ink">
-                  {chosen.firstAction}
+                  {rk(`s.${chosen.id}.first`, chosen.firstAction)}
                 </p>
               </Card>
             ) : null}
@@ -154,7 +168,7 @@ export function ReportFlow({ config }: { config: KindConfig }) {
             {chosen ? (
               <section className="mt-8">
                 <h2 className="font-display text-[22px] font-bold text-ink">
-                  How should we record this?
+                  {t("rp.howRecord")}
                 </h2>
                 <div className="mt-4 space-y-3">
                   {config.anonymous ? (
@@ -176,11 +190,10 @@ export function ReportFlow({ config }: { config: KindConfig }) {
                       <span>
                         <span className="flex items-center gap-2 text-[18px] font-semibold text-ink">
                           <IconLock className="h-5 w-5" />
-                          Without my name
+                          {t("rp.withoutName")}
                         </span>
                         <span className="mt-1 block text-[16px] text-ink-soft">
-                          You get a code to track it and add to it later. We
-                          never learn who you are, and nobody can ask us.
+{t("rp.withoutNameSub")}
                         </span>
                       </span>
                     </label>
@@ -203,11 +216,10 @@ export function ReportFlow({ config }: { config: KindConfig }) {
                     />
                     <span>
                       <span className="block text-[18px] font-semibold text-ink">
-                        With my details
+                        {t("rp.withDetails")}
                       </span>
                       <span className="mt-1 block text-[16px] text-ink-soft">
-                        An officer can call you, and you can be told what
-                        happened. Needed if you want anything back.
+{t("rp.withDetailsSub")}
                       </span>
                     </span>
                   </label>
@@ -219,7 +231,7 @@ export function ReportFlow({ config }: { config: KindConfig }) {
             {chosen ? (
               <section className="mt-8">
                 <h2 className="font-display text-[22px] font-bold text-ink">
-                  Where is it happening?
+                  {t("rp.whereHappening")}
                 </h2>
                 <label htmlFor="where" className="sr-only">
                   Link, username or platform
@@ -228,7 +240,7 @@ export function ReportFlow({ config }: { config: KindConfig }) {
                   id="where"
                   value={where}
                   onChange={(e) => setWhere(e.target.value)}
-                  placeholder="A link, a username, or just the app name"
+                  placeholder={t("rp.wherePlaceholder")}
                   className="mt-3 w-full rounded-[10px] border border-line-strong bg-surface p-4 text-[17px] focus:border-primary focus:outline-none"
                 />
 
@@ -236,12 +248,15 @@ export function ReportFlow({ config }: { config: KindConfig }) {
                   htmlFor="detail"
                   className="mt-5 block text-[17px] font-semibold text-ink"
                 >
-                  Anything you want to add{" "}
-                  <span className="font-normal text-ink-faint">optional</span>
+                  {situation === "other"
+                    ? t("rp.addAnything")
+                    : t("rp.addAnything")}{" "}
+                  {situation === "other" ? null : (
+                    <span className="font-normal text-ink-faint">optional</span>
+                  )}
                 </label>
                 <p className="mt-1 text-[15px] text-ink-soft">
-                  In any language. There is no minimum length, and every
-                  character works.
+{t("rp.addAnythingSub")}
                 </p>
                 <textarea
                   id="detail"
@@ -257,13 +272,16 @@ export function ReportFlow({ config }: { config: KindConfig }) {
 
                 <Button
                   className="mt-6 w-full"
-                  disabled={!where.trim()}
+                  disabled={
+                    !where.trim() ||
+                    (situation === "other" && detail.trim().length < 20)
+                  }
                   onClick={() => setPhase("acting")}
                 >
-                  {config.raceLabel} →
+                  {rk("raceLabel", config.raceLabel)} →
                 </Button>
                 <p className="mt-2 text-center text-[15px] text-ink-faint">
-                  We start before asking you anything else.
+                  {t("rp.startsBefore")}
                 </p>
               </section>
             ) : null}
@@ -275,7 +293,7 @@ export function ReportFlow({ config }: { config: KindConfig }) {
           <Card className="mt-8">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <p className="text-[18px] font-semibold text-ink">
-                {config.raceLabel}
+                {rk("raceLabel", config.raceLabel)}
               </p>
               <span className="inline-flex items-center gap-1.5 text-[14px] font-semibold text-ink-faint">
                 <IconClock className="h-4 w-4" />
@@ -285,15 +303,15 @@ export function ReportFlow({ config }: { config: KindConfig }) {
               </span>
             </div>
             <p className="mt-1.5 text-[16px] text-ink-soft">
-              {config.raceDetail}
+              {rk("raceDetail", config.raceDetail)}
             </p>
 
             <ul className="mt-4 space-y-2">
-              {config.targets.map((t, i) => {
+              {config.targets.map((target, i) => {
                 const on = i < sent;
                 return (
                   <li
-                    key={t}
+                    key={target}
                     className={clsx(
                       "flex items-center justify-between gap-3 rounded-[10px] border px-4 py-3",
                       on
@@ -302,11 +320,11 @@ export function ReportFlow({ config }: { config: KindConfig }) {
                     )}
                   >
                     <span className="text-[16px] font-semibold text-ink">
-                      {t}
+                      {target}
                     </span>
                     {on ? (
                       <span className="flex items-center gap-1.5 text-[15px] font-semibold text-secondary-text">
-                        Notice sent
+                        {t("rp.noticeSent")}
                         <IconCheck className="h-5 w-5" />
                       </span>
                     ) : (
@@ -327,19 +345,16 @@ export function ReportFlow({ config }: { config: KindConfig }) {
             <Card className="mt-5 border-secondary-border bg-secondary-soft">
               <Chip tone="held">
                 <IconCheck className="h-4 w-4" />
-                Report open
+                {t("rp.reportOpen")}
               </Chip>
               <p className="mt-3 text-[20px] font-bold text-ink">
-                {anonymous ? "Recorded without your name" : `Case ${caseId}`}
+                {anonymous ? t("rp.recordedAnon") : `${caseId}`}
               </p>
 
               {anonymous ? (
                 <>
                   <p className="mt-2 text-[16px] leading-relaxed text-ink-soft">
-                    Keep this code somewhere safe. It is the only way back to
-                    this report, and it is not linked to you in any way — if you
-                    lose it, nobody can recover it for you, which is exactly
-                    what makes it anonymous.
+{t("rp.keepCode")}
                   </p>
                   <p className="data mt-4 rounded-[10px] border border-line bg-surface p-4 text-center text-[24px] font-bold tracking-[0.16em] text-ink">
                     {token}
@@ -347,38 +362,35 @@ export function ReportFlow({ config }: { config: KindConfig }) {
                 </>
               ) : (
                 <p className="mt-2 text-[16px] leading-relaxed text-ink-soft">
-                  An officer can reach you about this. You can follow it from
-                  your case list at any time.
+{t("rp.officerReach")}
                 </p>
               )}
             </Card>
 
             <Card className="mt-5">
               <p className="text-[17px] font-semibold text-ink">
-                What happens next
+                {t("rp.whatNext")}
               </p>
               <ul className="mt-3 space-y-2.5 text-[16px] leading-relaxed text-ink-soft">
                 <li>
-                  Platforms have been asked to preserve the records now, before
-                  their own retention clock deletes them.
+{t("rp.next1")}
                 </li>
                 <li>
-                  A cyber police station is assigned from where the content is
-                  hosted — you were never asked to pick a district.
+{t("rp.next2")}
                 </li>
                 <li>
                   {anonymous
-                    ? "You can add to this report later with your code, without ever giving a name."
-                    : "You will be told when it is assigned, and by when."}
+                    ? t("rp.next3anon")
+                    : t("rp.next3named")}
                 </li>
               </ul>
               <div className="mt-5 flex flex-wrap gap-3">
                 <Button href="/learn" variant="secondary">
-                  How this scam works
+                  {t("rp.howScamWorks")}
                 </Button>
                 {!anonymous ? (
                   <Button href="/dashboard" variant="secondary">
-                    Track it
+                    {t("rp.trackIt")}
                   </Button>
                 ) : null}
               </div>

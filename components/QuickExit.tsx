@@ -20,12 +20,26 @@ import { useT } from "@/lib/i18n";
  *
  * This cannot clear browser history — that is a real limit, and we say so on
  * the page rather than implying a safety we cannot deliver.
+ *
+ * It is hidden in local development, where being thrown off the site on every
+ * mis-click makes the app impossible to work on. Set NEXT_PUBLIC_QUICK_EXIT=1
+ * to bring it back locally. It is always present in a production build, where
+ * the people who need it actually are — a safety control that can be switched
+ * off by configuration in production would not be a safety control.
  */
 
 const NEUTRAL = "https://www.google.com/search?q=weather+today";
 
 export function QuickExit() {
   const t = useT();
+
+  /*
+   * Deliberately evaluated at build time, not from a runtime toggle: a
+   * production build always ships the button regardless of environment.
+   */
+  const hiddenLocally =
+    process.env.NODE_ENV === "development" &&
+    process.env.NEXT_PUBLIC_QUICK_EXIT !== "1";
   useEffect(() => {
     let taps = 0;
     let timer: ReturnType<typeof setTimeout> | null = null;
@@ -46,6 +60,8 @@ export function QuickExit() {
       if (timer) clearTimeout(timer);
     };
   }, []);
+
+  if (hiddenLocally) return null;
 
   return (
     <button
