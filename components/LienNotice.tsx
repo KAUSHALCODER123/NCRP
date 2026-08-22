@@ -4,6 +4,7 @@ import { useState } from "react";
 import clsx from "clsx";
 import { Button, Card, Chip, Shell, TopBar } from "@/components/ui";
 import { SlaClock } from "@/components/SlaClock";
+import { MoneyTrail } from "@/components/MoneyTrail";
 import { formatPaise } from "@/lib/money";
 import { useStore } from "@/lib/store";
 import type { Evidence, Lien } from "@/lib/types";
@@ -112,6 +113,32 @@ export function LienNotice({ lienId }: { lienId: string }) {
               · you were notified the same second
             </p>
           </div>
+        </Card>
+
+        {/* The signature, third use: he sees exactly where he landed. */}
+        <Card className="mt-5">
+          <p className="eyebrow">How this reached you</p>
+          <MoneyTrail
+            hops={[
+              { label: "A victim in Pune", amount: "₹3,20,000", state: "source" },
+              { label: "Mule account", amount: "held", state: "held" },
+              { label: "Second mule", amount: "moved on", state: "moved" },
+              {
+                label: lien.holderName,
+                amount: formatPaise(lien.amountPaise) + " held",
+                sub: "A payment you were owed",
+                state: "innocent",
+              },
+            ]}
+            animate={false}
+            youAre={3}
+            className="mt-5"
+          />
+          <p className="mt-6 border-t border-line pt-5 text-[16px] leading-relaxed text-ink-soft">
+            You are three transfers away from a crime you had nothing to do
+            with. That distance is why only the disputed amount is held, and
+            why your remaining balance was never touched.
+          </p>
         </Card>
 
         {/* Contrast callout — the argument, stated once, plainly. */}
