@@ -1,165 +1,307 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import clsx from "clsx";
 import { IconCheck, IconClock } from "@/components/icons";
+import { useT, type Key } from "@/lib/i18n";
 
 /**
  * The hero panel — what happens when you report, shown rather than described.
  *
- * Deliberately one story and one number. An earlier version drew the whole
- * money trail here, with mule accounts and hop numbers and four competing
- * amounts; that is the product's argument, and it belongs further down the
- * page where there is room to explain it. Someone who has just lost money
- * and landed on the homepage needs to understand one thing: paste the
- * message, and banks start holding your money in under a minute.
+ * Tabs, not a carousel. Nothing rotates on its own: an auto-advancing hero
+ * moves the emergency demo away from someone who is reading it, and WCAG
+ * 2.2.2 would then require a pause control nobody uses. Tabs are keyboard
+ * navigable, announce themselves, and leave the strongest demo as the
+ * default.
+ *
+ * They exist because the panel used to show only the money flow, which told
+ * anyone arriving to report blackmail that this site was not for them. Each
+ * tab shows the same three beats — what you hand over, what happens before
+ * anything else is asked of you, and the outcome — because that shape is the
+ * argument, and it holds for every kind of crime here.
  */
+
+interface Demo {
+  id: string;
+  tab: Key;
+  give: Key;
+  /** The thing the citizen already has. A raw string, or a key to resolve. */
+  sample: { text: string } | { key: Key };
+  act: Key;
+  rows: { name: string; amount?: Key }[];
+  outcome: Key;
+  figure?: Key;
+  seconds: string;
+  anonymous?: boolean;
+}
 
 const SMS =
   "Rs.47,500.00 debited from A/c XX4471 to VPA rahul.verma@ybl. Not you? -HDFC Bank";
 
-interface Row {
-  bank: string;
-  note: string;
-  amount?: string;
-  at: number;
-}
-
-const ROWS: Row[] = [
-  { bank: "HDFC Bank", note: "Your bank confirmed the debit", at: 2200 },
-  { bank: "Paytm Payments Bank", note: "Money held", amount: "₹34,200", at: 3400 },
-  { bank: "PhonePe", note: "Traced and flagged", at: 4600 },
+const DEMOS: Demo[] = [
+  {
+    id: "money",
+    tab: "hero.tab.money",
+    give: "hero.give.money",
+    sample: { text: SMS },
+    act: "hero.act.money",
+    rows: [
+      { name: "HDFC Bank" },
+      { name: "Paytm Payments Bank", amount: "hero.done.money" },
+      { name: "PhonePe" },
+    ],
+    outcome: "hero.out.money",
+    figure: "hero.done.money",
+    seconds: "41s",
+  },
+  {
+    id: "blackmail",
+    tab: "hero.tab.blackmail",
+    give: "hero.give.blackmail",
+    sample: { key: "hero.sample.blackmail" },
+    act: "hero.act.blackmail",
+    rows: [
+      { name: "Instagram / Meta" },
+      { name: "WhatsApp" },
+      { name: "Your telecom operator" },
+      { name: "Chakshu (Dept of Telecom)" },
+    ],
+    outcome: "hero.out.blackmail",
+    seconds: "38s",
+    anonymous: true,
+  },
+  {
+    id: "impersonation",
+    tab: "hero.tab.impersonation",
+    give: "hero.give.impersonation",
+    sample: { key: "hero.sample.impersonation" },
+    act: "hero.act.impersonation",
+    rows: [
+      { name: "Instagram / Meta" },
+      { name: "The hosting provider" },
+      { name: "X" },
+    ],
+    outcome: "hero.out.impersonation",
+    seconds: "33s",
+  },
+  {
+    id: "account",
+    tab: "hero.tab.account",
+    give: "hero.give.account",
+    sample: { key: "hero.sample.account" },
+    act: "hero.act.account",
+    rows: [
+      { name: "Google" },
+      { name: "Your telecom operator" },
+      { name: "Meta" },
+    ],
+    outcome: "hero.out.account",
+    seconds: "29s",
+  },
 ];
 
 export function HeroTicker() {
+  const t = useT();
+  const [active, setActive] = useState(0);
+  const tabs = useRef<(HTMLButtonElement | null)[]>([]);
+  const demo = DEMOS[active];
+
+  function onTabKey(e: React.KeyboardEvent, i: number) {
+    const last = DEMOS.length - 1;
+    let next = i;
+    if (e.key === "ArrowRight") next = i === last ? 0 : i + 1;
+    else if (e.key === "ArrowLeft") next = i === 0 ? last : i - 1;
+    else if (e.key === "Home") next = 0;
+    else if (e.key === "End") next = last;
+    else return;
+    e.preventDefault();
+    setActive(next);
+    tabs.current[next]?.focus();
+  }
+
+  return (
+    <div className="overflow-hidden rounded-card border border-line bg-surface shadow-lg">
+      <div
+        role="tablist"
+        aria-label={t("hero.tabsLabel")}
+        className="flex gap-1 overflow-x-auto border-b border-line bg-sunken px-2 py-2"
+      >
+        {DEMOS.map((d, i) => (
+          <button
+            key={d.id}
+            ref={(el) => {
+              tabs.current[i] = el;
+            }}
+            role="tab"
+            id={`hero-tab-${d.id}`}
+            aria-selected={i === active}
+            aria-controls={`hero-panel-${d.id}`}
+            tabIndex={i === active ? 0 : -1}
+            onClick={() => setActive(i)}
+            onKeyDown={(e) => onTabKey(e, i)}
+            className={clsx(
+              "press shrink-0 rounded-lg px-3.5 py-2 text-[15px] font-semibold",
+              i === active
+                ? "bg-surface text-ink shadow-sm"
+                : "text-ink-soft hover:bg-surface/60",
+            )}
+          >
+            {t(d.tab)}
+          </button>
+        ))}
+      </div>
+
+      {/*
+       * Keyed by tab, so switching remounts the panel and the sequence
+       * restarts from the beginning. Resetting the animation inside an effect
+       * instead would mean setting state during an effect body, which
+       * cascades renders — and would show a finished state for a moment
+       * before rewinding.
+       */}
+      <DemoPanel key={demo.id} demo={demo} />
+    </div>
+  );
+}
+
+function DemoPanel({ demo }: { demo: Demo }) {
+  const t = useT();
   const [typed, setTyped] = useState(0);
   const [shown, setShown] = useState(0);
+
+  const sample = "text" in demo.sample ? demo.sample.text : t(demo.sample.key);
 
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     if (reduced) {
-      const t = setTimeout(() => {
-        setTyped(SMS.length);
-        setShown(ROWS.length);
+      const settle = setTimeout(() => {
+        setTyped(sample.length);
+        setShown(demo.rows.length);
       }, 0);
-      return () => clearTimeout(t);
+      return () => clearTimeout(settle);
     }
 
     const reveal = setInterval(() => {
       setTyped((n) => {
-        if (n >= SMS.length) {
+        if (n >= sample.length) {
           clearInterval(reveal);
           return n;
         }
-        return Math.min(SMS.length, n + 2);
+        return Math.min(sample.length, n + 2);
       });
     }, 18);
 
-    const timers = ROWS.map((r, i) => setTimeout(() => setShown(i + 1), r.at));
+    const start = 800 + sample.length * 9;
+    const timers = demo.rows.map((_, i) =>
+      setTimeout(() => setShown(i + 1), start + i * 600),
+    );
 
     return () => {
       clearInterval(reveal);
       timers.forEach(clearTimeout);
     };
-  }, []);
+  }, [sample, demo.rows.length]);
 
-  const done = shown >= ROWS.length;
+  const done = shown >= demo.rows.length;
 
   return (
-    <div className="overflow-hidden rounded-card border border-line bg-surface shadow-lg">
-      <div className="border-b border-line bg-sunken px-5 py-3">
-        <p className="text-[15px] font-semibold text-ink">
-          What happens when you report
+    <div
+      role="tabpanel"
+      id={`hero-panel-${demo.id}`}
+      aria-labelledby={`hero-tab-${demo.id}`}
+      className="p-5 sm:p-6"
+    >
+      <p className="text-[15px] font-semibold text-ink-soft">
+        <Step n={1} />
+        {t(demo.give)}
+      </p>
+      <p className="mt-2.5 min-h-[64px] rounded-[10px] border border-line bg-sunken p-3.5 text-[14px] leading-relaxed text-ink-soft">
+        <span className="data break-words">{sample.slice(0, typed)}</span>
+        <span
+          className={clsx(
+            "ml-0.5 inline-block h-[14px] w-[6px] translate-y-[2px] bg-ink-faint",
+            typed >= sample.length && "caret",
+          )}
+        />
+      </p>
+
+      <p className="mt-6 text-[15px] font-semibold text-ink-soft">
+        <Step n={2} />
+        {t(demo.act)}
+      </p>
+
+      <ul className="mt-3 space-y-2">
+        {demo.rows.map((r, i) => {
+          const on = i < shown;
+          return (
+            <li
+              key={r.name}
+              className={clsx(
+                "flex items-center justify-between gap-3 rounded-[10px] border px-3.5 py-2.5 transition-colors",
+                on
+                  ? "ack-in border-secondary-border bg-secondary-soft"
+                  : "border-line bg-surface",
+              )}
+            >
+              <span className="min-w-0 truncate text-[15px] font-semibold text-ink">
+                {r.name}
+              </span>
+              {on ? (
+                <span className="flex shrink-0 items-center gap-1.5 text-secondary-text">
+                  {r.amount ? (
+                    <span className="data text-[15px] font-semibold">
+                      {t(r.amount)}
+                    </span>
+                  ) : null}
+                  <IconCheck className="h-5 w-5" />
+                </span>
+              ) : (
+                <span
+                  aria-hidden="true"
+                  className="pulse-ring h-2.5 w-2.5 shrink-0 rounded-full bg-line-strong text-ink-faint"
+                />
+              )}
+            </li>
+          );
+        })}
+      </ul>
+
+      <div
+        className={clsx(
+          "mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-5 transition-opacity duration-500",
+          done ? "opacity-100" : "opacity-0",
+        )}
+      >
+        <p className="text-[16px] text-ink-soft">
+          <strong className="data text-[20px] font-semibold text-secondary-text">
+            {demo.figure ? t(demo.figure) : demo.rows.length}{" "}
+          </strong>
+          {t(demo.outcome)}
         </p>
+        <span className="inline-flex items-center gap-1.5 text-[14px] font-semibold text-ink-faint">
+          <IconClock className="h-4 w-4" />
+          <span className="data">{demo.seconds}</span>
+        </span>
       </div>
 
-      <div className="p-5 sm:p-6">
-        {/* 1. The thing the citizen already has in their hand. */}
-        <p className="text-[15px] font-semibold text-ink-soft">
-          <span className="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary text-[13px] font-bold text-primary-on">
-            1
-          </span>
-          You paste the message your bank sent you
-        </p>
-        <p className="mt-2.5 rounded-[10px] border border-line bg-sunken p-3.5 text-[14px] leading-relaxed text-ink-soft">
-          <span className="data break-words">{SMS.slice(0, typed)}</span>
-          <span
-            className={clsx(
-              "ml-0.5 inline-block h-[14px] w-[6px] translate-y-[2px] bg-ink-faint",
-              typed >= SMS.length && "caret",
-            )}
-          />
-        </p>
-
-        {/* 2. The system acting, before anything else is asked of them. */}
-        <p className="mt-6 text-[15px] font-semibold text-ink-soft">
-          <span className="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary text-[13px] font-bold text-primary-on">
-            2
-          </span>
-          We ask the banks to hold your money
-        </p>
-
-        <ul className="mt-3 space-y-2">
-          {ROWS.map((r, i) => {
-            const on = i < shown;
-            return (
-              <li
-                key={r.bank}
-                className={clsx(
-                  "flex items-center justify-between gap-3 rounded-[10px] border px-3.5 py-2.5 transition-colors",
-                  on
-                    ? "ack-in border-secondary-border bg-secondary-soft"
-                    : "border-line bg-surface",
-                )}
-              >
-                <span className="min-w-0">
-                  <span className="block text-[15px] font-semibold text-ink">
-                    {r.bank}
-                  </span>
-                  <span className="block text-[14px] text-ink-soft">
-                    {on ? r.note : "Contacting…"}
-                  </span>
-                </span>
-                {on ? (
-                  <span className="flex shrink-0 items-center gap-1.5 text-secondary-text">
-                    {r.amount ? (
-                      <span className="data text-[15px] font-semibold">
-                        {r.amount}
-                      </span>
-                    ) : null}
-                    <IconCheck className="h-5 w-5" />
-                  </span>
-                ) : (
-                  <span
-                    aria-hidden="true"
-                    className="pulse-ring h-2.5 w-2.5 shrink-0 rounded-full bg-line-strong text-ink-faint"
-                  />
-                )}
-              </li>
-            );
-          })}
-        </ul>
-
-        {/* 3. The outcome, as one sentence and one number. */}
-        <div
+      {demo.anonymous ? (
+        <p
           className={clsx(
-            "mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-5 transition-opacity duration-500",
+            "mt-2 text-[15px] text-ink-faint transition-opacity duration-500",
             done ? "opacity-100" : "opacity-0",
           )}
         >
-          <p className="text-[16px] text-ink-soft">
-            <strong className="data text-[20px] font-semibold text-secondary-text">
-              ₹34,200
-            </strong>{" "}
-            held before you filled in a single form
-          </p>
-          <span className="inline-flex items-center gap-1.5 text-[14px] font-semibold text-ink-faint">
-            <IconClock className="h-4 w-4" />
-            <span className="data">41 seconds</span>
-          </span>
-        </div>
-      </div>
+          {t("hero.anonNote")}
+        </p>
+      ) : null}
     </div>
+  );
+}
+
+function Step({ n }: { n: number }) {
+  return (
+    <span className="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary text-[13px] font-bold text-primary-on">
+      {n}
+    </span>
   );
 }

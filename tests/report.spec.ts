@@ -203,3 +203,46 @@ test.describe("the identifier decides where the notice goes", () => {
     await expect(page.getByText(/bank SMS screenshot/i)).toBeVisible();
   });
 });
+
+test.describe("hero shows every kind of crime, without rotating", () => {
+  test("all four kinds are reachable, money is the default", async ({ page }) => {
+    await page.goto("/");
+    const tabs = page.getByRole("tab");
+    await expect(tabs).toHaveCount(4);
+    await expect(tabs.first()).toHaveAttribute("aria-selected", "true");
+  });
+
+  test("nothing rotates on its own", async ({ page }) => {
+    await page.goto("/");
+    const selected = () =>
+      page.getByRole("tab", { selected: true }).getAttribute("id");
+    const before = await selected();
+    await page.waitForTimeout(6000);
+    // An auto-advancing hero would move the emergency demo away from a reader.
+    expect(await selected()).toBe(before);
+  });
+
+  test("switching tabs shows that crime's own recipients", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("tab", { name: /blackmail/i }).click();
+
+    const panel = page.getByRole("tabpanel");
+    await expect(panel.getByText(/Chakshu/i)).toBeVisible();
+    await expect(panel.getByText(/WhatsApp/i)).toBeVisible();
+    // The money demo's bank list must not linger.
+    await expect(panel.getByText(/Paytm Payments Bank/i)).toBeHidden();
+  });
+
+  test("tabs are keyboard navigable", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("tab").first().focus();
+    await page.keyboard.press("ArrowRight");
+    await expect(
+      page.getByRole("tab", { name: /blackmail/i }),
+    ).toHaveAttribute("aria-selected", "true");
+    await page.keyboard.press("End");
+    await expect(
+      page.getByRole("tab", { name: /hacked account/i }),
+    ).toHaveAttribute("aria-selected", "true");
+  });
+});
