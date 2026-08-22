@@ -400,5 +400,19 @@
   "hero.sample.impersonation": "instagram.com/not_really_me",
   "hero.sample.account": "My email, some time last night",
   "hero.done.money": "₹34,200",
-  "hero.anonNote": "You never had to give your name."
+  "hero.anonNote": "You never had to give your name.",
+  "tiles.t4": "Money in my account is blocked",
+  "tiles.t4body": "You did nothing wrong, but a payment you received has been held. Get it released.",
+  "tiles.t4meta": "About 2 minutes",
+  "frozen.h1": "Money in your account is blocked",
+  "frozen.lede": "Someone paid you, and that money turns out to have been stolen further back. You are not a suspect, and this is not a criminal record.",
+  "frozen.gotSms": "You should have received an SMS with a link. Open that, and you can clear it from your phone.",
+  "frozen.lostSms": "Lost the message?",
+  "frozen.lostSmsSub": "Your bank can resend it, or read what happens next and how long it should take.",
+  "frozen.whatNext": "What happens next",
+  "frozen.checkHolds": "See my holds",
+  "frozen.readMore": "Read what to expect",
+  "blocked.s1": "Only the disputed amount is held. The rest of your balance works normally — cards, UPI and transfers all still go through.",
+  "blocked.s2": "Show that the payment was legitimate: an invoice, a chat with the buyer, or a bank statement. It takes about two minutes from your phone.",
+  "blocked.s3": "A bank review is owed within 7 days and an officer's decision within 15. Both clocks are visible to you, and if either is missed it escalates on its own."
 }

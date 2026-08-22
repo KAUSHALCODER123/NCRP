@@ -23,6 +23,7 @@ const GROUPS: { title: string; links: { href: string; label: string }[] }[] = [
       { href: "/report/harassment", label: "Threats or blackmail" },
       { href: "/report/impersonation", label: "Impersonation" },
       { href: "/report/account", label: "Hacked account" },
+      { href: "/blocked", label: "My account is blocked" },
     ],
   },
   {

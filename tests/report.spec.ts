@@ -246,3 +246,29 @@ test.describe("hero shows every kind of crime, without rotating", () => {
     ).toHaveAttribute("aria-selected", "true");
   });
 });
+
+test.describe("the person whose account is blocked has a door", () => {
+  test("home offers it as a real option, not an essay", async ({ page }) => {
+    await page.goto("/");
+    // The old section explained mule accounts and hop numbers at someone who
+    // came here to do something. It should be gone.
+    await expect(page.getByText(/mule account/i)).toBeHidden();
+    await expect(page.getByText(/hop 1/i)).toBeHidden();
+    await expect(page.getByText(/2\.18%/)).toBeHidden();
+
+    await page.getByRole("link", { name: /money in my account is blocked/i }).first().click();
+    await expect(page).toHaveURL(/\/blocked$/);
+  });
+
+  test("it answers what that person is actually asking", async ({ page }) => {
+    await page.goto("/blocked");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText(/blocked/i);
+    // Am I in trouble? How much is held? How do I fix it? How long?
+    await expect(page.getByText(/not a suspect/i)).toBeVisible();
+    await expect(page.getByText(/rest of your balance works normally/i)).toBeVisible();
+    await expect(page.getByText(/about two minutes/i)).toBeVisible();
+    await expect(page.getByText(/7 days/i)).toBeVisible();
+    // And no jargon.
+    await expect(page.getByText(/mule|hop \d/i)).toBeHidden();
+  });
+});

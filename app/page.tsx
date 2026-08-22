@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { HeroTicker } from "@/components/HeroTicker";
-import { MoneyTrail, type Hop } from "@/components/MoneyTrail";
 import {
   IconArrow,
   IconBook,
@@ -29,6 +28,7 @@ const TILES = [
   { href: "/freeze", Icon: IconRupee, title: "tiles.t1", body: "tiles.t1body", meta: "tiles.t1meta", primary: true },
   { href: "/report/harassment", Icon: IconMask, title: "tiles.t2", body: "tiles.t2body", meta: "tiles.t2meta", primary: false },
   { href: "/report/impersonation", Icon: IconUser, title: "tiles.t3", body: "tiles.t3body", meta: "tiles.t3meta", primary: false },
+  { href: "/blocked", Icon: IconLock, title: "tiles.t4", body: "tiles.t4body", meta: "tiles.t4meta", primary: false },
 ] as const;
 
 const TRUST = [
@@ -37,18 +37,6 @@ const TRUST = [
   { Icon: IconShield, k: "hero.trust3" },
 ] as const;
 
-/* The same trail, rewritten as it should work. */
-const FIXED: Hop[] = [
-  { label: "Your account", amount: "₹47,500", state: "source" },
-  { label: "Mule account", amount: "₹34,200 held", state: "held" },
-  { label: "Second mule", amount: "₹13,300 gone", state: "moved" },
-  {
-    label: "A shop in Kollam",
-    amount: "₹5,000 held",
-    sub: "₹9,95,000 still spendable",
-    state: "innocent",
-  },
-];
 
 const LEARN = [
   {
@@ -143,7 +131,7 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="mt-10 grid gap-5 md:grid-cols-3">
+        <div className="mt-10 grid gap-5 sm:grid-cols-2">
           {TILES.map((tile) => (
             <Link
               key={tile.href}
@@ -175,53 +163,6 @@ export default function Home() {
               </span>
             </Link>
           ))}
-        </div>
-      </section>
-
-      {/* ---------------- The second victim ---------------- */}
-      <section className="border-y border-line bg-sunken/60">
-        <div className="mx-auto max-w-6xl px-5 py-16 sm:py-20">
-          <div className="max-w-3xl">
-            <p className="eyebrow">{t("home.victimEyebrow")}</p>
-            <h2 className="mt-3 font-display text-[30px] font-bold leading-tight tracking-tight text-ink sm:text-[36px]">
-  {t("home.victimH2")}
-            </h2>
-            <p className="mt-4 text-[17px] leading-relaxed text-ink-soft">
-              He sold a phone and was paid ₹5,000. Three transfers earlier, that
-              money had been stolen. Today his{" "}
-              <strong className="font-semibold text-ink">entire balance</strong>{" "}
-              is frozen with no notice, and getting it back can mean travelling
-              to a police station in another state. It takes months.
-            </p>
-          </div>
-
-          <div className="mt-10 rounded-card border border-line bg-surface p-6 shadow-md sm:p-8">
-            <p className="eyebrow">{t("home.trailEyebrow")}</p>
-            <MoneyTrail hops={FIXED} animate={false} className="mt-6" />
-            <div className="mt-7 border-t border-line pt-6">
-              <p className="text-[17px] leading-relaxed text-ink-soft">
-                We hold the disputed ₹5,000 and leave the other ₹9,95,000
-                working. He is told the moment it happens, and can clear it from
-                his phone in about two minutes.
-              </p>
-              <Link
-                href="/lien/LN-2026-08-7741"
-                className="press mt-5 inline-flex min-h-[48px] items-center gap-2 rounded-[10px] border border-line-strong bg-surface px-5 text-[16px] font-semibold text-ink shadow-sm hover:bg-sunken"
-              >
-                {t("home.trailCta")}
-                <IconArrow className="h-4 w-4" />
-              </Link>
-            </div>
-          </div>
-
-          <p className="mt-10 max-w-2xl text-[17px] leading-relaxed text-ink-soft">
-            Of roughly{" "}
-            <span className="data font-semibold text-ink">₹52,969 crore</span>{" "}
-            reported stolen, about{" "}
-            <span className="data font-semibold text-critical-text">2.18%</span>{" "}
-            has reached the people it was taken from. That is the number this
-            rebuild is measured against — not complaints registered.
-          </p>
         </div>
       </section>
 

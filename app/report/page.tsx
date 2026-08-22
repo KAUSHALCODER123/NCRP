@@ -57,8 +57,15 @@ const OPTIONS: Option[] = [
     meta: "tiles.t3meta",
   },
   {
-    href: "/report/account",
+    href: "/blocked",
     Icon: IconLock,
+    title: "tiles.t4",
+    body: "tiles.t4body",
+    meta: "tiles.t4meta",
+  },
+  {
+    href: "/report/account",
+    Icon: IconUser,
     title: "rk.account.title",
     body: "rk.account.lede",
     meta: "tiles.t3meta",

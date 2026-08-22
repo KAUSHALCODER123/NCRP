@@ -28,6 +28,7 @@ const ROUTES = [
   "/scam-check/appeal",
   "/verify-officer",
   "/report",
+  "/blocked",
   "/report/harassment",
   "/report/impersonation",
   "/report/account",
