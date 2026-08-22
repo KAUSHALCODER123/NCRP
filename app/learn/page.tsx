@@ -76,6 +76,23 @@ export default function LearnPage() {
           </p>
         </section>
 
+        {/* Real accounts, verified by case number */}
+        <section className="mt-10">
+          <Link
+            href="/stories"
+            className="lift block rounded-card border border-line bg-surface p-6"
+          >
+            <p className="eyebrow">From people who reported</p>
+            <p className="mt-2 font-display text-[22px] font-bold text-ink">
+              Survivor stories
+            </p>
+            <p className="mt-1.5 text-[16px] leading-relaxed text-ink-soft">
+              Written by people who went through it, verified against their own
+              case number — including the ones who never got their money back.
+            </p>
+          </Link>
+        </section>
+
         {/* Audience routing */}
         <section className="mt-10">
           <h2 className="font-display text-[22px] font-bold text-ink">Who is this for?</h2>

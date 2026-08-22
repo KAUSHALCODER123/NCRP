@@ -2,125 +2,163 @@
 
 import { useEffect, useState } from "react";
 import clsx from "clsx";
-import { MoneyTrail, type Hop } from "@/components/MoneyTrail";
 import { IconCheck, IconClock } from "@/components/icons";
 
 /**
- * The hero panel — a white, elevated card carrying the product's thesis.
+ * The hero panel — what happens when you report, shown rather than described.
  *
- * A bank SMS arrives (the artifact every Indian recognises instantly), then
- * the money trail draws itself along the hops the money actually took. By the
- * last hop the argument has landed without a line of marketing copy:
- *
- *   money moves in hops · we caught some · some got away ·
- *   and the last person on the line is a shopkeeper who did nothing wrong.
+ * Deliberately one story and one number. An earlier version drew the whole
+ * money trail here, with mule accounts and hop numbers and four competing
+ * amounts; that is the product's argument, and it belongs further down the
+ * page where there is room to explain it. Someone who has just lost money
+ * and landed on the homepage needs to understand one thing: paste the
+ * message, and banks start holding your money in under a minute.
  */
 
 const SMS =
-  "Rs.47,500.00 debited from A/c XX4471 on 21-08-26 at 21:14:07 to VPA rahul.verma@ybl (UPI Ref 456123789012). Not you? -HDFC Bank";
+  "Rs.47,500.00 debited from A/c XX4471 to VPA rahul.verma@ybl. Not you? -HDFC Bank";
 
-const HOPS: Hop[] = [
-  {
-    label: "Your account",
-    amount: "₹47,500",
-    sub: "HDFC Bank · 21:14",
-    state: "source",
-  },
-  {
-    label: "Mule account",
-    amount: "₹34,200 held",
-    sub: "Frozen 31 seconds in",
-    state: "held",
-  },
-  {
-    label: "Second mule",
-    amount: "₹13,300 gone",
-    sub: "Moved on before we arrived",
-    state: "moved",
-  },
-  {
-    label: "A shop in Kollam",
-    amount: "₹5,000 held",
-    sub: "Sold a phone. Did nothing wrong.",
-    state: "innocent",
-  },
+interface Row {
+  bank: string;
+  note: string;
+  amount?: string;
+  at: number;
+}
+
+const ROWS: Row[] = [
+  { bank: "HDFC Bank", note: "Your bank confirmed the debit", at: 2200 },
+  { bank: "Paytm Payments Bank", note: "Money held", amount: "₹34,200", at: 3400 },
+  { bank: "PhonePe", note: "Traced and flagged", at: 4600 },
 ];
 
 export function HeroTicker() {
   const [typed, setTyped] = useState(0);
-  const [trail, setTrail] = useState(false);
+  const [shown, setShown] = useState(0);
 
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
     if (reduced) {
       const t = setTimeout(() => {
         setTyped(SMS.length);
-        setTrail(true);
+        setShown(ROWS.length);
       }, 0);
       return () => clearTimeout(t);
     }
+
     const reveal = setInterval(() => {
       setTyped((n) => {
         if (n >= SMS.length) {
           clearInterval(reveal);
           return n;
         }
-        return Math.min(SMS.length, n + 3);
+        return Math.min(SMS.length, n + 2);
       });
-    }, 16);
-    const start = setTimeout(() => setTrail(true), 1300);
+    }, 18);
+
+    const timers = ROWS.map((r, i) => setTimeout(() => setShown(i + 1), r.at));
+
     return () => {
       clearInterval(reveal);
-      clearTimeout(start);
+      timers.forEach(clearTimeout);
     };
   }, []);
 
+  const done = shown >= ROWS.length;
+
   return (
     <div className="overflow-hidden rounded-card border border-line bg-surface shadow-lg">
-      {/* Status strip — a live case, not a screenshot */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line bg-sunken px-5 py-3">
-        <span className="data text-[13px] font-semibold text-ink-soft">
-          CASE SHY-2026-08-4471
-        </span>
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary-soft px-2.5 py-1 text-[13px] font-semibold text-secondary-text">
-          <IconCheck className="h-3.5 w-3.5" />
-          Open · banks contacted
-        </span>
+      <div className="border-b border-line bg-sunken px-5 py-3">
+        <p className="text-[15px] font-semibold text-ink">
+          What happens when you report
+        </p>
       </div>
 
       <div className="p-5 sm:p-6">
-        <p className="eyebrow">The message you already have</p>
-        <p className="mt-2.5 rounded-[10px] border border-line bg-sunken p-4 text-[14px] leading-relaxed text-ink-soft">
+        {/* 1. The thing the citizen already has in their hand. */}
+        <p className="text-[15px] font-semibold text-ink-soft">
+          <span className="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary text-[13px] font-bold text-primary-on">
+            1
+          </span>
+          You paste the message your bank sent you
+        </p>
+        <p className="mt-2.5 rounded-[10px] border border-line bg-sunken p-3.5 text-[14px] leading-relaxed text-ink-soft">
           <span className="data break-words">{SMS.slice(0, typed)}</span>
           <span
             className={clsx(
-              "ml-0.5 inline-block h-[15px] w-[7px] translate-y-[2px] bg-ink-faint",
+              "ml-0.5 inline-block h-[14px] w-[6px] translate-y-[2px] bg-ink-faint",
               typed >= SMS.length && "caret",
             )}
           />
         </p>
 
-        <div className="mt-7 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
-          <p className="eyebrow">Where that money went</p>
-          <span className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-ink-faint">
-            <IconClock className="h-4 w-4" />
-            <span className="data">41s</span>
+        {/* 2. The system acting, before anything else is asked of them. */}
+        <p className="mt-6 text-[15px] font-semibold text-ink-soft">
+          <span className="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary text-[13px] font-bold text-primary-on">
+            2
           </span>
-        </div>
+          We ask the banks to hold your money
+        </p>
 
-        <MoneyTrail hops={HOPS} animate={trail} className="mt-4" />
+        <ul className="mt-3 space-y-2">
+          {ROWS.map((r, i) => {
+            const on = i < shown;
+            return (
+              <li
+                key={r.bank}
+                className={clsx(
+                  "flex items-center justify-between gap-3 rounded-[10px] border px-3.5 py-2.5 transition-colors",
+                  on
+                    ? "ack-in border-secondary-border bg-secondary-soft"
+                    : "border-line bg-surface",
+                )}
+              >
+                <span className="min-w-0">
+                  <span className="block text-[15px] font-semibold text-ink">
+                    {r.bank}
+                  </span>
+                  <span className="block text-[14px] text-ink-soft">
+                    {on ? r.note : "Contacting…"}
+                  </span>
+                </span>
+                {on ? (
+                  <span className="flex shrink-0 items-center gap-1.5 text-secondary-text">
+                    {r.amount ? (
+                      <span className="data text-[15px] font-semibold">
+                        {r.amount}
+                      </span>
+                    ) : null}
+                    <IconCheck className="h-5 w-5" />
+                  </span>
+                ) : (
+                  <span
+                    aria-hidden="true"
+                    className="pulse-ring h-2.5 w-2.5 shrink-0 rounded-full bg-line-strong text-ink-faint"
+                  />
+                )}
+              </li>
+            );
+          })}
+        </ul>
 
-        <p
+        {/* 3. The outcome, as one sentence and one number. */}
+        <div
           className={clsx(
-            "mt-2 border-t border-line pt-4 text-[15px] leading-relaxed text-ink-soft transition-opacity duration-700",
-            trail ? "opacity-100" : "opacity-0",
+            "mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-5 transition-opacity duration-500",
+            done ? "opacity-100" : "opacity-0",
           )}
         >
-          Every portal is built for the first box. This one is also built for
-          the last — because today a shopkeeper at hop three loses{" "}
-          <strong className="font-semibold text-ink">his entire account</strong>
-          , not ₹5,000.
-        </p>
+          <p className="text-[16px] text-ink-soft">
+            <strong className="data text-[20px] font-semibold text-secondary-text">
+              ₹34,200
+            </strong>{" "}
+            held before you filled in a single form
+          </p>
+          <span className="inline-flex items-center gap-1.5 text-[14px] font-semibold text-ink-faint">
+            <IconClock className="h-4 w-4" />
+            <span className="data">41 seconds</span>
+          </span>
+        </div>
       </div>
     </div>
   );

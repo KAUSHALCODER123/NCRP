@@ -36,10 +36,31 @@ import type { FreezeRequest, Rail as TxRail } from "@/lib/types";
 
 type When = "under2h" | "2to24h" | "over24h";
 
+/*
+ * Each option says what happens for THAT person, never how they rank against
+ * the others. An earlier version read "highest chance" / "still worth it" /
+ * "report anyway", which told someone arriving on day three that they were a
+ * lost cause — at the exact moment they had finally worked up to reporting.
+ * Most people do not notice a fraud within two hours, and a late report still
+ * freezes the account and strengthens every other case against the same
+ * people. All of that is true, so it is what we say.
+ */
 const WHEN_OPTIONS: { id: When; label: string; note: string }[] = [
-  { id: "under2h", label: "In the last 2 hours", note: "Highest chance of holding the money" },
-  { id: "2to24h", label: "Between 2 and 24 hours ago", note: "Still worth reporting immediately" },
-  { id: "over24h", label: "More than 24 hours ago", note: "Report anyway — the trail still matters" },
+  {
+    id: "under2h",
+    label: "In the last 2 hours",
+    note: "Money can often be caught before it moves on again",
+  },
+  {
+    id: "2to24h",
+    label: "Earlier today",
+    note: "Banks can still place a hold on whatever is left",
+  },
+  {
+    id: "over24h",
+    label: "More than a day ago",
+    note: "Your report still freezes the account and strengthens every case against them",
+  },
 ];
 
 export default function FreezePage() {
@@ -229,6 +250,10 @@ export default function FreezePage() {
             <Card>
               <p className="text-[18px] font-semibold text-ink">
                 1. When did this happen?
+              </p>
+              <p className="mt-1 text-[16px] text-ink-soft">
+                There is no deadline. People report weeks later and still get
+                results — this only helps us decide what to do first.
               </p>
               <div className="mt-3 space-y-2">
                 {WHEN_OPTIONS.map((o) => (

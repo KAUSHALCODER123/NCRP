@@ -19,6 +19,11 @@ const ROUTES = [
   "/learn/for/student",
   "/learn/for/women",
   "/learn/for/business",
+  "/stories",
+  "/stories/st-0041",
+  "/stories/st-0038",
+  "/stories/st-0035",
+  "/stories/write",
   "/scam-check",
   "/scam-check/appeal",
   "/verify-officer",
@@ -68,6 +73,7 @@ test.describe("unknown content 404s rather than crashing", () => {
     "/learn/not-a-real-scam",
     "/learn/for/martians",
     "/report/nonsense",
+    "/stories/st-9999",
   ]) {
     test(`404: ${path}`, async ({ page }) => {
       const res = await page.goto(path);

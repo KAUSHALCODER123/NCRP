@@ -27,13 +27,18 @@ export const FAQ: FaqGroup[] = [
     blurb: "The first hour matters more than anything else you will do.",
     items: [
       {
+        q: "How quickly should I report?",
+        a: "As soon as you can, and never let 'too late' stop you. Under Reserve Bank of India rules on unauthorised electronic transactions, reporting promptly also protects you from liability — so we stamp and sign the exact moment you report and give you that as proof.",
+      },
+      {
         q: "Money just left my account. What do I do first?",
         a: "Report it now — before you gather documents, before you call anyone. Stolen money gets moved between accounts within minutes, and a hold can only catch what has not moved yet. Paste the message your bank sent you and we ask the banks to hold the money straight away. Everything else can wait.",
         cta: { label: "Report it now", href: "/freeze" },
       },
       {
-        q: "How long do I have?",
-        a: "There is no hard cutoff, but every minute lowers what can be recovered. Reporting inside the first hour gives the best chance. Reporting inside three days also matters for a separate reason: under Reserve Bank of India rules on unauthorised electronic transactions, reporting promptly protects you from liability. We stamp and sign the exact moment you report so you have proof.",
+        q: "I only noticed days later. Is it too late?",
+        a: "No. Reporting sooner catches more money, but a later report is not a wasted one: it can still freeze the account, and because the same accounts are used against many people, your report strengthens every other case against them. Accounts are frozen on the strength of older reports every day. File it.",
+        cta: { label: "Report it now", href: "/freeze" },
       },
       {
         q: "Do I need to create an account first?",
