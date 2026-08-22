@@ -12,13 +12,15 @@ import { useSyncExternalStore } from "react";
  */
 
 export type Scale = "" | "lg" | "xl";
+export type Theme = "" | "light" | "dark"; // "" follows the operating system
 
 export interface Prefs {
   scale: Scale;
   contrast: boolean;
+  theme: Theme;
 }
 
-const DEFAULTS: Prefs = { scale: "", contrast: false };
+const DEFAULTS: Prefs = { scale: "", contrast: false, theme: "" };
 
 let cache: Prefs = DEFAULTS;
 const listeners = new Set<() => void>();
@@ -28,13 +30,18 @@ function readDom(): Prefs {
   return {
     scale: (d.scale ?? "") as Scale,
     contrast: d.contrast === "high",
+    theme: (d.theme ?? "") as Theme,
   };
 }
 
 function snapshot(): Prefs {
   const next = readDom();
   // getSnapshot must be referentially stable between changes.
-  if (next.scale !== cache.scale || next.contrast !== cache.contrast) {
+  if (
+    next.scale !== cache.scale ||
+    next.contrast !== cache.contrast ||
+    next.theme !== cache.theme
+  ) {
     cache = next;
   }
   return cache;
@@ -68,6 +75,18 @@ export function setContrast(high: boolean) {
   emit();
 }
 
+export function setTheme(theme: Theme) {
+  const d = document.documentElement;
+  if (theme) d.dataset.theme = theme;
+  else delete d.dataset.theme;
+  try {
+    localStorage.setItem("sahaay-theme", theme);
+  } catch {
+    /* ignore */
+  }
+  emit();
+}
+
 export function usePrefs(): Prefs {
   return useSyncExternalStore(
     (cb) => {
@@ -80,4 +99,4 @@ export function usePrefs(): Prefs {
 }
 
 /** Runs before paint. Kept tiny and dependency-free on purpose. */
-export const PREFS_SCRIPT = `(function(){try{var d=document.documentElement,s=localStorage.getItem('sahaay-scale'),c=localStorage.getItem('sahaay-contrast');if(s)d.dataset.scale=s;if(c==='high')d.dataset.contrast='high';}catch(e){}})();`;
+export const PREFS_SCRIPT = `(function(){try{var d=document.documentElement,s=localStorage.getItem('sahaay-scale'),c=localStorage.getItem('sahaay-contrast'),t=localStorage.getItem('sahaay-theme');if(s)d.dataset.scale=s;if(c==='high')d.dataset.contrast='high';if(t)d.dataset.theme=t;}catch(e){}})();`;

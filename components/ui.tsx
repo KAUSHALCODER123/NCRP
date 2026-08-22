@@ -71,7 +71,7 @@ export function Button({
   className?: string;
 }) {
   const base =
-    "inline-flex min-h-[54px] items-center justify-center gap-2 rounded-lg px-6 text-[17px] font-semibold transition-colors disabled:opacity-45 disabled:cursor-not-allowed";
+    "press inline-flex min-h-[54px] items-center justify-center gap-2 rounded-lg px-6 text-[17px] font-semibold disabled:opacity-45 disabled:cursor-not-allowed";
   const variants = {
     primary: "bg-primary text-white hover:bg-primary-hover",
     secondary: "border border-line-strong bg-surface text-ink hover:bg-sunken",

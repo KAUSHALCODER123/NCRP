@@ -100,13 +100,13 @@ export default function Home() {
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link
                 href="/freeze"
-                className="inline-flex min-h-[58px] items-center justify-center rounded-lg bg-white px-7 text-[18px] font-bold text-deep transition-transform hover:scale-[1.015]"
+                className="press inline-flex min-h-[58px] items-center justify-center rounded-lg bg-white px-7 text-[18px] font-bold text-deep hover:scale-[1.015]"
               >
                 Report money lost →
               </Link>
               <a
                 href="tel:1930"
-                className="inline-flex min-h-[58px] items-center justify-center gap-2 rounded-lg border border-white/35 px-7 text-[18px] font-semibold text-white hover:bg-white/10"
+                className="press inline-flex min-h-[58px] items-center justify-center gap-2 rounded-lg border border-white/35 px-7 text-[18px] font-semibold text-white hover:bg-white/10"
               >
                 Call <span className="data">1930</span>
               </a>
@@ -137,8 +137,8 @@ export default function Home() {
               href={t.href}
               className={
                 t.primary
-                  ? "flex flex-col rounded-card border-2 border-primary bg-primary-soft p-6 transition-colors hover:bg-primary-soft/60"
-                  : "flex flex-col rounded-card border border-line bg-surface p-6 transition-colors hover:border-line-strong hover:bg-sunken"
+                  ? "lift flex flex-col rounded-card border-2 border-primary bg-primary-soft p-6 hover:bg-primary-soft/60"
+                  : "lift flex flex-col rounded-card border border-line bg-surface p-6 hover:border-line-strong hover:bg-sunken"
               }
             >
               <p className="eyebrow">{t.kicker}</p>
@@ -181,7 +181,7 @@ export default function Home() {
               in about two minutes.{" "}
               <Link
                 href="/lien/LN-2026-08-7741"
-                className="font-semibold text-primary underline underline-offset-4"
+                className="link-draw font-semibold text-primary"
               >
                 See what he sees →
               </Link>
@@ -235,7 +235,7 @@ export default function Home() {
                 </span>
                 <span
                   aria-hidden="true"
-                  className="text-primary opacity-0 transition-opacity group-hover:opacity-100"
+                  className="row-arrow text-primary"
                 >
                   →
                 </span>

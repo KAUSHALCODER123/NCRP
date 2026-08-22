@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import clsx from "clsx";
-import { setContrast, setScale, usePrefs } from "@/lib/prefs";
+import { setContrast, setScale, setTheme, usePrefs } from "@/lib/prefs";
 
 /**
  * Site header, mirroring the official portal's structure: government
@@ -29,7 +29,7 @@ const NAV = [
 export function SiteHeader() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const { scale, contrast } = usePrefs();
+  const { scale, contrast, theme } = usePrefs();
 
   return (
     <header>
@@ -77,6 +77,8 @@ export function SiteHeader() {
                 ◐
               </A11yBtn>
             </div>
+            <span className="mx-1 h-4 w-px bg-white/25" aria-hidden="true" />
+            <ThemeToggle theme={theme} />
             <span className="mx-1 h-4 w-px bg-white/25" aria-hidden="true" />
             <button
               type="button"
@@ -142,7 +144,7 @@ export function SiteHeader() {
                       href={n.href}
                       onClick={() => setOpen(false)}
                       className={clsx(
-                        "block border-b-2 px-3 py-2.5 text-[15px] font-semibold transition-colors",
+                        "press block border-b-2 px-3 py-2.5 text-[15px] font-semibold",
                         active
                           ? "border-primary text-primary"
                           : "border-transparent text-ink-soft hover:border-line-strong hover:text-ink",
@@ -179,12 +181,41 @@ function A11yBtn({
       aria-label={label}
       aria-pressed={active}
       className={clsx(
-        "min-w-[32px] rounded px-2 py-1 text-[13px] font-bold transition-colors",
+        "press min-w-[32px] rounded px-2 py-1 text-[13px] font-bold",
         active ? "bg-white text-deep" : "hover:bg-white/15",
       )}
     >
       {children}
     </button>
+  );
+}
+
+function ThemeToggle({ theme }: { theme: "" | "light" | "dark" }) {
+  /* Three states, because "follow my device" is a real preference and
+     silently overriding it is the thing dark-mode toggles usually get wrong. */
+  const OPTIONS = [
+    { id: "" as const, glyph: "◑", label: "Match my device" },
+    { id: "light" as const, glyph: "☀", label: "Light" },
+    { id: "dark" as const, glyph: "☾", label: "Dark" },
+  ];
+  return (
+    <div className="flex items-center gap-0.5" role="group" aria-label="Theme">
+      {OPTIONS.map((o) => (
+        <button
+          key={o.id || "system"}
+          type="button"
+          onClick={() => setTheme(o.id)}
+          aria-label={o.label}
+          aria-pressed={theme === o.id}
+          className={clsx(
+            "press min-w-[30px] rounded px-1.5 py-1 text-[13px] font-bold",
+            theme === o.id ? "bg-white text-deep" : "hover:bg-white/15",
+          )}
+        >
+          {o.glyph}
+        </button>
+      ))}
+    </div>
   );
 }
 
