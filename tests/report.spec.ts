@@ -1,0 +1,93 @@
+import { test, expect } from "@playwright/test";
+
+test.describe("harassment report", () => {
+  test("safety guidance comes before anything is collected", async ({ page }) => {
+    await page.goto("/report/harassment");
+    await expect(page.getByText(/Before you start/i)).toBeVisible();
+    await expect(page.getByText(/Quick exit/i).first()).toBeVisible();
+    await expect(page.getByText(/never have to give your name/i)).toBeVisible();
+    // No form fields until a situation is chosen.
+    await expect(page.getByLabel(/Link, username or platform/i)).toBeHidden();
+  });
+
+  test("choosing a situation gives one action before any form", async ({ page }) => {
+    await page.goto("/report/harassment");
+    await page.getByRole("button", { name: /Private photos or videos/i }).click();
+    await expect(page.getByText(/Do this first/i)).toBeVisible();
+    await expect(page.getByText(/Do not pay and do not reply/i)).toBeVisible();
+  });
+
+  test("anonymous is the default and yields a claim token", async ({ page }) => {
+    await page.goto("/report/harassment");
+    await page.getByRole("button", { name: /Someone is demanding money/i }).click();
+
+    const anon = page.getByRole("radio", { name: /Without my name/i });
+    await expect(anon).toBeChecked();
+
+    await page.getByLabel(/Link, username or platform/i).fill("instagram.com/fake_account");
+    await page.getByRole("button", { name: /Getting the content taken down/i }).click();
+
+    await expect(page.getByText(/Recorded without your name/i)).toBeVisible({
+      timeout: 20_000,
+    });
+    // The token is the only route back to an anonymous report.
+    await expect(page.getByText(/only way back to this report/i)).toBeVisible();
+  });
+
+  test("takedown notices are dispatched to platforms", async ({ page }) => {
+    await page.goto("/report/harassment");
+    await page.getByRole("button", { name: /will not leave me alone/i }).click();
+    await page.getByLabel(/Link, username or platform/i).fill("telegram");
+    await page.getByRole("button", { name: /Getting the content taken down/i }).click();
+
+    await expect(page.getByText(/Notice sent/i).first()).toBeVisible({
+      timeout: 20_000,
+    });
+    await expect(page.getByText(/preserve/i).first()).toBeVisible();
+  });
+
+  test("a child-related report is offered without a name", async ({ page }) => {
+    await page.goto("/report/harassment");
+    await page.getByRole("button", { name: /A child is involved/i }).click();
+    await expect(page.getByText(/highest priority/i)).toBeVisible();
+    await expect(page.getByText(/Do not share or forward/i)).toBeVisible();
+  });
+});
+
+test.describe("other report kinds", () => {
+  test("impersonation has no anonymous option and says why to act", async ({ page }) => {
+    await page.goto("/report/impersonation");
+    await expect(page.getByRole("radio", { name: /Without my name/i })).toBeHidden();
+    await page.getByRole("button", { name: /fake profile using my name/i }).click();
+    await expect(page.getByText(/Do not message the account yourself/i)).toBeVisible();
+  });
+
+  test("hacked email is prioritised as the master key", async ({ page }) => {
+    await page.goto("/report/account");
+    await page.getByRole("button", { name: /My email was taken over/i }).click();
+    await expect(page.getByText(/master key/i)).toBeVisible();
+  });
+
+  test("banking takeover is redirected to the faster money path", async ({ page }) => {
+    await page.goto("/report/account");
+    await page.getByRole("button", { name: /banking or payment app/i }).click();
+    await expect(page.getByText(/report that first/i)).toBeVisible();
+  });
+});
+
+test.describe("the emergency path is localised", () => {
+  const CASES = [
+    { value: "hi", marker: "यह कब हुआ" },
+    { value: "ta", marker: "இது எப்போது நடந்தது" },
+    { value: "kn", marker: "ಇದು ಯಾವಾಗ ನಡೆಯಿತು" },
+  ];
+
+  for (const c of CASES) {
+    test(`freeze flow in ${c.value}`, async ({ page }) => {
+      await page.goto("/");
+      await page.getByLabel(/language/i).selectOption(c.value);
+      await page.goto("/freeze");
+      await expect(page.getByText(c.marker).first()).toBeVisible();
+    });
+  }
+});

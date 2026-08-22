@@ -9,6 +9,7 @@ import { OtpPanel } from "@/components/OtpPanel";
 import { parseSms, SAMPLE_SMS } from "@/lib/sms-parser";
 import { clearDraft, saveDraft, useDraft } from "@/lib/draft";
 import { useNow } from "@/lib/use-now";
+import { useT } from "@/lib/i18n";
 import { formatPaise } from "@/lib/money";
 import { useStore } from "@/lib/store";
 import { planFanOut } from "@/lib/mock/banks";
@@ -45,27 +46,16 @@ type When = "under2h" | "2to24h" | "over24h";
  * freezes the account and strengthens every other case against the same
  * people. All of that is true, so it is what we say.
  */
-const WHEN_OPTIONS: { id: When; label: string; note: string }[] = [
-  {
-    id: "under2h",
-    label: "In the last 2 hours",
-    note: "Money can often be caught before it moves on again",
-  },
-  {
-    id: "2to24h",
-    label: "Earlier today",
-    note: "Banks can still place a hold on whatever is left",
-  },
-  {
-    id: "over24h",
-    label: "More than a day ago",
-    note: "Your report still freezes the account and strengthens every case against them",
-  },
-];
+const WHEN_OPTIONS = [
+  { id: "under2h", label: "fz.when1", note: "fz.when1sub" },
+  { id: "2to24h", label: "fz.when2", note: "fz.when2sub" },
+  { id: "over24h", label: "fz.when3", note: "fz.when3sub" },
+] as const;
 
 export default function FreezePage() {
   const router = useRouter();
   const createCase = useStore((s) => s.createCase);
+  const t = useT();
 
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [when, setWhen] = useState<When | null>(null);
@@ -185,20 +175,19 @@ export default function FreezePage() {
         {/* Emergency banner */}
         <div className="rounded-card border-2 border-breach bg-breach-soft p-5">
           <p className="text-[19px] font-bold text-ink" aria-hidden="true">
-            Active financial fraud
+            {t("fz.banner")}
           </p>
           <p className="mt-1 text-[16px] text-ink-soft">
-            For unauthorised transfers, UPI scams, card fraud and phishing.
+            {t("fz.bannerSub")}
           </p>
           <p className="mt-3 rounded-lg bg-surface p-3 text-[16px] text-ink">
-            ⏱ <strong>Time matters.</strong> Money reported within 24 hours has
-            by far the highest chance of being held.
+            ⏱ {t("fz.time")}
           </p>
           <a
             href="tel:1930"
             className="mt-3 inline-flex min-h-[52px] w-full items-center justify-center rounded-xl bg-breach px-6 text-[18px] font-bold text-white"
           >
-            📞 Call 1930 now — free, 24×7
+            {t("fz.call1930")}
           </a>
         </div>
 
@@ -249,11 +238,10 @@ export default function FreezePage() {
           <div className="mt-6 space-y-5">
             <Card>
               <p className="text-[18px] font-semibold text-ink">
-                1. When did this happen?
+                {t("fz.step1")}
               </p>
               <p className="mt-1 text-[16px] text-ink-soft">
-                There is no deadline. People report weeks later and still get
-                results — this only helps us decide what to do first.
+                {t("fz.noDeadline")}
               </p>
               <div className="mt-3 space-y-2">
                 {WHEN_OPTIONS.map((o) => (
@@ -269,10 +257,10 @@ export default function FreezePage() {
                     )}
                   >
                     <span className="block text-[17px] font-semibold text-ink">
-                      {o.label}
+                      {t(o.label)}
                     </span>
                     <span className="mt-0.5 block text-[16px] text-ink-soft">
-                      {o.note}
+                      {t(o.note)}
                     </span>
                   </button>
                 ))}
@@ -281,20 +269,20 @@ export default function FreezePage() {
 
             <Card>
               <p className="text-[18px] font-semibold text-ink">
-                2. Have you called 1930 yet?
+                {t("fz.step2")}
               </p>
               <div className="mt-3 flex flex-wrap gap-3">
                 <Button
                   variant={called1930 === true ? "primary" : "secondary"}
                   onClick={() => setCalled1930(true)}
                 >
-                  Yes, I have an incident ID
+                  {t("fz.called")}
                 </Button>
                 <Button
                   variant={called1930 === false ? "primary" : "secondary"}
                   onClick={() => setCalled1930(false)}
                 >
-                  No — file directly here
+                  {t("fz.notCalled")}
                 </Button>
               </div>
               {called1930 ? (
@@ -318,7 +306,7 @@ export default function FreezePage() {
               disabled={!when || called1930 === null}
               onClick={() => setStep(2)}
             >
-              Continue to transaction details →
+              {t("fz.continue")} →
             </Button>
           </div>
         ) : null}
@@ -328,11 +316,10 @@ export default function FreezePage() {
           <div className="mt-6 space-y-5">
             <Card>
               <label htmlFor="sms" className="block text-[18px] font-semibold text-ink">
-                Paste the bank message
+                {t("fz.paste")}
               </label>
               <p className="mt-1 text-[16px] text-ink-soft">
-                Fastest option — we read every field out of it. Every character
-                works, including {"@"} and {"#"}.
+                {t("fz.pasteSub")}
               </p>
               <textarea
                 id="sms"
@@ -363,7 +350,7 @@ export default function FreezePage() {
                 Transaction details
               </p>
 
-              <Field label="Amount taken" error={amountCheck.error} warn={amountCheck.warn}>
+              <Field label={t("fz.amount")} error={amountCheck.error} warn={amountCheck.warn}>
                 <input
                   inputMode="decimal"
                   value={amount}
@@ -380,7 +367,7 @@ export default function FreezePage() {
                 </p>
               ) : null}
 
-              <Field label="Which bank or wallet">
+              <Field label={t("fz.bank")}>
                 <input
                   list="banks"
                   value={bank}
@@ -403,7 +390,7 @@ export default function FreezePage() {
 
               <fieldset className="mb-4">
                 <legend className="mb-2 block text-[17px] font-semibold text-ink">
-                  How was it paid?
+                  {t("fz.rail")}
                 </legend>
                 <div className="flex flex-wrap gap-2">
                   {(["upi", "imps", "neft", "rtgs", "card"] as Rail[]).map((r) => (
@@ -425,7 +412,7 @@ export default function FreezePage() {
               </fieldset>
 
               <Field
-                label="Transaction reference (UTR)"
+                label={t("fz.utr")}
                 warn={utrCheck.warn}
                 optional
               >
@@ -451,7 +438,7 @@ export default function FreezePage() {
                 </div>
               ) : null}
 
-              <Field label="Who was paid" optional>
+              <Field label={t("fz.who")} optional>
                 <input
                   value={counterparty}
                   onChange={(e) => setCounterparty(e.target.value)}
@@ -511,7 +498,7 @@ export default function FreezePage() {
                   htmlFor="mobile"
                   className="mb-2 block text-[17px] font-semibold text-ink"
                 >
-                  Your mobile number
+                  {t("fz.mobile")}
                 </label>
                 <div className="flex gap-2">
                   <span
@@ -541,16 +528,13 @@ export default function FreezePage() {
                   </p>
                 ) : null}
               </div>
-              <p className="text-[16px] text-ink-soft">
-                We verify this <em>while</em> the freeze is going out — not
-                before. Your money is never waiting on an OTP.
-              </p>
+              <p className="text-[16px] text-ink-soft">{t("fz.mobileSub")}</p>
             </Card>
 
             <Button className="w-full" disabled={!canDispatch} onClick={dispatch}>
               {canDispatch
-                ? `Freeze ${formatPaise(amountCheck.paise ?? 0)} now →`
-                : "Enter the amount and bank to continue"}
+                ? `${t("fz.submit")} · ${formatPaise(amountCheck.paise ?? 0)}`
+                : t("fz.submitBlocked")}
             </Button>
           </div>
         ) : null}
@@ -647,6 +631,7 @@ function Field({
    * box — and on a form where a mistyped reference silently misroutes a
    * freeze request, that is not a cosmetic problem.
    */
+  const t = useT();
   const id = useId();
   const msgId = `${id}-msg`;
   const message = error ?? warn;
@@ -660,7 +645,7 @@ function Field({
         {label}
         {optional ? (
           <span className="ml-2 text-[15px] font-normal text-ink-faint">
-            optional
+            {t("fz.optional")}
           </span>
         ) : null}
       </label>

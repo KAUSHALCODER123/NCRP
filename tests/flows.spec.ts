@@ -17,7 +17,7 @@ test.describe("emergency freeze flow", () => {
     await expect(page.getByLabel("Which bank or wallet")).toHaveValue(/HDFC/);
 
     await page.getByLabel("Your mobile number").fill("9876543210");
-    const submit = page.getByRole("button", { name: /Freeze .* now/i });
+    const submit = page.getByRole("button", { name: /Freeze now/i });
     await expect(submit).toBeEnabled();
     await submit.click();
 
@@ -66,7 +66,7 @@ test.describe("emergency freeze flow", () => {
     await page.getByLabel("Which bank or wallet").fill("HDFC Bank");
     await page.getByLabel(/Transaction reference/i).fill("4239871234");
     await expect(page.getByText(/2 more to find/i)).toBeVisible();
-    await expect(page.getByRole("button", { name: /Freeze .* now/i })).toBeEnabled();
+    await expect(page.getByRole("button", { name: /Freeze now/i })).toBeEnabled();
   });
 
   test("accepts characters the official portal rejects", async ({ page }) => {
@@ -79,7 +79,7 @@ test.describe("emergency freeze flow", () => {
     await triage(page);
     await page.getByRole("button", { name: "UPI debit — HDFC" }).click();
     await page.getByLabel("Your mobile number").fill("9876543210");
-    await page.getByRole("button", { name: /Freeze .* now/i }).click();
+    await page.getByRole("button", { name: /Freeze now/i }).click();
     await page.getByRole("link", { name: /Watch the banks respond/i }).click();
 
     await expect(page).toHaveURL(/\/receipt\//);
@@ -95,7 +95,7 @@ test.describe("emergency freeze flow", () => {
     await triage(page);
     await page.getByRole("button", { name: "UPI debit — HDFC" }).click();
     await page.getByLabel("Your mobile number").fill("9876543210");
-    await page.getByRole("button", { name: /Freeze .* now/i }).click();
+    await page.getByRole("button", { name: /Freeze now/i }).click();
     await page.getByRole("link", { name: /Watch the banks respond/i }).click();
     await page.waitForURL(/\/receipt\//);
     const url = page.url();

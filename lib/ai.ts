@@ -1,11 +1,24 @@
 /**
  * Model access, provider-agnostic.
  *
- * PROVIDERS. Gemini first, OpenAI second — whichever has a key. Two providers
- * rather than one because this project has already lost its AI features once
- * to an exhausted quota, and the failure was invisible: the offline answers
- * are good enough that nothing looked broken. A second provider turns a dead
- * demo into a slightly cheaper one.
+ * PROVIDERS. Gemini, then OpenAI, then NVIDIA NIM — whichever has a key.
+ * Several rather than one because this project has already lost its AI
+ * features to an exhausted quota, and the failure was invisible: the offline
+ * answers are good enough that nothing looked broken.
+ *
+ * The order is not arbitrary. This product answers in seven Indian languages,
+ * and Gemini's flash-lite tier handles Indic scripts markedly better than the
+ * small open models available elsewhere. The rest are redundancy: they keep
+ * the demo alive if Gemini is unreachable, accepting a weaker answer over no
+ * answer at all.
+ *
+ * OpenRouter is last, and that is a measured decision rather than a slight.
+ * Its free tier is genuinely free, but several models return 429 at any given
+ * moment, and the ones that stay up are reasoning models that leak their
+ * working into the reply — "User wants a reply in Tamil, one short
+ * sentence: ..." is not something to show someone who has just been
+ * defrauded. So replies that look like leaked reasoning are rejected, and the
+ * chain moves on.
  *
  * MODELS. Everything here is short classification and 2–4 sentence replies, so
  * the cheapest tier is the right tier — a larger model costs more per call
@@ -45,6 +58,34 @@ const GEMINI_VISION = ["gemini-3.1-flash-lite", "gemini-2.5-flash-lite"];
 
 const OPENAI_TEXT = ["gpt-5-nano", "gpt-4.1-nano", "gpt-4o-mini"];
 const OPENAI_VISION = ["gpt-4.1-nano", "gpt-4o-mini"];
+
+/* NVIDIA NIM is OpenAI-compatible, so it reuses the same request path. */
+const NIM_BASE = "https://integrate.api.nvidia.com/v1/chat/completions";
+const NIM_TEXT = ["meta/llama-3.1-8b-instruct", "google/gemma-3-4b-it"];
+const NIM_VISION = ["google/gemma-3-4b-it"];
+
+/* OpenRouter is OpenAI-compatible too. Free slugs only. */
+const OR_BASE = "https://openrouter.ai/api/v1/chat/completions";
+const OR_TEXT = [
+  "nvidia/nemotron-3-super-120b-a12b:free",
+  "nvidia/nemotron-3-nano-30b-a3b:free",
+  "nvidia/nemotron-nano-9b-v2:free",
+];
+
+/**
+ * Reasoning models on the free tier narrate their own thinking before
+ * answering. That text is coherent enough to pass a length check and utterly
+ * wrong to show a frightened person, so it is rejected rather than trimmed —
+ * a half-stripped monologue is worse than moving to the next model.
+ */
+const LEAKED_REASONING = new RegExp(
+  String.raw`^\s*(okay|alright|so|hmm|let me|the user|user wants|user is asking|we need to|we must|i need to|first,? i)`,
+  "i",
+);
+
+export function looksLikeReasoning(text: string): boolean {
+  return LEAKED_REASONING.test(text);
+}
 
 /** Names the parameter an error is complaining about, if any. */
 function offendingParam(message: string): string | null {
@@ -156,18 +197,15 @@ async function askGemini(
 /* OpenAI                                                              */
 /* ------------------------------------------------------------------ */
 
-async function askOpenAI(
+async function askOpenAICompatible(
+  label: string,
+  url: string,
+  key: string | undefined,
+  chain: string[],
   opts: AskOptions,
   signal: AbortSignal,
 ): Promise<{ text: string | null; error: string }> {
-  const key = process.env.OPENAI_API_KEY;
   if (!key) return { text: null, error: "" };
-
-  const chain = process.env.OPENAI_CHAT_MODEL
-    ? [process.env.OPENAI_CHAT_MODEL]
-    : opts.image
-      ? OPENAI_VISION
-      : OPENAI_TEXT;
 
   const messages: unknown[] = [];
   if (opts.system) messages.push({ role: "system", content: opts.system });
@@ -201,17 +239,20 @@ async function askOpenAI(
     for (let attempt = 0; attempt < 4; attempt++) {
       let res: Response;
       try {
-        res = await fetch("https://api.openai.com/v1/chat/completions", {
+        res = await fetch(url, {
           method: "POST",
           signal,
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${key}`,
+            // OpenRouter attributes usage to the calling app.
+            "HTTP-Referer": "https://sahaay.example",
+            "X-Title": "Sahaay",
           },
           body: JSON.stringify(body),
         });
       } catch {
-        return { text: null, error: "openai: aborted or network failure" };
+        return { text: null, error: `${label}: aborted or network failure` };
       }
 
       if (res.ok) {
@@ -219,13 +260,17 @@ async function askOpenAI(
           choices?: { message?: { content?: string } }[];
         };
         const text = data.choices?.[0]?.message?.content?.trim();
+        if (text && looksLikeReasoning(text)) {
+          error = `${label}/${model}: leaked reasoning, rejected`;
+          break;
+        }
         if (text) return { text, error: "" };
-        error = `openai/${model}: empty completion`;
+        error = `${label}/${model}: empty completion`;
         break;
       }
 
       const raw = await res.text();
-      error = `openai/${model}: ${res.status} ${raw.slice(0, 160)}`;
+      error = `${label}/${model}: ${res.status} ${raw.slice(0, 160)}`;
       if (res.status !== 400 && res.status !== 404) break;
 
       const param = offendingParam(raw);
@@ -252,6 +297,22 @@ async function askOpenAI(
 
 /* ------------------------------------------------------------------ */
 
+function openaiChain(opts: AskOptions) {
+  return process.env.OPENAI_CHAT_MODEL
+    ? [process.env.OPENAI_CHAT_MODEL]
+    : opts.image
+      ? OPENAI_VISION
+      : OPENAI_TEXT;
+}
+
+function nimChain(opts: AskOptions) {
+  return process.env.NVIDIA_MODEL
+    ? [process.env.NVIDIA_MODEL]
+    : opts.image
+      ? NIM_VISION
+      : NIM_TEXT;
+}
+
 /** Returns the model's text, or null. Never throws. */
 export async function askAI(opts: AskOptions): Promise<string | null> {
   const controller = new AbortController();
@@ -259,8 +320,41 @@ export async function askAI(opts: AskOptions): Promise<string | null> {
   const errors: string[] = [];
 
   try {
-    for (const provider of [askGemini, askOpenAI]) {
-      const { text, error } = await provider(opts, controller.signal);
+    const providers = [
+      () => askGemini(opts, controller.signal),
+      () =>
+        askOpenAICompatible(
+          "openai",
+          "https://api.openai.com/v1/chat/completions",
+          process.env.OPENAI_API_KEY,
+          openaiChain(opts),
+          opts,
+          controller.signal,
+        ),
+      () =>
+        askOpenAICompatible(
+          "nvidia",
+          NIM_BASE,
+          process.env.NVIDIA_API_KEY,
+          nimChain(opts),
+          opts,
+          controller.signal,
+        ),
+      () =>
+        askOpenAICompatible(
+          "openrouter",
+          OR_BASE,
+          process.env.OPENROUTER_API_KEY,
+          process.env.OPENROUTER_MODEL
+            ? [process.env.OPENROUTER_MODEL]
+            : OR_TEXT,
+          opts,
+          controller.signal,
+        ),
+    ];
+
+    for (const provider of providers) {
+      const { text, error } = await provider();
       if (text) return text;
       if (error) errors.push(error);
     }
