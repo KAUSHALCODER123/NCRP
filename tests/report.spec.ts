@@ -154,3 +154,52 @@ test.describe("report flows are localised", () => {
     });
   }
 });
+
+test.describe("the identifier decides where the notice goes", () => {
+  test("a phone number adds the telecom route a platform cannot do", async ({ page }) => {
+    await page.goto("/report/harassment");
+    await page.getByRole("button", { name: /Someone is demanding money/i }).click();
+    await page.getByLabel(/Link, username or platform|Where is it happening/i)
+      .or(page.locator("#where"))
+      .first()
+      .fill("9142207781");
+
+    await expect(page.getByText(/telecom operator/i).first()).toBeVisible();
+
+    await page.getByRole("button", { name: /Getting the content taken down/i }).click();
+    await expect(page.getByText(/Chakshu/i).first()).toBeVisible({ timeout: 20_000 });
+  });
+
+  test("a profile link routes to the platform, not the telecom operator", async ({ page }) => {
+    await page.goto("/report/impersonation");
+    await page.getByRole("button", { name: /fake profile using my name/i }).click();
+    await page.locator("#where").fill("instagram.com/fake_account_123");
+
+    await expect(page.getByText(/Recognised as a link/i)).toBeVisible();
+    await expect(page.getByText(/Chakshu/i)).toBeHidden();
+  });
+
+  test("a UPI ID routes to the bank behind it", async ({ page }) => {
+    await page.goto("/report/impersonation");
+    await page.getByRole("button", { name: /asking my contacts for money/i }).click();
+    await page.locator("#where").fill("rahul.verma@ybl");
+
+    await expect(page.getByText(/Recognised as a UPI ID/i)).toBeVisible();
+    // Already reported by others, so the report joins an existing cluster.
+    await expect(page.getByText(/already reported this/i)).toBeVisible();
+  });
+
+  test("evidence copy matches what is being collected", async ({ page }) => {
+    await page.goto("/report/harassment");
+    await page.getByRole("button", { name: /Someone is demanding money/i }).click();
+    // A bank receipt prompt on a blackmail report is nonsense.
+    await expect(page.getByText(/bank SMS screenshot/i)).toBeHidden();
+    await expect(page.getByText(/screenshots of what they sent/i)).toBeVisible();
+
+    await page.goto("/freeze");
+    await page.getByRole("button", { name: /In the last 2 hours/i }).click();
+    await page.getByRole("button", { name: /No — file directly here/i }).click();
+    await page.getByRole("button", { name: /Continue to transaction details/i }).click();
+    await expect(page.getByText(/bank SMS screenshot/i)).toBeVisible();
+  });
+});

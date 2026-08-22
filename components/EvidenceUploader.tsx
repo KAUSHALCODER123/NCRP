@@ -9,6 +9,7 @@ import {
   scoreExtraction,
   type EvidenceFile,
 } from "@/lib/evidence";
+import { useT } from "@/lib/i18n";
 import {
   detectApp,
   parseEvidenceText,
@@ -39,10 +40,20 @@ type Phase = "idle" | "hashing" | "scanning" | "review" | "unreadable";
 export function EvidenceUploader({
   onAutofill,
   onFiles,
+  context = "financial",
 }: {
   onAutofill: (a: Autofill) => void;
   onFiles?: (files: EvidenceFile[]) => void;
+  /*
+   * What the evidence IS changes what we do with it, not just what we call
+   * it. A bank receipt is parsed for an amount and a reference; a screenshot
+   * of a threat is preserved and fingerprinted and must not be run through a
+   * transaction parser that will find nothing and report a failure for it.
+   */
+  context?: "financial" | "content";
 }) {
+  const t = useT();
+  const financial = context === "financial";
   const input = useRef<HTMLInputElement>(null);
   const [phase, setPhase] = useState<Phase>("idle");
   const [progress, setProgress] = useState(0);
@@ -75,7 +86,9 @@ export function EvidenceUploader({
     onFiles?.(accepted);
     setProgress(40);
 
-    const image = accepted.find((f) => f.type.startsWith("image/"));
+    const image = financial
+      ? accepted.find((f) => f.type.startsWith("image/"))
+      : undefined;
     if (!image) {
       setPhase(accepted.length ? "review" : "idle");
       return;
@@ -128,12 +141,10 @@ export function EvidenceUploader({
   return (
     <Card>
       <p className="text-[18px] font-semibold text-ink">
-        📸 Upload your receipt or bank SMS screenshot
+        {financial ? t("ev.finTitle") : t("ev.conTitle")}
       </p>
       <p className="mt-1 text-[16px] text-ink-soft">
-        We read the details out of it so you don&apos;t have to type any
-        numbers. Your location and device details are removed before anything
-        is stored.
+        {financial ? t("ev.finSub") : t("ev.conSub")}
       </p>
 
       <input
@@ -150,14 +161,14 @@ export function EvidenceUploader({
         className="mt-4 w-full"
         onClick={() => input.current?.click()}
       >
-        Choose a file
+        {t("ev.choose")}
       </Button>
 
       {/* State A — scanning */}
       {(phase === "hashing" || phase === "scanning") && (
         <div className="mt-4 rounded-xl border border-line bg-sunken p-4">
           <p className="truncate text-[16px] font-semibold text-ink">
-            🔄 {phase === "hashing" ? "Securing" : "Reading"} {current}
+            {phase === "hashing" ? t("ev.securing") : t("ev.reading")} {current}
           </p>
           <div className="mt-3 h-2 overflow-hidden rounded-full bg-black/10">
             <div
@@ -167,8 +178,10 @@ export function EvidenceUploader({
           </div>
           <p className="mt-2 text-[15px] text-ink-soft">
             {phase === "hashing"
-              ? "Fingerprinting the original file and stripping location data…"
-              : "Looking for the amount, the 12-digit reference and who was paid…"}
+              ? t("ev.hashing")
+              : financial
+                ? t("ev.scanning")
+                : t("ev.preserving")}
           </p>
         </div>
       )}
@@ -292,12 +305,18 @@ export function EvidenceUploader({
               </p>
               {f.stripped.length ? (
                 <p className="mt-1 text-[14px] text-held">
-                  Removed: {f.stripped.join(", ")}
+                  {t("ev.removed")} {f.stripped.join(", ")}
                 </p>
               ) : null}
             </li>
           ))}
         </ul>
+      ) : null}
+
+      {!financial && files.length ? (
+        <p className="mt-3 text-[15px] leading-relaxed text-ink-soft">
+          {t("ev.preservedNote")}
+        </p>
       ) : null}
 
       {errors.length ? (

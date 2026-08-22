@@ -8,6 +8,8 @@ import { EvidenceUploader } from "@/components/EvidenceUploader";
 import { useHydrated } from "@/lib/use-now";
 import type { KindConfig } from "@/lib/report-kinds";
 import { useT, type Key } from "@/lib/i18n";
+import { identify, detectedKey } from "@/lib/identify";
+import { lookupCluster } from "@/lib/mock/clusters";
 
 /**
  * The non-financial report.
@@ -63,22 +65,32 @@ export function ReportFlow({ config }: { config: KindConfig }) {
 
   const chosen = config.situations.find((s) => s.id === situation) ?? null;
 
+  /*
+   * What was pasted decides where the notice goes. A phone number cannot be
+   * taken down by a platform — it needs the telecom operator and Chakshu —
+   * so the dispatch list is built from the identifier, not fixed in advance.
+   */
+  const identified = identify(where);
+  const targets = [...identified.extraTargets, ...config.targets];
+  const known = identified.value ? lookupCluster(identified.value) : null;
+
   /* Dispatch, shown as it happens — the analogue of the freeze receipt. */
   useEffect(() => {
     if (phase !== "acting") return;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const timers = config.targets.map((_, i) =>
+    const timers = targets.map((_, i) =>
       setTimeout(() => setSent(i + 1), reduced ? 0 : 500 + i * 620),
     );
     const finish = setTimeout(
       () => setPhase("done"),
-      reduced ? 10 : 500 + config.targets.length * 620 + 500,
+      reduced ? 10 : 500 + targets.length * 620 + 500,
     );
     return () => {
       timers.forEach(clearTimeout);
       clearTimeout(finish);
     };
-  }, [phase, config.targets]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, targets.length]);
 
   if (!hydrated) {
     return (
@@ -236,6 +248,9 @@ export function ReportFlow({ config }: { config: KindConfig }) {
                 <label htmlFor="where" className="sr-only">
                   Link, username or platform
                 </label>
+                <p className="mt-1 text-[16px] text-ink-soft">
+                  {t("rp.whereHint")}
+                </p>
                 <input
                   id="where"
                   value={where}
@@ -243,6 +258,23 @@ export function ReportFlow({ config }: { config: KindConfig }) {
                   placeholder={t("rp.wherePlaceholder")}
                   className="mt-3 w-full rounded-[10px] border border-line-strong bg-surface p-4 text-[17px] focus:border-primary focus:outline-none"
                 />
+
+                {where.trim() ? (
+                  <p className="mt-2 text-[15px] leading-relaxed text-secondary-text">
+                    {t(detectedKey(identified.kind) as Key)}
+                  </p>
+                ) : null}
+
+                {known && known.reports > 0 ? (
+                  <div className="mt-3 rounded-[10px] border border-tertiary-border bg-tertiary-soft p-4">
+                    <p className="text-[16px] font-semibold text-ink">
+                      {t("rp.alreadyReported")} — {known.reports}
+                    </p>
+                    <p className="mt-1 text-[16px] text-ink-soft">
+                      {t("rp.alreadyReportedSub")}
+                    </p>
+                  </div>
+                ) : null}
 
                 <label
                   htmlFor="detail"
@@ -267,7 +299,7 @@ export function ReportFlow({ config }: { config: KindConfig }) {
                 />
 
                 <div className="mt-5">
-                  <EvidenceUploader onAutofill={() => {}} />
+                  <EvidenceUploader onAutofill={() => {}} context="content" />
                 </div>
 
                 <Button
@@ -298,7 +330,7 @@ export function ReportFlow({ config }: { config: KindConfig }) {
               <span className="inline-flex items-center gap-1.5 text-[14px] font-semibold text-ink-faint">
                 <IconClock className="h-4 w-4" />
                 <span className="data">
-                  {sent}/{config.targets.length}
+                  {sent}/{targets.length}
                 </span>
               </span>
             </div>
@@ -307,7 +339,7 @@ export function ReportFlow({ config }: { config: KindConfig }) {
             </p>
 
             <ul className="mt-4 space-y-2">
-              {config.targets.map((target, i) => {
+              {targets.map((target, i) => {
                 const on = i < sent;
                 return (
                   <li
