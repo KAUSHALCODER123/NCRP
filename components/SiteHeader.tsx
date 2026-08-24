@@ -29,6 +29,8 @@ const NAV = [
   { href: "/help", key: "nav.help" },
 ] as const;
 
+const BUILD_LINK = { href: "/how-built", label: "How it’s built" } as const;
+
 export function SiteHeader() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -149,6 +151,20 @@ export function SiteHeader() {
                   </li>
                 );
               })}
+              <li>
+                <Link
+                  href={BUILD_LINK.href}
+                  onClick={() => setOpen(false)}
+                  className={clsx(
+                    "press block border-b-2 px-3 py-2.5 text-[15px] font-semibold",
+                    pathname.startsWith(BUILD_LINK.href)
+                      ? "border-primary text-primary-text"
+                      : "border-transparent text-ink-soft hover:border-line-strong hover:text-ink",
+                  )}
+                >
+                  {BUILD_LINK.label}
+                </Link>
+              </li>
             </ul>
           </nav>
         </div>

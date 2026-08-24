@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { HeroTicker } from "@/components/HeroTicker";
+import { useState } from "react";
+import { HERO_DEMOS, HeroTicker } from "@/components/HeroTicker";
 import {
   IconArrow,
   IconBook,
@@ -63,6 +64,14 @@ const LEARN = [
 
 export default function Home() {
   const t = useT();
+  /*
+   * The hero tab and the copy beside it are one selection, not two. Someone
+   * who picks "Blackmail" is told about blackmail — headline, blurb and
+   * button — instead of reading a paragraph about stolen money next to a
+   * demo of a takedown.
+   */
+  const [heroTab, setHeroTab] = useState(0);
+  const hero = HERO_DEMOS[heroTab];
   return (
     <>
       {/* ---------------- Hero ---------------- */}
@@ -75,21 +84,28 @@ export default function Home() {
                 {t("hero.badge")}
               </span>
 
-              <h1 className="mt-6 font-display text-[40px] font-bold leading-[1.06] tracking-tight text-ink sm:text-[54px]">
-                {t("hero.h1a")}
-                <span className="block text-primary-text">{t("hero.h1b")}</span>
-              </h1>
+              {/*
+               * Keyed by tab so the new wording fades in rather than swapping
+               * mid-sentence. Live-polite, because the text changes without
+               * the focus moving off the tab that changed it.
+               */}
+              <div key={hero.id} className="hero-swap" aria-live="polite">
+                <h1 className="mt-6 font-display text-[40px] font-bold leading-[1.06] tracking-tight text-ink sm:text-[54px]">
+                  {t(hero.h1a)}
+                  <span className="block text-primary-text">{t(hero.h1b)}</span>
+                </h1>
 
-              <p className="mt-6 max-w-xl text-[18px] leading-relaxed text-ink-soft">
-                {t("hero.sub")}
-              </p>
+                <p className="mt-6 max-w-xl text-[18px] leading-relaxed text-ink-soft">
+                  {t(hero.sub)}
+                </p>
+              </div>
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Link
-                  href="/freeze"
+                  href={hero.href}
                   className="press inline-flex min-h-[56px] items-center justify-center gap-2 rounded-[10px] bg-primary px-7 text-[17px] font-semibold text-primary-on shadow-md hover:bg-primary-hover"
                 >
-                  {t("hero.ctaReport")}
+                  {t(hero.cta)}
                   <IconArrow className="h-5 w-5" />
                 </Link>
                 <a
@@ -114,7 +130,7 @@ export default function Home() {
               </ul>
             </div>
 
-            <HeroTicker />
+            <HeroTicker active={heroTab} onSelect={setHeroTab} />
           </div>
         </div>
       </section>

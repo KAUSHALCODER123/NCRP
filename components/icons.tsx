@@ -111,6 +111,20 @@ export const IconDoc = (p: Props) => (
   </Svg>
 );
 
+export const IconCard = (p: Props) => (
+  <Svg {...p}>
+    <rect x="3.5" y="5.5" width="17" height="13" rx="2.2" />
+    <path d="M3.5 9.5h17M7 14.5h3.5" />
+  </Svg>
+);
+
+export const IconTransfer = (p: Props) => (
+  <Svg {...p}>
+    <path d="M4 8h15M15.5 4.5 19 8l-3.5 3.5" />
+    <path d="M20 16H5M8.5 12.5 5 16l3.5 3.5" />
+  </Svg>
+);
+
 export const IconBook = (p: Props) => (
   <Svg {...p}>
     <path d="M4.5 5a2 2 0 0 1 2-2H19v15.5H6.5a2 2 0 0 0-2 2Z" />

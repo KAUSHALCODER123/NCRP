@@ -23,6 +23,15 @@ import {
   type Rail,
 } from "@/lib/validation";
 import type { FreezeRequest, Rail as TxRail } from "@/lib/types";
+import {
+  IconArrow,
+  IconCard,
+  IconClock,
+  IconDoc,
+  IconRupee,
+  IconShield,
+  IconTransfer,
+} from "@/components/icons";
 
 /**
  * Emergency financial freeze — triage, then dispatch.
@@ -52,6 +61,18 @@ const WHEN_OPTIONS = [
   { id: "2to24h", label: "fz.when2", note: "fz.when2sub" },
   { id: "over24h", label: "fz.when3", note: "fz.when3sub" },
 ] as const;
+
+const RAIL_OPTIONS: {
+  id: Rail;
+  label: string;
+  Icon: typeof IconRupee;
+}[] = [
+  { id: "upi", label: "UPI", Icon: IconRupee },
+  { id: "imps", label: "IMPS", Icon: IconTransfer },
+  { id: "neft", label: "NEFT", Icon: IconTransfer },
+  { id: "rtgs", label: "RTGS", Icon: IconTransfer },
+  { id: "card", label: "Card", Icon: IconCard },
+];
 
 export default function FreezePage() {
   const router = useRouter();
@@ -246,6 +267,8 @@ export default function FreezePage() {
 
         <Steps step={step} />
 
+        {step === 1 ? <EmergencyPath /> : null}
+
         {/* ---------------- Step 1: triage ---------------- */}
         {step === 1 ? (
           <div className="mt-6 space-y-5">
@@ -405,20 +428,31 @@ export default function FreezePage() {
                 <legend className="mb-2 block text-[17px] font-semibold text-ink">
                   {t("fz.rail")}
                 </legend>
-                <div className="flex flex-wrap gap-2">
-                  {(["upi", "imps", "neft", "rtgs", "card"] as Rail[]).map((r) => (
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+                  {RAIL_OPTIONS.map(({ id, label, Icon }) => (
                     <button
-                      key={r}
+                      key={id}
                       type="button"
-                      onClick={() => setRail(r)}
+                      onClick={() => setRail(id)}
+                      aria-pressed={rail === id}
                       className={clsx(
-                        "min-h-[48px] rounded-xl border px-4 text-[16px] font-semibold uppercase",
-                        rail === r
+                        "flex min-h-[64px] items-center gap-2 rounded-xl border px-3 text-left text-[15px] font-semibold",
+                        rail === id
                           ? "border-primary bg-primary-soft text-ink"
-                          : "border-line-strong bg-surface text-ink-soft",
+                          : "border-line-strong bg-surface text-ink-soft hover:bg-sunken",
                       )}
                     >
-                      {r}
+                      <span
+                        className={clsx(
+                          "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg",
+                          rail === id
+                            ? "bg-primary text-primary-on"
+                            : "bg-sunken text-primary-text",
+                        )}
+                      >
+                        <Icon className="h-5 w-5" />
+                      </span>
+                      <span>{label}</span>
                     </button>
                   ))}
                 </div>
@@ -591,6 +625,67 @@ export default function FreezePage() {
         ) : null}
       </Shell>
     </>
+  );
+}
+
+function EmergencyPath() {
+  const items = [
+    {
+      Icon: IconClock,
+      title: "Tell us when",
+      body: "Urgency first—no category tree.",
+    },
+    {
+      Icon: IconDoc,
+      title: "Share one transaction",
+      body: "Paste an SMS or upload a receipt.",
+    },
+    {
+      Icon: IconShield,
+      title: "Alert institutions",
+      body: "Then verify and complete the statement.",
+    },
+  ];
+
+  return (
+    <section
+      aria-labelledby="urgent-path-title"
+      className="mt-6 rounded-card border border-primary/20 bg-primary-soft p-4 sm:p-5"
+    >
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <p className="eyebrow">The urgent path</p>
+          <h2 id="urgent-path-title" className="mt-1 text-[19px] font-bold text-ink">
+            Enough to act, then enough to investigate
+          </h2>
+        </div>
+        <span className="data hidden rounded-full border border-primary/20 bg-surface px-3 py-1 text-[14px] font-semibold text-primary-text sm:block">
+          Target: under 60s
+        </span>
+      </div>
+
+      <ol className="mt-5 grid gap-3 sm:grid-cols-3">
+        {items.map(({ Icon, title, body }, i) => (
+          <li
+            key={title}
+            className="relative flex gap-3 rounded-xl border border-line bg-surface p-3.5 sm:block"
+          >
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-on">
+              <Icon className="h-5 w-5" />
+            </span>
+            <div className="sm:mt-3">
+              <p className="text-[16px] font-semibold text-ink">
+                <span className="data mr-1 text-primary-text">{i + 1}.</span> {title}
+              </p>
+              <p className="mt-0.5 text-[15px] leading-relaxed text-ink-soft">{body}</p>
+            </div>
+            {i < items.length - 1 ? (
+              <IconArrow className="absolute -right-[21px] top-5 z-10 hidden h-5 w-5 text-primary-text sm:block" />
+            ) : null}
+          </li>
+        ))}
+      </ol>
+    </section>
   );
 }
 

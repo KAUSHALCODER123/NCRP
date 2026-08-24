@@ -226,6 +226,13 @@ test.describe("hero shows every kind of crime, without rotating", () => {
     await page.goto("/");
     await page.getByRole("tab", { name: /blackmail/i }).click();
 
+    await expect(page.getByRole("heading", { level: 1 })).toContainText(
+      /take away their leverage/i,
+    );
+    await expect(
+      page.getByRole("link", { name: /report blackmail/i }),
+    ).toHaveAttribute("href", "/report/harassment");
+
     const panel = page.getByRole("tabpanel");
     await expect(panel.getByText(/Chakshu/i)).toBeVisible();
     await expect(panel.getByText(/WhatsApp/i)).toBeVisible();

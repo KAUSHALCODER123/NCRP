@@ -6,6 +6,7 @@ const ROUTES = [
   "/dashboard",
   "/login",
   "/help",
+  "/how-built",
   "/learn",
   "/learn/digital-arrest",
   "/learn/otp-vishing",
@@ -35,6 +36,20 @@ const ROUTES = [
   "/lien/LN-2026-08-7741",
   "/case/SHY-2026-08-3312",
 ];
+
+test("build transparency distinguishes implementation from simulation", async ({ page }) => {
+  await page.goto("/how-built");
+
+  await expect(
+    page.getByRole("heading", { name: "What this prototype cannot prove" }),
+  ).toBeVisible();
+  await expect(page.getByRole("table")).toContainText("Simulated");
+  await expect(page.getByRole("table")).toContainText("Real + fallback");
+  await expect(
+    page.getByText("No bank or government integration"),
+  ).toBeVisible();
+  await expect(page.getByText("Turn the report into prevention")).toBeVisible();
+});
 
 test.describe("every route renders", () => {
   for (const path of ROUTES) {

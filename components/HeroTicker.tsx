@@ -21,9 +21,15 @@ import { useT, type Key } from "@/lib/i18n";
  * argument, and it holds for every kind of crime here.
  */
 
-interface Demo {
+export interface Demo {
   id: string;
   tab: Key;
+  /** The headline copy beside the panel — the left column follows the tab. */
+  h1a: Key;
+  h1b: Key;
+  sub: Key;
+  cta: Key;
+  href: string;
   give: Key;
   /** The thing the citizen already has. A raw string, or a key to resolve. */
   sample: { text: string } | { key: Key };
@@ -38,10 +44,15 @@ interface Demo {
 const SMS =
   "Rs.47,500.00 debited from A/c XX4471 to VPA rahul.verma@ybl. Not you? -HDFC Bank";
 
-const DEMOS: Demo[] = [
+export const HERO_DEMOS: Demo[] = [
   {
     id: "money",
     tab: "hero.tab.money",
+    h1a: "hero.h1a",
+    h1b: "hero.h1b",
+    sub: "hero.sub",
+    cta: "hero.ctaReport",
+    href: "/freeze",
     give: "hero.give.money",
     sample: { text: SMS },
     act: "hero.act.money",
@@ -57,6 +68,11 @@ const DEMOS: Demo[] = [
   {
     id: "blackmail",
     tab: "hero.tab.blackmail",
+    h1a: "hero.h1a.blackmail",
+    h1b: "hero.h1b.blackmail",
+    sub: "hero.sub.blackmail",
+    cta: "hero.cta.blackmail",
+    href: "/report/harassment",
     give: "hero.give.blackmail",
     sample: { key: "hero.sample.blackmail" },
     act: "hero.act.blackmail",
@@ -73,6 +89,11 @@ const DEMOS: Demo[] = [
   {
     id: "impersonation",
     tab: "hero.tab.impersonation",
+    h1a: "hero.h1a.impersonation",
+    h1b: "hero.h1b.impersonation",
+    sub: "hero.sub.impersonation",
+    cta: "hero.cta.impersonation",
+    href: "/report/impersonation",
     give: "hero.give.impersonation",
     sample: { key: "hero.sample.impersonation" },
     act: "hero.act.impersonation",
@@ -87,6 +108,11 @@ const DEMOS: Demo[] = [
   {
     id: "account",
     tab: "hero.tab.account",
+    h1a: "hero.h1a.account",
+    h1b: "hero.h1b.account",
+    sub: "hero.sub.account",
+    cta: "hero.cta.account",
+    href: "/report/account",
     give: "hero.give.account",
     sample: { key: "hero.sample.account" },
     act: "hero.act.account",
@@ -100,14 +126,25 @@ const DEMOS: Demo[] = [
   },
 ];
 
-export function HeroTicker() {
+/**
+ * `active` is owned by the page, not by this component: the headline, the
+ * blurb and the primary button beside the panel belong to the same crime as
+ * the tab, so a citizen who arrives for blackmail is not read a paragraph
+ * about stolen money.
+ */
+export function HeroTicker({
+  active,
+  onSelect,
+}: {
+  active: number;
+  onSelect: (i: number) => void;
+}) {
   const t = useT();
-  const [active, setActive] = useState(0);
   const tabs = useRef<(HTMLButtonElement | null)[]>([]);
-  const demo = DEMOS[active];
+  const demo = HERO_DEMOS[active];
 
   function onTabKey(e: React.KeyboardEvent, i: number) {
-    const last = DEMOS.length - 1;
+    const last = HERO_DEMOS.length - 1;
     let next = i;
     if (e.key === "ArrowRight") next = i === last ? 0 : i + 1;
     else if (e.key === "ArrowLeft") next = i === 0 ? last : i - 1;
@@ -115,7 +152,7 @@ export function HeroTicker() {
     else if (e.key === "End") next = last;
     else return;
     e.preventDefault();
-    setActive(next);
+    onSelect(next);
     tabs.current[next]?.focus();
   }
 
@@ -126,7 +163,7 @@ export function HeroTicker() {
         aria-label={t("hero.tabsLabel")}
         className="flex gap-1 overflow-x-auto border-b border-line bg-sunken px-2 py-2"
       >
-        {DEMOS.map((d, i) => (
+        {HERO_DEMOS.map((d, i) => (
           <button
             key={d.id}
             ref={(el) => {
@@ -137,7 +174,7 @@ export function HeroTicker() {
             aria-selected={i === active}
             aria-controls={`hero-panel-${d.id}`}
             tabIndex={i === active ? 0 : -1}
-            onClick={() => setActive(i)}
+            onClick={() => onSelect(i)}
             onKeyDown={(e) => onTabKey(e, i)}
             className={clsx(
               "press shrink-0 rounded-lg px-3.5 py-2 text-[15px] font-semibold",
