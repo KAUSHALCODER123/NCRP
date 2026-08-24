@@ -11,6 +11,7 @@ import { useT, type Key } from "@/lib/i18n";
 import { identify, detectedKey } from "@/lib/identify";
 import { lookupCluster } from "@/lib/mock/clusters";
 import { reportSignal, signalCount } from "@/lib/signal";
+import { useStore } from "@/lib/store";
 
 /**
  * The non-financial report.
@@ -54,6 +55,7 @@ export function ReportFlow({ config }: { config: KindConfig }) {
     return value === key ? fallback : value;
   };
   const hydrated = useHydrated();
+  const saveAnonymousClaim = useStore((s) => s.saveAnonymousClaim);
 
   const [situation, setSituation] = useState<string | null>(null);
   const [anonymous, setAnonymous] = useState(config.anonymous);
@@ -343,6 +345,16 @@ export function ReportFlow({ config }: { config: KindConfig }) {
                       identifier: identified.value,
                       scam: config.kind,
                     });
+                    if (anonymous && chosen) {
+                      saveAnonymousClaim({
+                        token,
+                        caseId,
+                        kind: config.kind,
+                        situation: chosen.label,
+                        filedAt: new Date().toISOString(),
+                        noticeTargets: targets,
+                      });
+                    }
                     setPhase("acting");
                   }}
                 >
@@ -456,11 +468,9 @@ export function ReportFlow({ config }: { config: KindConfig }) {
                 <Button href="/learn" variant="secondary">
                   {t("rp.howScamWorks")}
                 </Button>
-                {!anonymous ? (
-                  <Button href="/dashboard" variant="secondary">
-                    {t("rp.trackIt")}
-                  </Button>
-                ) : null}
+                <Button href="/dashboard" variant="secondary">
+                  {t("rp.trackIt")}
+                </Button>
               </div>
             </Card>
           </>

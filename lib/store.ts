@@ -3,6 +3,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type {
+  AnonymousClaim,
   Case,
   CaseKind,
   Classification,
@@ -24,7 +25,7 @@ import { rupeesToPaise } from "./money";
  * scoring risk, not a nicety.
  */
 
-const SEED_VERSION = 3;
+const SEED_VERSION = 4;
 
 let evSeq = 1000;
 function nextEventId() {
@@ -53,9 +54,13 @@ interface State {
   currentEmail: string | null;
   cases: Case[];
   liens: Lien[];
+  anonymousClaims: AnonymousClaim[];
 
   login: (email: string) => void;
   logout: () => void;
+
+  saveAnonymousClaim: (claim: AnonymousClaim) => void;
+  anonymousClaimByToken: (token: string) => AnonymousClaim | undefined;
 
   createCase: (input: {
     kind: CaseKind;
@@ -95,6 +100,7 @@ function freshState() {
     currentEmail: null as string | null,
     cases: seedCases(),
     liens: seedLiens(),
+    anonymousClaims: [] as AnonymousClaim[],
   };
 }
 
@@ -112,6 +118,19 @@ export const useStore = create<State>()(
 
       login: (email) => set({ currentEmail: email.trim().toLowerCase() }),
       logout: () => set({ currentEmail: null }),
+
+      saveAnonymousClaim: (claim) =>
+        set((s) => ({
+          anonymousClaims: [
+            claim,
+            ...s.anonymousClaims.filter((c) => c.token !== claim.token),
+          ],
+        })),
+
+      anonymousClaimByToken: (token) => {
+        const normalised = token.trim().toUpperCase();
+        return get().anonymousClaims.find((c) => c.token === normalised);
+      },
 
       createCase: ({ kind, transaction, narrative, email }) => {
         const owner = email ?? get().currentEmail ?? "guest@demo";

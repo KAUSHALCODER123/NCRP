@@ -140,6 +140,19 @@ export interface Case {
   reportedWithinRbiWindow: boolean;
 }
 
+/**
+ * The minimum receipt needed to reopen an anonymous non-financial report.
+ * It deliberately excludes the identifier, narrative, evidence and identity.
+ */
+export interface AnonymousClaim {
+  token: string;
+  caseId: string;
+  kind: "harassment" | "impersonation" | "account" | "other";
+  situation: string;
+  filedAt: string;
+  noticeTargets: string[];
+}
+
 /* ------------------------------------------------------------------ */
 /* The collateral victim — the part of the system nobody counts        */
 /* ------------------------------------------------------------------ */

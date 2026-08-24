@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { FormEvent, useMemo, useState } from "react";
 import Link from "next/link";
 import { Button, Card, Chip, Shell, TopBar } from "@/components/ui";
 import { formatPaise } from "@/lib/money";
@@ -22,6 +22,19 @@ export default function DashboardPage() {
   const allCases = useStore((s) => s.cases);
   const allLiens = useStore((s) => s.liens);
   const logout = useStore((s) => s.logout);
+  const anonymousClaims = useStore((s) => s.anonymousClaims);
+  const [trackingCode, setTrackingCode] = useState("");
+  const [searchedCode, setSearchedCode] = useState<string | null>(null);
+
+  const normalisedCode = searchedCode?.trim().toUpperCase() ?? "";
+  const anonymousClaim = normalisedCode
+    ? anonymousClaims.find((claim) => claim.token === normalisedCode)
+    : undefined;
+
+  function trackAnonymous(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setSearchedCode(trackingCode);
+  }
 
   const cases = useMemo(
     () => (email ? allCases.filter((c) => c.ownerEmail === email) : []),
@@ -53,16 +66,66 @@ export default function DashboardPage() {
         <TopBar />
         <Shell>
           <h1 className="font-display text-[30px] font-bold text-ink">
-            {t("db.yourCases")}
+            {t("db.trackCase")}
           </h1>
           <Card className="mt-6">
-            <p className="text-[18px] font-semibold text-ink">
-              {t("db.notSignedIn")}
+            <form onSubmit={trackAnonymous}>
+              <label htmlFor="tracking-code" className="text-[18px] font-semibold text-ink">
+                {t("db.anonymousCode")}
+              </label>
+              <p className="mt-1 text-[16px] leading-relaxed text-ink-soft">
+                {t("db.anonymousCodeHint")}
+              </p>
+              <input
+                id="tracking-code"
+                value={trackingCode}
+                onChange={(event) => {
+                  setTrackingCode(event.target.value.toUpperCase());
+                  setSearchedCode(null);
+                }}
+                placeholder="XXXX-XXXX-XXXX"
+                autoComplete="off"
+                spellCheck={false}
+                className="data mt-4 w-full rounded-[10px] border border-line-strong bg-surface p-4 text-[18px] uppercase tracking-[0.08em] focus:border-primary focus:outline-none"
+              />
+              <Button type="submit" className="mt-4" disabled={!trackingCode.trim()}>
+                {t("db.findReport")}
+              </Button>
+            </form>
+          </Card>
+
+          {searchedCode && anonymousClaim ? (
+            <Card className="mt-4 border-secondary-border bg-secondary-soft">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="data text-[16px] font-semibold text-ink-soft">
+                  {anonymousClaim.token}
+                </span>
+                <Chip tone="held">{t("rp.reportOpen")}</Chip>
+              </div>
+              <p className="mt-3 text-[20px] font-bold text-ink">
+                {anonymousClaim.situation}
+              </p>
+              <p className="mt-1 text-[16px] text-ink-soft">
+                {t("db.noticesSent")} {anonymousClaim.noticeTargets.length} · {t("db.awaitingAssignment")}
+              </p>
+              <p className="data mt-3 text-[14px] text-ink-faint">
+                {new Date(anonymousClaim.filedAt).toLocaleString()}
+              </p>
+            </Card>
+          ) : null}
+
+          {searchedCode && !anonymousClaim ? (
+            <p role="alert" className="mt-4 rounded-[10px] border border-danger/30 bg-danger-soft p-4 text-[16px] text-ink">
+              {t("db.codeNotFound")}
             </p>
-            <Button href="/login" className="mt-5">
+          ) : null}
+
+          <div className="mt-7 border-t border-line pt-6">
+            <p className="text-[16px] text-ink-soft">{t("db.namedReportPrompt")}</p>
+            <Button href="/login" variant="secondary" className="mt-3">
               {t("db.pickLogin")}
             </Button>
-          </Card>
+          </div>
         </Shell>
       </>
     );

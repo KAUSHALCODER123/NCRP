@@ -34,6 +34,21 @@ test.describe("harassment report", () => {
     });
     // The token is the only route back to an anonymous report.
     await expect(page.getByText(/only way back to this report/i)).toBeVisible();
+
+    const token = (await page.getByText(/^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/).textContent())!;
+    await page.getByRole("link", { name: /Track it/i }).click();
+    await page.getByLabel(/Anonymous tracking code/i).fill(token);
+    await page.getByRole("button", { name: /Find my report/i }).click();
+
+    await expect(page.getByText(token)).toBeVisible();
+    await expect(page.getByText(/Someone is demanding money/i)).toBeVisible();
+    await expect(page.getByText(/Report open/i)).toBeVisible();
+
+    // The anonymous receipt survives a refresh without becoming a login.
+    await page.reload();
+    await page.getByLabel(/Anonymous tracking code/i).fill(token);
+    await page.getByRole("button", { name: /Find my report/i }).click();
+    await expect(page.getByText(token)).toBeVisible();
   });
 
   test("takedown notices are dispatched to platforms", async ({ page }) => {
