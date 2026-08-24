@@ -95,7 +95,7 @@ export const REPORT_KINDS: Record<ReportKind, KindConfig> = {
       "The hosting provider",
     ],
     safety: [
-      "You can leave this page instantly with the Quick exit button, or by pressing Escape three times.",
+      "Use a private device if someone else can see or check this one.",
       "Nothing here is stored on this device once you leave.",
       "You never have to give your name for this kind of report.",
     ],

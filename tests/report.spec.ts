@@ -6,7 +6,7 @@ test.describe("harassment report", () => {
   test("safety guidance comes before anything is collected", async ({ page }) => {
     await page.goto("/report/harassment");
     await expect(page.getByText(/Before you start/i)).toBeVisible();
-    await expect(page.getByText(/Quick exit/i).first()).toBeVisible();
+    await expect(page.getByText(/private device/i).first()).toBeVisible();
     await expect(page.getByText(/never have to give your name/i)).toBeVisible();
     // No form fields until a situation is chosen.
     await expect(page.getByLabel(/Link, username or platform/i)).toBeHidden();

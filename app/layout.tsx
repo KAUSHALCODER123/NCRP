@@ -11,7 +11,6 @@ import {
 import "./globals.css";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
-import { QuickExit } from "@/components/QuickExit";
 import { Assistant } from "@/components/Assistant";
 import Script from "next/script";
 import { PREFS_SCRIPT } from "@/lib/prefs";
@@ -126,7 +125,6 @@ export default function RootLayout({
           <SiteFooter />
         </div>
         <Assistant />
-        <QuickExit />
       </body>
     </html>
   );

@@ -105,28 +105,6 @@ test.describe("assistant panel", () => {
     await expect(page.getByRole("dialog", { name: /assistant/i })).toBeHidden();
   });
 
-  test("does not sit on top of Quick Exit", async ({ page }) => {
-    await page.goto("/");
-    test.skip(
-      (await page
-        .getByRole("button", { name: /leave this site immediately/i })
-        .count()) === 0,
-      "quick exit is hidden in dev; run against a production build",
-    );
-    const exit = await page
-      .getByRole("button", { name: /leave this site immediately/i })
-      .boundingBox();
-    const ask = await page
-      .getByRole("button", { name: /ask for help/i })
-      .boundingBox();
-    expect(exit).not.toBeNull();
-    expect(ask).not.toBeNull();
-    // Separate horizontally: the safety control must never be mis-tapped.
-    const overlap =
-      Math.min(exit!.x + exit!.width, ask!.x + ask!.width) -
-      Math.max(exit!.x, ask!.x);
-    expect(overlap).toBeLessThan(0);
-  });
 });
 
 test.describe("scope is restricted to cybercrime", () => {

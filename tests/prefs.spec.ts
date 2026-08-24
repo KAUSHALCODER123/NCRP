@@ -137,53 +137,6 @@ test.describe("localisation", () => {
   });
 });
 
-test.describe("safety", () => {
-  test("quick exit is always reachable", async ({ page }) => {
-    await page.goto("/");
-    const control = page.getByRole("button", {
-      name: /leave this site immediately/i,
-    });
-    /*
-     * Hidden in local development so it does not throw a developer off the
-     * site on every mis-click. It is unconditionally present in a production
-     * build, which is where this assertion matters.
-     */
-    test.skip(
-      (await control.count()) === 0,
-      "quick exit is hidden in dev; run against a production build",
-    );
-
-    for (const p of ["/", "/freeze", "/learn/sextortion"]) {
-      await page.goto(p);
-      await expect(
-        page.getByRole("button", { name: /leave this site immediately/i }),
-      ).toBeVisible();
-    }
-  });
-
-  test("quick exit leaves the site and clears stored cases", async ({ page }) => {
-    await page.goto("/");
-    test.skip(
-      (await page
-        .getByRole("button", { name: /leave this site immediately/i })
-        .count()) === 0,
-      "quick exit is hidden in dev; run against a production build",
-    );
-
-    await page.goto("/login");
-    await page.getByRole("button", { name: /Suresh Pillai/i }).click();
-    await expect(page).toHaveURL(/dashboard/);
-
-    await page
-      .getByRole("button", { name: /leave this site immediately/i })
-      .click();
-    await page.waitForURL((u) => !u.href.includes("localhost:3000"), {
-      timeout: 10_000,
-    });
-    expect(page.url()).not.toContain("localhost:3000");
-  });
-});
-
 test.describe("saved preferences do not break hydration", () => {
   /*
    * The pre-paint script mutates <html> before React hydrates. Every earlier
