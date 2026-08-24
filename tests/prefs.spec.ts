@@ -86,14 +86,17 @@ test.describe("localisation", () => {
    * reworded translation can never silently break the test — and the test
    * verifies the string the app will actually render.
    */
-  const CASES = ["hi", "mr", "gu", "ta", "te", "kn"].map((value) => ({
-    value,
-    marker: (
-      JSON.parse(
-        readFileSync(join("lib", "i18n", `${value}.json`), "utf8"),
-      ) as Record<string, string>
-    )["hero.ctaReport"],
-  }));
+  const CASES = ["hi", "mr", "gu", "ta", "te", "kn"].map((value) => {
+    const dict = JSON.parse(
+      readFileSync(join("lib", "i18n", `${value}.json`), "utf8"),
+    ) as Record<string, string>;
+    return {
+      value,
+      marker: dict["hero.ctaReport"],
+      blackmailTab: dict["hero.tab.blackmail"],
+      blackmailCta: dict["hero.cta.blackmail"],
+    };
+  });
 
   for (const c of CASES) {
     test(`switches to ${c.value} and persists`, async ({ page }) => {
@@ -101,6 +104,11 @@ test.describe("localisation", () => {
       await page.getByTestId("language").selectOption(c.value);
       await expect(page.locator("html")).toHaveAttribute("lang", c.value);
       await expect(page.getByText(c.marker).first()).toBeVisible();
+
+      await page.getByRole("tab", { name: c.blackmailTab }).click();
+      await expect(
+        page.getByRole("link", { name: c.blackmailCta }),
+      ).toBeVisible();
 
       await page.reload();
       await expect(page.locator("html")).toHaveAttribute("lang", c.value);
