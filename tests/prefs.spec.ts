@@ -114,6 +114,27 @@ test.describe("localisation", () => {
     await page.goto("/learn/digital-arrest");
     await expect(page.locator("h1")).toContainText(/Digital arrest/i);
   });
+
+  test("language follows the citizen through receipt and lien journeys", async ({ page }) => {
+    const hi = JSON.parse(
+      readFileSync(join("lib", "i18n", "hi.json"), "utf8"),
+    ) as Record<string, string>;
+
+    await page.goto("/");
+    await page.getByTestId("language").selectOption("hi");
+    await expect(page.locator("html")).toHaveAttribute("lang", "hi");
+
+    await page.goto("/receipt/SHY-2026-08-3312");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      hi["rc.holding"],
+    );
+
+    await page.goto("/lien/LN-2026-08-7741");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      hi["ln.smallAmount"],
+    );
+    await expect(page.getByRole("button", { name: hi["ln.submit"] })).toBeVisible();
+  });
 });
 
 test.describe("safety", () => {

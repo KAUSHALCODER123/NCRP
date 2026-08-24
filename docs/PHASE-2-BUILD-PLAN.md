@@ -6,6 +6,11 @@
 **Working deadline:** 28 Aug, **18:00 IST** (2-hour buffer — forms break, uploads fail, Vercel has bad days)
 **Days available:** 7 (22–28 Aug)
 
+> **FEATURE FREEZE DECLARED — 24 Aug 2026.** No new features or journeys.
+> Changes from this point must fix an observed usability problem, a broken
+> judging path, an accessibility regression, a deployment failure, or an
+> inaccurate product claim. New ideas go to `ICEBOX.md`.
+
 ---
 
 ## 1. What we are actually submitting

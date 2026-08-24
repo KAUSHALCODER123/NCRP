@@ -10,6 +10,7 @@ import { useHydrated } from "@/lib/use-now";
 import { INSTITUTIONS } from "@/lib/mock/banks";
 import { lookupCluster } from "@/lib/mock/clusters";
 import type { FreezeAck, FreezeRequest } from "@/lib/types";
+import { useT } from "@/lib/i18n";
 
 /**
  * Screen 3 — the live freeze receipt.
@@ -33,6 +34,7 @@ interface AckPayload {
 }
 
 export function FreezeReceipt({ caseId }: { caseId: string }) {
+  const t = useT();
   // This page reads client-stored data; SSR cannot be correct for it.
   const hydrated = useHydrated();
   const kase = useStore((s) => s.cases.find((c) => c.id === caseId));
@@ -224,18 +226,17 @@ export function FreezeReceipt({ caseId }: { caseId: string }) {
       <TopBar back={{ href: "/", label: "Home" }} />
       <Shell>
         <div className="flex flex-wrap items-center gap-3">
-          <Chip tone="held">✅ Case open</Chip>
+          <Chip tone="held">✅ {t("rc.caseOpen")}</Chip>
           <span className="data text-[16px] font-semibold text-ink-soft">
             {kase.id}
           </span>
         </div>
 
         <h1 className="font-display mt-4 text-[30px] font-bold leading-tight text-ink sm:text-[34px]">
-          We&apos;re holding your money
+          {t("rc.holding")}
         </h1>
         <p className="mt-3 text-ink-soft">
-          You didn&apos;t have to register, pick a category, or choose a
-          district. We started before asking you anything else.
+          {t("rc.holdingSub")}
         </p>
 
         {/* The headline pair: seconds elapsed, rupees secured */}
@@ -243,18 +244,18 @@ export function FreezeReceipt({ caseId }: { caseId: string }) {
           <div className="grid grid-cols-2 gap-5">
             <div>
               <p className="text-[15px] font-medium text-ink-faint">
-                Time since you tapped
+                {t("rc.elapsed")}
               </p>
               <p className="data text-[34px] font-bold leading-none text-ink">
                 {clock(elapsed)}
               </p>
               <p className="mt-1 text-[15px] text-ink-faint">
-                {settled} of {freezes.length} institutions responded
+                {settled} {t("rc.of")} {freezes.length} {t("rc.responded")}
               </p>
             </div>
             <div>
               <p className="text-[15px] font-medium text-ink-faint">
-                Money held so far
+                {t("rc.held")}
               </p>
               <p
                 className={clsx(
@@ -265,7 +266,7 @@ export function FreezeReceipt({ caseId }: { caseId: string }) {
                 {formatPaise(heldTotal)}
               </p>
               <p className="mt-1 text-[15px] text-ink-faint">
-                of {formatPaise(amountPaise)} reported
+                {t("rc.of")} {formatPaise(amountPaise)} {t("rc.reported")}
               </p>
             </div>
           </div>
@@ -281,12 +282,10 @@ export function FreezeReceipt({ caseId }: { caseId: string }) {
         {kase.reportedWithinRbiWindow ? (
           <Card className="mt-5 border-held/30 bg-held-soft">
             <p className="text-[17px] font-semibold text-ink">
-              ✅ You reported inside the RBI 3-day window
+              ✅ {t("rc.rbi")}
             </p>
             <p className="mt-1 text-[16px] text-ink-soft">
-              We&apos;ve stamped and signed the exact moment you reported. Under
-              RBI rules on unauthorised electronic transactions, that timestamp
-              is your proof of zero liability — keep it.
+              {t("rc.rbiSub")}
             </p>
           </Card>
         ) : null}
@@ -310,11 +309,10 @@ export function FreezeReceipt({ caseId }: { caseId: string }) {
             className="w-full"
             variant={done ? "primary" : "secondary"}
           >
-            {done ? "Continue — add details" : "Add details while we work"}
+            {done ? t("rc.addDetails") : t("rc.addDetails")}
           </Button>
           <p className="text-center text-[15px] text-ink-faint">
-            Your case is already open. Details make it stronger, but nothing is
-            waiting on you.
+            {t("rc.nothingWaiting")}
           </p>
         </div>
       </Shell>
@@ -323,12 +321,13 @@ export function FreezeReceipt({ caseId }: { caseId: string }) {
 }
 
 function AckRow({ f }: { f: FreezeRequest }) {
+  const t = useT();
   const roleLabel =
     f.role === "debit"
-      ? "your bank"
+      ? t("rc.yourBank")
       : f.role === "beneficiary"
-        ? "received the money"
-        : "next in the trail";
+        ? t("rc.received")
+        : t("rc.nextInTrail");
 
   const pending = f.ack === "pending";
 
@@ -342,11 +341,11 @@ function AckRow({ f }: { f: FreezeRequest }) {
           : "neutral";
 
   const statusText: Record<FreezeAck, string> = {
-    pending: "Contacting…",
-    acknowledged: "Acknowledged",
+    pending: t("rc.contacting"),
+    acknowledged: t("rc.acknowledged"),
     held: `Held ${formatPaise(f.heldPaise)}`,
     partial: `Partially held ${formatPaise(f.heldPaise)}`,
-    moved: "Money already moved on",
+    moved: t("rc.moved"),
     failed: "No response",
   };
 
@@ -371,7 +370,7 @@ function AckRow({ f }: { f: FreezeRequest }) {
         {pending ? (
           <span className="inline-flex items-center gap-2 text-[16px] font-semibold text-ink-faint">
             <span className="pulse-ring inline-block h-2.5 w-2.5 rounded-full bg-pending" />
-            Contacting…
+            {t("rc.contacting")}
           </span>
         ) : (
           <span

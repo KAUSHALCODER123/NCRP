@@ -9,6 +9,7 @@ import { formatPaise } from "@/lib/money";
 import { useStore } from "@/lib/store";
 import { useHydrated } from "@/lib/use-now";
 import type { Evidence, Lien } from "@/lib/types";
+import { useT, type Key } from "@/lib/i18n";
 
 /**
  * THE DIFFERENTIATOR — the second victim nobody counts.
@@ -23,12 +24,13 @@ import type { Evidence, Lien } from "@/lib/types";
  */
 
 const DOC_OPTIONS = [
-  { label: "Sale invoice", kind: "invoice" as const },
-  { label: "Chat with the buyer", kind: "chat" as const },
-  { label: "Bank statement", kind: "statement" as const },
+  { label: "Sale invoice", labelKey: "ln.invoice" as Key, kind: "invoice" as const },
+  { label: "Chat with the buyer", labelKey: "ln.chat" as Key, kind: "chat" as const },
+  { label: "Bank statement", labelKey: "ln.statement" as Key, kind: "statement" as const },
 ];
 
 export function LienNotice({ lienId }: { lienId: string }) {
+  const t = useT();
   // This page reads client-stored data; SSR cannot be correct for it.
   const hydrated = useHydrated();
   const lien = useStore((s) => s.liens.find((l) => l.id === lienId));
@@ -66,20 +68,20 @@ export function LienNotice({ lienId }: { lienId: string }) {
       <TopBar back={{ href: "/dashboard", label: "My account" }} />
       <Shell>
         <Chip tone={lien.liftedAt ? "held" : "pending"}>
-          {lien.liftedAt ? "✅ Hold lifted" : "⚠ Hold placed"}
+          {lien.liftedAt ? `✅ ${t("ln.holdLifted")}` : `⚠ ${t("ln.holdPlaced")}`}
         </Chip>
 
         <h1 className="font-display mt-4 text-[28px] font-bold leading-tight text-ink sm:text-[32px]">
           {lien.liftedAt
-            ? "Your money has been released"
-            : "A small amount of your money is on hold"}
+            ? t("ln.released")
+            : t("ln.smallAmount")}
         </h1>
 
         {/* The thesis, in one row. */}
         <Card className="mt-6">
           <div className="grid grid-cols-2 gap-5">
             <div>
-              <p className="text-[15px] font-medium text-ink-faint">On hold</p>
+              <p className="text-[15px] font-medium text-ink-faint">{t("ln.onHold")}</p>
               <p
                 className={clsx(
                   "data text-[32px] font-bold leading-none",
@@ -89,25 +91,25 @@ export function LienNotice({ lienId }: { lienId: string }) {
                 {formatPaise(lien.amountPaise)}
               </p>
               <p className="mt-1 text-[15px] text-ink-faint">
-                only the disputed amount
+                {t("ln.onlyDisputed")}
               </p>
             </div>
             <div>
               <p className="text-[15px] font-medium text-ink-faint">
-                Still yours to use
+                {t("ln.stillYours")}
               </p>
               <p className="data text-[32px] font-bold leading-none text-available">
                 {formatPaise(lien.balancePaise)}
               </p>
               <p className="mt-1 text-[15px] text-ink-faint">
-                cards, UPI and transfers all work
+                {t("ln.cardsWork")}
               </p>
             </div>
           </div>
 
           <div className="mt-5 rounded-xl border border-line bg-sunken p-4 text-[16px] text-ink-soft">
             <p>
-              <strong className="text-ink">Why this happened:</strong>{" "}
+              <strong className="text-ink">{t("ln.why")}</strong>{" "}
               {lien.reason}
             </p>
             <p className="mt-2 tnum text-[15px] text-ink-faint">
@@ -116,14 +118,14 @@ export function LienNotice({ lienId }: { lienId: string }) {
                 day: "2-digit",
                 month: "short",
               })}{" "}
-              · you were notified the same second
+              · {t("ln.notifiedSame")}
             </p>
           </div>
         </Card>
 
         {/* The signature, third use: he sees exactly where he landed. */}
         <Card className="mt-5">
-          <p className="eyebrow">How this reached you</p>
+          <p className="eyebrow">{t("ln.howReached")}</p>
           <MoneyTrail
             hops={[
               { label: "A victim in Pune", amount: "₹3,20,000", state: "source" },
@@ -150,7 +152,7 @@ export function LienNotice({ lienId }: { lienId: string }) {
         {/* Contrast callout — the argument, stated once, plainly. */}
         <Card className="mt-5 border-breach/25 bg-breach-soft">
           <p className="text-[17px] font-semibold text-ink">
-            On the current system, this would look different
+            {t("ln.currentSystem")}
           </p>
           <p className="mt-1 text-[16px] text-ink-soft">
             Your <strong>entire account</strong> —{" "}
@@ -165,16 +167,15 @@ export function LienNotice({ lienId }: { lienId: string }) {
         {!d ? (
           <Card className="mt-5">
             <p className="text-[19px] font-semibold text-ink">
-              Believe this is a mistake?
+              {t("ln.mistake")}
             </p>
             <p className="mt-1 text-[16px] text-ink-soft">
-              Show us the payment was legitimate. Takes about two minutes — no
-              branch visit, no travel, no paper.
+              {t("ln.mistakeSub")}
             </p>
 
             <fieldset className="mt-4">
               <legend className="mb-2 text-[16px] font-semibold text-ink">
-                What can you show us?
+                {t("ln.whatShow")}
               </legend>
               <div className="space-y-2">
                 {DOC_OPTIONS.map((o) => {
@@ -205,7 +206,7 @@ export function LienNotice({ lienId }: { lienId: string }) {
                       >
                         ✓
                       </span>
-                      {o.label}
+                      {t(o.labelKey)}
                     </button>
                   );
                 })}
@@ -216,7 +217,7 @@ export function LienNotice({ lienId }: { lienId: string }) {
               htmlFor="note"
               className="mt-4 block text-[16px] font-semibold text-ink"
             >
-              Anything you want to add
+              {t("ln.addNote")}
             </label>
             <textarea
               id="note"
@@ -245,7 +246,7 @@ export function LienNotice({ lienId }: { lienId: string }) {
                 );
               }}
             >
-              Submit dispute
+              {t("ln.submit")}
             </Button>
           </Card>
         ) : (
