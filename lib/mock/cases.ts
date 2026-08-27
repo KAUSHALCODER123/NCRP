@@ -89,7 +89,7 @@ function rameshCase(): Case {
     ],
     evidence: [
       { id: "e1", label: "Bank SMS", kind: "screenshot", addedAt: iso(filedAt + 3 * 60_000) },
-      { id: "e2", label: "Call log — 9142207781", kind: "call_log", addedAt: iso(filedAt + 6 * 60_000) },
+      { id: "e2", label: "Call log — demo number", kind: "call_log", addedAt: iso(filedAt + 6 * 60_000) },
       { id: "e3", label: "Card statement (Aug)", kind: "statement", addedAt: iso(filedAt + 2 * HOUR) },
     ],
     timeline: [
@@ -235,7 +235,7 @@ function originCase(): Case {
       bank: "HDFC Bank",
       rail: "upi",
       occurredAt: iso(filedAt - 20 * 60_000),
-      counterparty: "rahul.verma@ybl",
+      counterparty: "sample.fraud@demo",
       reference: "456123789012",
     },
     narrative: "Digital arrest scam — victim coerced into transferring funds.",

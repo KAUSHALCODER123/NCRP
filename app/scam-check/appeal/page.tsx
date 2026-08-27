@@ -1,7 +1,7 @@
 import { Button, Card, Shell, TopBar } from "@/components/ui";
 
 /**
- * The appeal path for the Suspect Registry.
+ * The production requirement for any future public risk corpus.
  *
  * The real public suspect-search repository is populated from citizen
  * complaints with no automated verification and no visible appeal flow — a
@@ -17,24 +17,24 @@ export default function AppealPage() {
       <TopBar back={{ href: "/scam-check", label: "Back" }} />
       <Shell>
         <h1 className="font-display text-[28px] font-bold leading-tight text-ink sm:text-[32px]">
-          This is my account and it&apos;s been wrongly flagged
+          No real account is listed on Sahaay
         </h1>
         <p className="mt-3 text-ink-soft">
-          Being reported is not proof of anything. Legitimate businesses get
-          flagged by mistake, and sometimes maliciously.
+          Scam Check uses only fictional, non-resolvable seed examples. Visitor
+          submissions are not accepted or published by this prototype.
         </p>
 
         <Card className="mt-6">
           <p className="text-[17px] font-semibold text-ink">
-            What we do while you appeal
+            What a production version must do
           </p>
           <ul className="mt-3 space-y-2 text-[16px] text-ink-soft">
             <li>
-              <strong className="text-ink">We mark it &ldquo;disputed&rdquo;</strong>{" "}
+              <strong className="text-ink">Mark it &ldquo;disputed&rdquo;</strong>{" "}
               immediately — anyone checking sees that you have contested it.
             </li>
             <li>
-              <strong className="text-ink">A clock starts.</strong> The review is
+              <strong className="text-ink">Start a clock.</strong> The review is
               owed inside 7 days, and escalates on its own if it&apos;s missed.
             </li>
             <li>
@@ -47,12 +47,13 @@ export default function AppealPage() {
 
         <Card className="mt-5 border-dashed">
           <p className="text-[17px] font-semibold text-ink">
-            Not built out for this round
+            Why there is no appeal form here
           </p>
           <p className="mt-1 text-[16px] text-ink-soft">
-            The appeal form itself is scoped for round two. It is documented
-            here rather than hidden, because a public risk lookup without a way
-            to contest it is the defect we set out to fix, not a feature.
+            There is nothing real to appeal: no visitor accusation enters the
+            corpus. A production launch would require verified I4C data,
+            moderation, notice, dispute status, and an enforceable appeal SLA
+            to ship together. Until then, public submissions remain disabled.
           </p>
           <Button href="/scam-check" className="mt-4" variant="secondary">
             Back to Scam Check

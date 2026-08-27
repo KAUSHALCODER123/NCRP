@@ -51,7 +51,7 @@ const RAIL_PATTERNS: Array<[RegExp, Rail]> = [
 const AMOUNT_RE =
   /(?:rs\.?|inr|₹)\s*([0-9][0-9,]*(?:\.[0-9]{1,2})?)/i;
 
-/** UPI handles: rahul.verma@ybl, 9876543210@paytm */
+/** UPI handles: sample.fraud@demo, 9876543210@paytm */
 const VPA_RE = /\b([a-z0-9][a-z0-9._-]{1,48}@[a-z]{2,12})\b/i;
 
 /** UTR / RRN / transaction reference — usually 10-16 digits. */
@@ -197,7 +197,7 @@ export const SAMPLE_SMS = [
   {
     label: "UPI debit — HDFC",
     text:
-      "Dear Customer, Rs.47,500.00 has been debited from A/c XX4471 on 21-08-26 at 21:14:07 to VPA rahul.verma@ybl (UPI Ref No 456123789099). Not you? Call 18002586161. -HDFC Bank",
+      "HDFC Bank demo: Rs.47,500.00 has been debited from A/c XX4471 on 21-08-26 at 21:14:07 to VPA sample.fraud@demo (UPI Ref No 456123789099). Not you? Call your bank. -DEMO",
   },
   {
     label: "Card fraud — ICICI",

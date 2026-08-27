@@ -36,14 +36,14 @@ export default function LearnPage() {
           call opens, what they say, and the single thing that gives it away.
         </p>
 
-        {/* Live, because the data exists. */}
+        {/* Fictional seeded examples only. Never publish user accusations. */}
         <section className="mt-8">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h2 className="font-display text-[22px] font-bold text-ink">
-              Being reported right now
+              Sample risk patterns
             </h2>
             <span className="text-[15px] text-ink-faint">
-              from complaints filed this month
+              fictional demo data — not real complaints
             </span>
           </div>
 
@@ -70,25 +70,24 @@ export default function LearnPage() {
           </div>
 
           <p className="mt-3 text-[15px] text-ink-soft">
-            The official Learning Corner cannot show you this, even though the
-            same system holds the reports. Prevention scales further than
-            investigation ever will.
+            These non-resolvable identifiers demonstrate how a real I4C-backed
+            warning could look. They do not accuse any person or account.
           </p>
         </section>
 
-        {/* Real accounts, verified by case number */}
+        {/* Explicitly fictional composite scenarios. */}
         <section className="mt-10">
           <Link
             href="/stories"
             className="lift block rounded-card border border-line bg-surface p-6"
           >
-            <p className="eyebrow">From people who reported</p>
+            <p className="eyebrow">Fictional composite scenarios</p>
             <p className="mt-2 font-display text-[22px] font-bold text-ink">
               Survivor stories
             </p>
             <p className="mt-1.5 text-[16px] leading-relaxed text-ink-soft">
-              Written by people who went through it, verified against their own
-              case number — including the ones who never got their money back.
+              Based on documented scam patterns. No real person is named and no
+              testimony was collected by this prototype.
             </p>
           </Link>
         </section>

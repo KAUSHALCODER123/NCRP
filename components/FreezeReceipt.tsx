@@ -239,6 +239,13 @@ export function FreezeReceipt({ caseId }: { caseId: string }) {
           {t("rc.holdingSub")}
         </p>
 
+        <div className="mt-4 rounded-xl border border-tertiary-border bg-tertiary-soft p-4 text-[16px] leading-relaxed text-ink">
+          <strong>Simulation only:</strong> these are timed demo responses.
+          No bank, wallet, police system, or payment network has been contacted,
+          and no money has been held. For a real incident, call 1930 and use
+          cybercrime.gov.in.
+        </div>
+
         {/* The headline pair: seconds elapsed, rupees secured */}
         <Card className="mt-6">
           <div className="grid grid-cols-2 gap-5">

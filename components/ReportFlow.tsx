@@ -10,7 +10,6 @@ import type { KindConfig } from "@/lib/report-kinds";
 import { useT, type Key } from "@/lib/i18n";
 import { identify, detectedKey } from "@/lib/identify";
 import { lookupCluster } from "@/lib/mock/clusters";
-import { reportSignal, signalCount } from "@/lib/signal";
 import { useStore } from "@/lib/store";
 
 /**
@@ -62,7 +61,6 @@ export function ReportFlow({ config }: { config: KindConfig }) {
   const [where, setWhere] = useState("");
   const [detail, setDetail] = useState("");
   const [phase, setPhase] = useState<Phase>("triage");
-  const [liveReports, setLiveReports] = useState(0);
   const [sent, setSent] = useState(0);
   const [caseId] = useState(makeCaseId);
   const [token] = useState(makeToken);
@@ -76,35 +74,10 @@ export function ReportFlow({ config }: { config: KindConfig }) {
    */
   const identified = identify(where);
 
-  useEffect(() => {
-    const value = identified.value;
-    let cancelled = false;
-
-    /*
-     * Debounced, and every write happens in a callback rather than in the
-     * effect body — clearing the count synchronously on each keystroke would
-     * cascade a render per character typed.
-     */
-    const timer = setTimeout(() => {
-      if (!value || value.length < 4) {
-        setLiveReports(0);
-        return;
-      }
-      void signalCount(value).then((n) => {
-        if (!cancelled) setLiveReports(n);
-      });
-    }, 400);
-
-    return () => {
-      cancelled = true;
-      clearTimeout(timer);
-    };
-  }, [identified.value]);
-
   const targets = [...identified.extraTargets, ...config.targets];
-  // Seeded demo data plus whatever this deployment has actually recorded.
+  // Fictional seeded demo data only; visitor reports are never republished.
   const seeded = identified.value ? lookupCluster(identified.value) : null;
-  const reports = (seeded?.reports ?? 0) + liveReports;
+  const reports = seeded?.reports ?? 0;
 
   /* Dispatch, shown as it happens — the analogue of the freeze receipt. */
   useEffect(() => {
@@ -341,10 +314,6 @@ export function ReportFlow({ config }: { config: KindConfig }) {
                     (situation === "other" && detail.trim().length < 20)
                   }
                   onClick={() => {
-                    reportSignal({
-                      identifier: identified.value,
-                      scam: config.kind,
-                    });
                     if (chosen) {
                       saveAnonymousClaim({
                         token,

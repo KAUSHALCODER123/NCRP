@@ -8,7 +8,7 @@ import { SCAMS } from "@/lib/learning";
 export const metadata: Metadata = {
   title: "Survivor stories — Sahaay",
   description:
-    "Written by people who reported, and verified against their own case number.",
+    "Composite fictional scenarios based on documented cybercrime patterns.",
 };
 
 /**
@@ -28,8 +28,8 @@ export default function StoriesPage() {
           Survivor stories
         </h1>
         <p className="mt-3 max-w-2xl text-[18px] leading-relaxed text-ink-soft">
-          Written by people who reported, and verified against their own case
-          number. Nobody here is a made-up example.
+          Composite fictional scenarios based on documented cybercrime
+          patterns. No real person is named and no testimony was collected.
         </p>
 
         <p className="mt-5 max-w-2xl rounded-card border border-line bg-sunken p-5 text-[16px] leading-relaxed text-ink-soft">
@@ -49,6 +49,7 @@ export default function StoriesPage() {
                 className="lift group block rounded-card border border-line bg-surface p-6 hover:border-line-strong sm:p-7"
               >
                 <div className="flex flex-wrap items-center gap-3">
+                  <Chip>Fictional composite</Chip>
                   <Chip tone={OUTCOME_TONE[s.outcome]}>
                     {OUTCOME_LABEL[s.outcome]}
                   </Chip>
@@ -88,19 +89,18 @@ export default function StoriesPage() {
             <IconShield className="h-6 w-6" />
           </span>
           <p className="mt-4 font-display text-[22px] font-bold text-ink">
-            Been through this? Write yours.
+            About these scenarios
           </p>
           <p className="mt-2 max-w-2xl text-[16px] leading-relaxed text-ink-soft">
-            You can write once your case reaches an outcome. We check it against
-            your case number, so every story here comes from someone who
-            actually went through the process — and you never have to use your
-            real name.
+            These examples show common scam scripts and possible outcomes
+            without collecting or publishing a survivor&apos;s story. Sahaay does
+            not accept real testimony in this prototype.
           </p>
           <Link
-            href="/stories/write"
+            href="/how-built"
             className="press mt-5 inline-flex min-h-[52px] items-center gap-2 rounded-[10px] bg-primary px-6 text-[17px] font-semibold text-primary-on shadow-sm hover:bg-primary-hover"
           >
-            Write your story
+            See what is real and mocked
             <IconArrow className="h-5 w-5" />
           </Link>
         </div>

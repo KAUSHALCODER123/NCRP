@@ -58,7 +58,7 @@ export function normaliseIdentifier(raw: string): string {
 
   /*
    * Phone numbers first, and carefully. Indian mobiles start 6-9, so a bare
-   * ten-digit number can legitimately begin "91" — 9142207781 is a real
+   * ten-digit number can legitimately begin "91" — that prefix can be part
    * number, not a country code followed by eight digits. Stripping a leading
    * 91 unconditionally turned that into 42207781 and split one reported
    * number into two identifiers that never met.

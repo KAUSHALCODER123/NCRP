@@ -38,10 +38,8 @@ export default async function StoryPage({
       <TopBar back={{ href: "/stories", label: "Survivor stories" }} />
       <Shell>
         <div className="flex flex-wrap items-center gap-3">
+          <Chip>Fictional composite</Chip>
           <Chip tone={OUTCOME_TONE[s.outcome]}>{OUTCOME_LABEL[s.outcome]}</Chip>
-          <span className="data text-[14px] text-ink-faint">
-            Verified against case {s.caseId}
-          </span>
         </div>
 
         <h1 className="mt-4 font-display text-[30px] font-bold leading-tight text-ink sm:text-[36px]">
@@ -89,7 +87,7 @@ export default async function StoryPage({
         </div>
 
         <Card className="mt-8 border-secondary-border bg-secondary-soft">
-          <p className="eyebrow">What they want you to know</p>
+          <p className="eyebrow">The safety lesson</p>
           <p className="mt-2.5 text-[19px] font-semibold leading-snug text-ink">
             {s.lesson}
           </p>

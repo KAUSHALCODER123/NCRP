@@ -73,6 +73,11 @@ export const metadata: Metadata = {
   title: "Sahaay — report cyber fraud in 60 seconds",
   description:
     "A proof of concept reimagining India's National Cyber Crime Reporting Portal. Freeze first, ask later — and freeze the amount, not the person.",
+  robots: {
+    index: false,
+    follow: false,
+    googleBot: { index: false, follow: false },
+  },
 };
 
 export const viewport: Viewport = {

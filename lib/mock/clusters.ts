@@ -13,7 +13,7 @@ import { rupeesToPaise } from "../money";
 
 export const CLUSTERS: ClusterHit[] = [
   {
-    identifier: "rahul.verma@ybl",
+    identifier: "sample.fraud@demo",
     kind: "upi",
     reports: 213,
     totalReportedPaise: rupeesToPaise(12_400_000),
@@ -22,7 +22,7 @@ export const CLUSTERS: ClusterHit[] = [
     risk: "high",
   },
   {
-    identifier: "9142207781",
+    identifier: "demo-number-001",
     kind: "phone",
     reports: 487,
     totalReportedPaise: rupeesToPaise(31_800_000),
@@ -31,7 +31,7 @@ export const CLUSTERS: ClusterHit[] = [
     risk: "high",
   },
   {
-    identifier: "cbi-verification-portal.in",
+    identifier: "cbi-verification.example",
     kind: "url",
     reports: 1024,
     totalReportedPaise: rupeesToPaise(88_200_000),
@@ -40,7 +40,7 @@ export const CLUSTERS: ClusterHit[] = [
     risk: "high",
   },
   {
-    identifier: "quickloan.support@okaxis",
+    identifier: "quickloan.sample@demo",
     kind: "upi",
     reports: 62,
     totalReportedPaise: rupeesToPaise(2_100_000),
@@ -49,7 +49,7 @@ export const CLUSTERS: ClusterHit[] = [
     risk: "medium",
   },
   {
-    identifier: "8890114522",
+    identifier: "demo-number-002",
     kind: "phone",
     reports: 9,
     totalReportedPaise: rupeesToPaise(148_000),

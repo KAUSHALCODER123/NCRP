@@ -42,7 +42,7 @@ export interface Demo {
 }
 
 const SMS =
-  "Rs.47,500.00 debited from A/c XX4471 to VPA rahul.verma@ybl. Not you? -HDFC Bank";
+  "Rs.47,500.00 debited from A/c XX4471 to VPA sample.fraud@demo. Not you? -DEMO";
 
 export const HERO_DEMOS: Demo[] = [
   {

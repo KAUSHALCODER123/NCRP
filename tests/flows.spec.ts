@@ -82,8 +82,8 @@ test.describe("emergency freeze flow", () => {
 
   test("accepts characters the official portal rejects", async ({ page }) => {
     await triage(page);
-    await page.getByLabel(/Who was paid/i).fill("rahul.verma@ybl #$*'~|!");
-    await expect(page.getByLabel(/Who was paid/i)).toHaveValue(/@ybl/);
+    await page.getByLabel(/Who was paid/i).fill("sample.fraud@demo #$*'~|!");
+    await expect(page.getByLabel(/Who was paid/i)).toHaveValue(/@demo/);
   });
 
   test("receipt streams bank acknowledgements and holds money", async ({ page }) => {
@@ -177,7 +177,7 @@ test.describe("collateral victim flow", () => {
 test.describe("public tools", () => {
   test("scam check flags a reported identifier", async ({ page }) => {
     await page.goto("/scam-check");
-    await page.getByRole("button", { name: "rahul.verma@ybl" }).click();
+    await page.getByRole("button", { name: "sample.fraud@demo" }).click();
     await expect(page.getByText(/High risk/i)).toBeVisible();
     await expect(page.getByText(/213/)).toBeVisible();
     await expect(page.getByText(/Do not pay/i)).toBeVisible();
@@ -193,8 +193,8 @@ test.describe("public tools", () => {
   test("the seeded lookup is labelled, and real services are offered", async ({ page }) => {
     await page.goto("/scam-check");
     // The demo database must never pass itself off as real complaint data.
-    await expect(page.getByText(/Demo data/i).first()).toBeVisible();
-    await expect(page.getByText(/not real complaints/i)).toBeVisible();
+    await expect(page.getByText(/Fictional sample data/i).first()).toBeVisible();
+    await expect(page.getByText(/fictional set/i)).toBeVisible();
 
     // Services that genuinely perform a lookup today.
     for (const name of ["Chakshu", "TAFCOP", "CEIR"]) {
@@ -213,19 +213,12 @@ test.describe("public tools", () => {
     await expect(page.getByText(/UPI PIN to receive money/i)).toBeVisible();
   });
 
-  test("officer verification distinguishes real from fake", async ({ page }) => {
+  test("officer safety never validates a caller", async ({ page }) => {
     await page.goto("/verify-officer");
-    const code = page.getByLabel(/6-digit code/i);
-
-    await code.fill("000000");
-    await page.getByRole("button", { name: /Check this officer/i }).click();
-    await expect(page.getByText(/No officer is contacting you/i)).toBeVisible();
-    await expect(page.getByText(/no such thing as a .digital arrest/i)).toBeVisible();
-
-    await code.fill("483921");
-    await page.getByRole("button", { name: /Check this officer/i }).click();
-    await expect(page.getByText(/Verified/i).first()).toBeVisible();
-    await expect(page.getByText(/never ask you for an OTP/i)).toBeVisible();
+    await expect(page.getByText(/cannot verify an officer/i)).toBeVisible();
+    await expect(page.getByText(/hang up/i).first()).toBeVisible();
+    await expect(page.getByText(/no such thing as a digital arrest/i)).toBeVisible();
+    await expect(page.getByLabel(/6-digit code/i)).toHaveCount(0);
   });
 });
 

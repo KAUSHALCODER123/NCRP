@@ -4,6 +4,7 @@ import { useRef, useState, useSyncExternalStore } from "react";
 import { Button, Card, Chip } from "@/components/ui";
 import { useStore } from "@/lib/store";
 import type { Case, Classification } from "@/lib/types";
+import { classifyLocally } from "@/lib/classify";
 
 /**
  * Category-free intake.
@@ -33,6 +34,7 @@ export function CaseIntake({ kase }: { kase: Case }) {
   const [busy, setBusy] = useState(false);
   const [lang, setLang] = useState<"en-IN" | "hi-IN">("en-IN");
   const [listening, setListening] = useState(false);
+  const [useExternalAI, setUseExternalAI] = useState(false);
   const recog = useRef<SpeechRecognitionLike | null>(null);
 
   /*
@@ -85,6 +87,12 @@ export function CaseIntake({ kase }: { kase: Case }) {
 
   async function analyse() {
     if (!text.trim() || busy) return;
+    if (!useExternalAI) {
+      const c = classifyLocally(text);
+      setClassification(kase.id, c);
+      if (text !== kase.narrative) appendNarrative(kase.id, text);
+      return;
+    }
     setBusy(true);
     try {
       const res = await fetch("/api/classify", {
@@ -145,6 +153,31 @@ export function CaseIntake({ kase }: { kase: Case }) {
         className="mt-3 w-full resize-y rounded-xl border border-line-strong bg-surface p-4 text-[17px] text-ink placeholder:text-ink-faint focus:border-primary focus:outline-none"
       />
 
+      <div className="mt-3 rounded-xl border border-line bg-sunken p-4">
+        <label className="flex min-h-12 cursor-pointer items-start gap-3 text-[16px] text-ink">
+          <input
+            type="checkbox"
+            checked={useExternalAI}
+            onChange={(e) => setUseExternalAI(e.target.checked)}
+            className="mt-1 h-5 w-5 accent-primary"
+          />
+          <span>
+            <strong>Use external AI classification (optional)</strong>
+            <span className="mt-1 block leading-relaxed text-ink-soft">
+              Off by default. If enabled, this text may be sent to Gemini,
+              NVIDIA NIM, OpenRouter, or OpenAI in sequence. Do not include
+              names, phone numbers, account numbers, or other personal data.
+            </span>
+          </span>
+        </label>
+        {!useExternalAI ? (
+          <p className="mt-2 text-[15px] text-ink-faint">
+            Local pattern matching stays in your browser and is enough to
+            continue this demo.
+          </p>
+        ) : null}
+      </div>
+
       <div className="mt-3 flex flex-wrap gap-3">
         <Button onClick={analyse} disabled={!text.trim() || busy}>
           {busy ? "Reading…" : c ? "Update" : "Continue"}
@@ -163,7 +196,7 @@ export function CaseIntake({ kase }: { kase: Case }) {
               What we understood
             </p>
             <Chip tone={c.fallback ? "neutral" : "primary"}>
-              {c.fallback ? "Offline classifier" : "AI"}
+              {c.fallback ? "Local classifier" : "External AI"}
             </Chip>
           </div>
           <dl className="mt-3 space-y-2 text-[16px]">

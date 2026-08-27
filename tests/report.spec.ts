@@ -188,7 +188,7 @@ test.describe("the identifier decides where the notice goes", () => {
     await page.getByLabel(/Link, username or platform|Where is it happening/i)
       .or(page.locator("#where"))
       .first()
-      .fill("9142207781");
+      .fill("9000000000");
 
     await expect(page.getByText(/telecom operator/i).first()).toBeVisible();
 
@@ -208,7 +208,7 @@ test.describe("the identifier decides where the notice goes", () => {
   test("a UPI ID routes to the bank behind it", async ({ page }) => {
     await page.goto("/report/impersonation");
     await page.getByRole("button", { name: /asking my contacts for money/i }).click();
-    await page.locator("#where").fill("rahul.verma@ybl");
+    await page.locator("#where").fill("sample.fraud@demo");
 
     await expect(page.getByText(/Recognised as a UPI ID/i)).toBeVisible();
     // Already reported by others, so the report joins an existing cluster.
