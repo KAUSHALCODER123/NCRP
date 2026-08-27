@@ -28,12 +28,13 @@ export default function LoginPage() {
           {t("lg.h1")}
         </h1>
         <p className="mt-3 text-ink-soft">
-          Tap any card to sign in — no password needed here. For the record,
-          it&apos;s{" "}
+          {t("lg.sub")}
+        </p>
+        <p className="mt-2 text-[15px] text-ink-faint">
+          {t("lg.password")} {" "}
           <code className="rounded bg-sunken px-1.5 py-0.5 text-[16px] font-semibold text-ink">
             {DEMO_PASSWORD}
           </code>
-          .
         </p>
 
         <div className="mt-6 space-y-3">

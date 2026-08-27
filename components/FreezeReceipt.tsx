@@ -305,7 +305,7 @@ export function FreezeReceipt({ caseId }: { caseId: string }) {
 
         <div className="mt-7 space-y-3">
           <Button
-            href={`/case/${kase.id}`}
+            href={`/case/${kase.id}#add-details`}
             className="w-full"
             variant={done ? "primary" : "secondary"}
           >

@@ -123,10 +123,10 @@ export function OtpPanel({
         <Chip tone="pending">Freeze already sent</Chip>
       </div>
       <p className="mt-1 text-[16px] text-ink-soft">
-        We sent a 6-digit code to{" "}
+        This demo shows a 6-digit code for{" "}
         <strong className="data text-ink">+91 {mobile}</strong>
         {channel !== "sms" ? ` by ${channel === "voice" ? "voice call" : "WhatsApp"}` : ""}
-        . Demo code: <strong className="data">{DEMO_OTP}</strong>
+        . No SMS was sent. Dummy OTP: <strong className="data">{DEMO_OTP}</strong>
       </p>
 
       <div className="mt-4 flex gap-1.5 sm:gap-2" onPaste={onPaste}>

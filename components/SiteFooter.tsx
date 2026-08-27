@@ -14,44 +14,44 @@ import { useT } from "@/lib/i18n";
  * attack pattern in India.
  */
 
-const GROUPS: { title: string; links: { href: string; label: string }[] }[] = [
+const GROUPS: { title: string; links: { href: string; key: string }[] }[] = [
   {
     title: "foot.gReport",
     links: [
-      { href: "/report", label: "Report a crime" },
-      { href: "/freeze", label: "Financial fraud" },
-      { href: "/report/harassment", label: "Threats or blackmail" },
-      { href: "/report/impersonation", label: "Impersonation" },
-      { href: "/report/account", label: "Hacked account" },
-      { href: "/blocked", label: "My account is blocked" },
+      { href: "/report", key: "foot.reportCrime" },
+      { href: "/freeze", key: "foot.financial" },
+      { href: "/report/harassment", key: "foot.blackmail" },
+      { href: "/report/impersonation", key: "foot.impersonation" },
+      { href: "/report/account", key: "foot.hacked" },
+      { href: "/blocked", key: "foot.blocked" },
     ],
   },
   {
     title: "foot.gCheck",
     links: [
-      { href: "/scam-check", label: "Check a UPI ID or number" },
-      { href: "/verify-officer", label: "Verify an officer" },
-      { href: "/scam-check/appeal", label: "Appeal a listing" },
-      { href: "/dashboard", label: "Track a case" },
+      { href: "/scam-check", key: "foot.checkId" },
+      { href: "/verify-officer", key: "foot.verify" },
+      { href: "/scam-check/appeal", key: "foot.appeal" },
+      { href: "/dashboard", key: "foot.track" },
     ],
   },
   {
     title: "foot.gLearn",
     links: [
-      { href: "/learn", label: "Learning Corner" },
-      { href: "/stories", label: "Survivor stories" },
-      { href: "/learn/for/senior", label: "For senior citizens" },
-      { href: "/learn/for/women", label: "For women" },
-      { href: "/learn/for/business", label: "For small businesses" },
+      { href: "/learn", key: "foot.learning" },
+      { href: "/stories", key: "foot.stories" },
+      { href: "/learn/for/senior", key: "foot.seniors" },
+      { href: "/learn/for/women", key: "foot.women" },
+      { href: "/learn/for/business", key: "foot.business" },
     ],
   },
   {
     title: "foot.gAbout",
     links: [
-      { href: "/help", label: "Help and FAQs" },
-      { href: "/help#about", label: "What this is" },
-      { href: "/how-built", label: "How this is built" },
-      { href: "/login", label: "Demo logins" },
+      { href: "/help", key: "foot.help" },
+      { href: "/help#about", key: "foot.about" },
+      { href: "/how-built", key: "foot.built" },
+      { href: "/login", key: "foot.logins" },
     ],
   },
 ];
@@ -67,12 +67,12 @@ export function SiteFooter() {
               <h2 className="eyebrow">{t(g.title as Parameters<typeof t>[0])}</h2>
               <ul className="mt-3 space-y-2">
                 {g.links.map((l) => (
-                  <li key={l.href + l.label}>
+                  <li key={l.href + l.key}>
                     <Link
                       href={l.href}
                       className="link-draw text-[15px] text-ink-soft hover:text-ink"
                     >
-                      {l.label}
+                      {t(l.key as Parameters<typeof t>[0])}
                     </Link>
                   </li>
                 ))}
@@ -87,11 +87,11 @@ export function SiteFooter() {
               {t("foot.discStrong")}
             </strong>{" "}
             {t("foot.discBody")}{" "}
-            To report an actual cybercrime in India, call{" "}
+            {t("foot.realRouteBefore")} {" "}
             <a href="tel:1930" className="font-semibold text-primary-text">
               1930
             </a>{" "}
-            or use{" "}
+            {t("foot.orUse")} {" "}
             <a
               href="https://cybercrime.gov.in"
               target="_blank"
@@ -103,12 +103,10 @@ export function SiteFooter() {
             .
           </p>
           <p className="mt-3">
-            Built for the Build What Moves India hackathon. Research sources are
-            in the project repository.
+            {t("foot.hackathon")}
           </p>
           <p className="mt-3 text-ink-faint">
-            <span className="data">{t("foot.updated")}</span> · Works in any
-            modern browser
+            <span className="data">{t("foot.updated")}</span> · {t("foot.browser")}
           </p>
         </div>
       </div>

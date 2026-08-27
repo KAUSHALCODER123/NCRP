@@ -197,7 +197,7 @@ export const SAMPLE_SMS = [
   {
     label: "UPI debit — HDFC",
     text:
-      "Dear Customer, Rs.47,500.00 has been debited from A/c XX4471 on 21-08-26 at 21:14:07 to VPA rahul.verma@ybl (UPI Ref No 456123789012). Not you? Call 18002586161. -HDFC Bank",
+      "Dear Customer, Rs.47,500.00 has been debited from A/c XX4471 on 21-08-26 at 21:14:07 to VPA rahul.verma@ybl (UPI Ref No 456123789099). Not you? Call 18002586161. -HDFC Bank",
   },
   {
     label: "Card fraud — ICICI",

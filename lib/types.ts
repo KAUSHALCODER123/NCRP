@@ -147,6 +147,7 @@ export interface Case {
 export interface AnonymousClaim {
   token: string;
   caseId: string;
+  anonymous: boolean;
   kind: "harassment" | "impersonation" | "account" | "other";
   situation: string;
   filedAt: string;

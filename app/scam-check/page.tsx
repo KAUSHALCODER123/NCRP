@@ -82,7 +82,8 @@ export default function ScamCheckPage() {
           </div>
           <p className="mt-1.5 text-[16px] text-ink-soft">
             This searches a small seeded set, plus anything reported through
-            this site. Reports here are stored without any personal detail —
+            this site. The seeded examples are demo data, not real complaints.
+            Reports here are stored without any personal detail —
             only the identifier, so it becomes the warning the next person
             sees. On the live system it would query the reports already held
             by I4C.

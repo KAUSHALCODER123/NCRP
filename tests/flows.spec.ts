@@ -60,10 +60,21 @@ test.describe("emergency freeze flow", () => {
     await expect(page.getByText(/start with 6, 7, 8 or 9/i)).toBeHidden();
   });
 
+  test("does not pretend to send an OTP without a valid demo number", async ({ page }) => {
+    await triage(page);
+    await page.getByLabel("Amount taken").fill("5000");
+    await page.getByLabel("Which bank or wallet").fill("HDFC Bank");
+    await expect(page.getByRole("button", { name: /Enter the demo mobile/i })).toBeDisabled();
+    await page.getByRole("button", { name: /Use demo number/i }).click();
+    await page.getByRole("button", { name: /Freeze now/i }).click();
+    await expect(page.getByText(/No SMS was sent\. Dummy OTP/i)).toBeVisible();
+  });
+
   test("a short UTR warns but never blocks reporting", async ({ page }) => {
     await triage(page);
     await page.getByLabel("Amount taken").fill("5000");
     await page.getByLabel("Which bank or wallet").fill("HDFC Bank");
+    await page.getByRole("button", { name: /Use demo number/i }).click();
     await page.getByLabel(/Transaction reference/i).fill("4239871234");
     await expect(page.getByText(/2 more to find/i)).toBeVisible();
     await expect(page.getByRole("button", { name: /Freeze now/i })).toBeEnabled();
@@ -85,7 +96,7 @@ test.describe("emergency freeze flow", () => {
     await expect(page).toHaveURL(/\/receipt\//);
     await expect(page.getByText(/Money held so far/i)).toBeVisible();
     // All three institutions settle.
-    await expect(page.getByText(/3 of 3 institutions responded/i)).toBeVisible({
+    await expect(page.getByText(/3 of 3 responded/i)).toBeVisible({
       timeout: 20_000,
     });
     await expect(page.getByText(/RBI 3-day window/i)).toBeVisible();
@@ -102,6 +113,33 @@ test.describe("emergency freeze flow", () => {
     await page.reload();
     expect(page.url()).toBe(url);
     await expect(page.getByText(/Money held so far/i)).toBeVisible();
+  });
+
+  test("a signed-out citizen can reopen a financial case by case ID", async ({ page }) => {
+    await triage(page);
+    await page.getByRole("button", { name: "UPI debit — HDFC" }).click();
+    await page.getByRole("button", { name: /Use demo number/i }).click();
+    await page.getByRole("button", { name: /Freeze now/i }).click();
+    const opened = (await page.getByText(/Case SHY-.* is open/i).textContent())!;
+    const caseId = opened.match(/SHY-[0-9-]+/)![0];
+
+    await page.goto("/dashboard");
+    await page.getByLabel(/Tracking code or case ID/i).fill(caseId);
+    await page.getByRole("button", { name: /Find my report/i }).click();
+    await expect(page.getByText(caseId)).toBeVisible();
+    await page.getByRole("link", { name: /Track it/i }).click();
+    await expect(page).toHaveURL(new RegExp(`/case/${caseId}$`));
+  });
+
+  test("a duplicate opens the existing case without another freeze", async ({ page }) => {
+    await triage(page);
+    await page.getByRole("button", { name: "UPI debit — HDFC" }).click();
+    await page.getByLabel(/Transaction reference/i).fill("456123789012");
+    await Promise.all([
+      page.waitForURL(/\/case\/SHY-2026-08-2904#add-details$/),
+      page.getByRole("button", { name: /Open existing case/i }).click(),
+    ]);
+    await expect(page.getByText(/Tell us what happened/i)).toBeVisible();
   });
 });
 
@@ -214,7 +252,7 @@ test.describe("demo personas", () => {
 
   test("signed-out dashboard does not dead-end", async ({ page }) => {
     await page.goto("/dashboard");
-    await expect(page.getByText(/not signed in/i)).toBeVisible();
+    await expect(page.getByText(/Tracking code or case ID/i)).toBeVisible();
     await expect(page.getByRole("link", { name: /pick a demo login/i })).toBeVisible();
   });
 });

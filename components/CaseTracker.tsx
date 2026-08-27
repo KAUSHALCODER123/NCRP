@@ -12,6 +12,7 @@ import { useStore } from "@/lib/store";
 import { useHydrated } from "@/lib/use-now";
 import { clusterById } from "@/lib/mock/clusters";
 import type { Case, CaseStatus } from "@/lib/types";
+import { useT, type Key } from "@/lib/i18n";
 
 /**
  * The live case tracker — replaces "Under Process".
@@ -25,13 +26,13 @@ import type { Case, CaseStatus } from "@/lib/types";
  *  - Escalation is a button, not a directory of nodal officers' phone numbers.
  */
 
-const RAIL: { key: CaseStatus; label: string }[] = [
-  { key: "filed", label: "Filed" },
-  { key: "freezing", label: "Money held" },
-  { key: "routed", label: "Routed" },
-  { key: "assigned", label: "Officer" },
-  { key: "fir_registered", label: "FIR" },
-  { key: "closed", label: "Money back" },
+const RAIL: { key: CaseStatus; label: Key }[] = [
+  { key: "filed", label: "ct.filed" },
+  { key: "freezing", label: "ct.moneyHeld" },
+  { key: "routed", label: "ct.routed" },
+  { key: "assigned", label: "ct.officer" },
+  { key: "fir_registered", label: "ct.fir" },
+  { key: "closed", label: "ct.returned" },
 ];
 
 function railIndex(c: Case): number {
@@ -55,6 +56,7 @@ function railIndex(c: Case): number {
 export function CaseTracker({ caseId }: { caseId: string }) {
   // This page reads client-stored data; SSR cannot be correct for it.
   const hydrated = useHydrated();
+  const t = useT();
   const kase = useStore((s) => s.cases.find((c) => c.id === caseId));
   const escalate = useStore((s) => s.escalate);
   const [escalated, setEscalated] = useState(false);
@@ -114,27 +116,27 @@ export function CaseTracker({ caseId }: { caseId: string }) {
 
         <h1 className="font-display mt-3 text-[28px] font-bold leading-tight text-ink sm:text-[32px]">
           {kase.status === "closed"
-            ? "Your money came back"
-            : "Here's exactly where your case is"}
+            ? t("ct.moneyBack")
+            : t("ct.whereis")}
         </h1>
 
         {/* Money summary */}
         <Card className="mt-6">
           <div className="grid grid-cols-2 gap-5 sm:grid-cols-3">
-            <Stat label="You reported" value={formatPaise(reported)} />
+            <Stat label={t("ct.youReported")} value={formatPaise(reported)} />
             <Stat
-              label="Held for you"
+              label={t("ct.heldForYou")}
               value={formatPaise(held)}
               tone={held > 0 ? "held" : "neutral"}
             />
             <Stat
-              label="Back in your account"
+              label={t("ct.backInAccount")}
               value={formatPaise(kase.restoration.creditedPaise)}
               tone={kase.restoration.creditedPaise > 0 ? "held" : "neutral"}
               hint={
                 kase.restoration.creditedPaise > 0
                   ? undefined
-                  : "The goal, not the paperwork"
+                  : t("ct.theGoal")
               }
             />
           </div>
@@ -167,7 +169,7 @@ export function CaseTracker({ caseId }: { caseId: string }) {
                         state === "todo" ? "text-ink-faint" : "text-ink",
                       )}
                     >
-                      {s.label}
+                      {t(s.label)}
                     </span>
                   </div>
                   {i < RAIL.length - 1 ? (
@@ -188,14 +190,13 @@ export function CaseTracker({ caseId }: { caseId: string }) {
         {kase.assignedOwner ? (
           <Card className="mt-6">
             <p className="text-[15px] font-medium text-ink-faint">
-              Currently with
+              {t("ct.currentlyWith")}
             </p>
             <p className="text-[20px] font-semibold text-ink">
               {kase.assignedOwner}
             </p>
             <p className="mt-1 text-[16px] text-ink-soft">
-              They will contact you from a number you can verify on this site.
-              Nobody will ask you for an OTP or a payment.
+              {t("ct.contactNote")}
             </p>
           </Card>
         ) : null}
@@ -207,9 +208,7 @@ export function CaseTracker({ caseId }: { caseId: string }) {
               <div className="mt-3">
                 {escalated ? (
                   <p className="rounded-xl border border-pending/30 bg-pending-soft p-4 text-[16px] text-ink">
-                    Escalated. The missed deadline was attached automatically as
-                    evidence — you didn&apos;t have to find anyone&apos;s phone
-                    number.
+                    {t("ct.escalated")}
                   </p>
                 ) : (
                   <Button
@@ -220,7 +219,7 @@ export function CaseTracker({ caseId }: { caseId: string }) {
                       setEscalated(true);
                     }}
                   >
-                    ⚡ Escalate — this deadline is at risk
+                    ⚡ {t("ct.escalate")}
                   </Button>
                 )}
               </div>
@@ -232,12 +231,12 @@ export function CaseTracker({ caseId }: { caseId: string }) {
         <Card className="mt-5">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="text-[18px] font-semibold text-ink">
-              Getting your money back
+              {t("ct.gettingBack")}
             </p>
             {kase.restoration.autoFiled ? (
-              <Chip tone="held">Filed for you</Chip>
+              <Chip tone="held">{t("ct.filedForYou")}</Chip>
             ) : (
-              <Chip>Not started</Chip>
+              <Chip>{t("ct.notStarted")}</Chip>
             )}
           </div>
           <p className="mt-2 text-[16px] text-ink-soft">
@@ -257,7 +256,7 @@ export function CaseTracker({ caseId }: { caseId: string }) {
         {cluster ? (
           <Card className="mt-5 border-primary/25 bg-primary-soft">
             <p className="text-[17px] font-semibold text-ink">
-              You are one of {cluster.reports} people
+              {t("ct.notAlone")} {cluster.reports} {t("ct.notAloneSub")}
             </p>
             <p className="mt-1 text-[16px] text-ink-soft">
               All linked to cluster {cluster.clusterId}. One investigation
@@ -268,13 +267,13 @@ export function CaseTracker({ caseId }: { caseId: string }) {
         ) : null}
 
         {/* What we understood + add details */}
-        <div className="mt-5">
+        <div id="add-details" className="mt-5 scroll-mt-24">
           <CaseIntake kase={kase} />
         </div>
 
         {/* Timeline */}
         <h2 className="mt-8 text-[22px] font-bold text-ink">
-          Everything that has happened
+          {t("ct.timeline")}
         </h2>
         <ol className="mt-4 space-y-0">
           {[...kase.timeline].reverse().map((e, i, arr) => (

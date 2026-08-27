@@ -76,10 +76,10 @@ export default function BlockedPage() {
           </p>
           <div className="mt-5 flex flex-wrap gap-3">
             <Link
-              href="/dashboard"
+              href="/login"
               className="press inline-flex min-h-[52px] items-center gap-2 rounded-[10px] bg-primary px-6 text-[17px] font-semibold text-primary-on shadow-sm hover:bg-primary-hover"
             >
-              {t("frozen.checkHolds")}
+              {t("lg.h1")}
               <IconArrow className="h-5 w-5" />
             </Link>
             <Link

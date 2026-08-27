@@ -29,7 +29,7 @@ const NAV = [
   { href: "/help", key: "nav.help" },
 ] as const;
 
-const BUILD_LINK = { href: "/how-built", label: "How it’s built" } as const;
+const BUILD_LINK = { href: "/how-built", key: "nav.built" } as const;
 
 export function SiteHeader() {
   const pathname = usePathname();
@@ -162,7 +162,7 @@ export function SiteHeader() {
                       : "border-transparent text-ink-soft hover:border-line-strong hover:text-ink",
                   )}
                 >
-                  {BUILD_LINK.label}
+                  {t(BUILD_LINK.key)}
                 </Link>
               </li>
             </ul>

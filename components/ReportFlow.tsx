@@ -345,10 +345,11 @@ export function ReportFlow({ config }: { config: KindConfig }) {
                       identifier: identified.value,
                       scam: config.kind,
                     });
-                    if (anonymous && chosen) {
+                    if (chosen) {
                       saveAnonymousClaim({
                         token,
                         caseId,
+                        anonymous,
                         kind: config.kind,
                         situation: chosen.label,
                         filedAt: new Date().toISOString(),
@@ -428,7 +429,7 @@ export function ReportFlow({ config }: { config: KindConfig }) {
                 {t("rp.reportOpen")}
               </Chip>
               <p className="mt-3 text-[20px] font-bold text-ink">
-                {anonymous ? t("rp.recordedAnon") : `${caseId}`}
+                  {anonymous ? t("rp.recordedAnon") : `${caseId}`}
               </p>
 
               {anonymous ? (
@@ -468,7 +469,10 @@ export function ReportFlow({ config }: { config: KindConfig }) {
                 <Button href="/learn" variant="secondary">
                   {t("rp.howScamWorks")}
                 </Button>
-                <Button href="/dashboard" variant="secondary">
+                <Button
+                  href={`/dashboard?code=${encodeURIComponent(anonymous ? token : caseId)}`}
+                  variant="secondary"
+                >
                   {t("rp.trackIt")}
                 </Button>
               </div>

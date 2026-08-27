@@ -32,12 +32,12 @@ test.describe("harassment report", () => {
     await expect(page.getByText(/Recorded without your name/i)).toBeVisible({
       timeout: 20_000,
     });
-    // The token is the only route back to an anonymous report.
-    await expect(page.getByText(/only way back to this report/i)).toBeVisible();
+    // The prototype is honest that this receipt is browser-local.
+    await expect(page.getByText(/only in this browser/i)).toBeVisible();
 
     const token = (await page.getByText(/^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/).textContent())!;
     await page.getByRole("link", { name: /Track it/i }).click();
-    await page.getByLabel(/Anonymous tracking code/i).fill(token);
+    await page.getByLabel(/Tracking code or case ID/i).fill(token);
     await page.getByRole("button", { name: /Find my report/i }).click();
 
     await expect(page.getByText(token)).toBeVisible();
@@ -46,9 +46,20 @@ test.describe("harassment report", () => {
 
     // The anonymous receipt survives a refresh without becoming a login.
     await page.reload();
-    await page.getByLabel(/Anonymous tracking code/i).fill(token);
+    await page.getByLabel(/Tracking code or case ID/i).fill(token);
     await page.getByRole("button", { name: /Find my report/i }).click();
     await expect(page.getByText(token)).toBeVisible();
+  });
+
+  test("a named report can be reopened by its case ID", async ({ page }) => {
+    await page.goto("/report/impersonation");
+    await page.getByRole("button", { name: /fake profile using my name/i }).click();
+    await page.locator("#where").fill("instagram.com/demo_profile");
+    await page.getByRole("button", { name: /Getting the fake account suspended/i }).click();
+    await expect(page.getByText(/^SHY-/)).toBeVisible({ timeout: 20_000 });
+    const caseId = (await page.getByText(/^SHY-/).textContent())!;
+    await page.getByRole("link", { name: /Track it/i }).click();
+    await expect(page.getByText(caseId)).toBeVisible();
   });
 
   test("takedown notices are dispatched to platforms", async ({ page }) => {

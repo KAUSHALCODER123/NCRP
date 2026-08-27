@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useMemo, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { Button, Card, Chip, Shell, TopBar } from "@/components/ui";
 import { formatPaise } from "@/lib/money";
@@ -23,17 +23,33 @@ export default function DashboardPage() {
   const allLiens = useStore((s) => s.liens);
   const logout = useStore((s) => s.logout);
   const anonymousClaims = useStore((s) => s.anonymousClaims);
-  const [trackingCode, setTrackingCode] = useState("");
-  const [searchedCode, setSearchedCode] = useState<string | null>(null);
+  const queryCode = useSyncExternalStore(
+    () => () => {},
+    () => new URLSearchParams(window.location.search).get("code") ?? "",
+    () => "",
+  );
+  const [trackingCode, setTrackingCode] = useState<string | null>(null);
+  const [searchedCode, setSearchedCode] = useState<string | null | undefined>(
+    undefined,
+  );
+  const visibleCode = trackingCode ?? queryCode.toUpperCase();
+  const effectiveSearch = searchedCode === undefined ? queryCode : searchedCode;
 
-  const normalisedCode = searchedCode?.trim().toUpperCase() ?? "";
-  const anonymousClaim = normalisedCode
-    ? anonymousClaims.find((claim) => claim.token === normalisedCode)
+  const normalisedCode = effectiveSearch?.trim().toUpperCase() ?? "";
+  const reportClaim = normalisedCode
+    ? anonymousClaims.find(
+        (claim) =>
+          claim.token === normalisedCode || claim.caseId.toUpperCase() === normalisedCode,
+      )
     : undefined;
+  const financialCase = normalisedCode
+    ? allCases.find((item) => item.id.toUpperCase() === normalisedCode)
+    : undefined;
+  const found = reportClaim ?? financialCase;
 
   function trackAnonymous(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setSearchedCode(trackingCode);
+    setSearchedCode(visibleCode);
   }
 
   const cases = useMemo(
@@ -78,7 +94,7 @@ export default function DashboardPage() {
               </p>
               <input
                 id="tracking-code"
-                value={trackingCode}
+                value={visibleCode}
                 onChange={(event) => {
                   setTrackingCode(event.target.value.toUpperCase());
                   setSearchedCode(null);
@@ -88,33 +104,50 @@ export default function DashboardPage() {
                 spellCheck={false}
                 className="data mt-4 w-full rounded-[10px] border border-line-strong bg-surface p-4 text-[18px] uppercase tracking-[0.08em] focus:border-primary focus:outline-none"
               />
-              <Button type="submit" className="mt-4" disabled={!trackingCode.trim()}>
+              <Button type="submit" className="mt-4" disabled={!visibleCode.trim()}>
                 {t("db.findReport")}
               </Button>
             </form>
           </Card>
 
-          {searchedCode && anonymousClaim ? (
+          {effectiveSearch && reportClaim ? (
             <Card className="mt-4 border-secondary-border bg-secondary-soft">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <span className="data text-[16px] font-semibold text-ink-soft">
-                  {anonymousClaim.token}
+                  {reportClaim.anonymous ? reportClaim.token : reportClaim.caseId}
                 </span>
                 <Chip tone="held">{t("rp.reportOpen")}</Chip>
               </div>
               <p className="mt-3 text-[20px] font-bold text-ink">
-                {anonymousClaim.situation}
+                {reportClaim.situation}
               </p>
               <p className="mt-1 text-[16px] text-ink-soft">
-                {t("db.noticesSent")} {anonymousClaim.noticeTargets.length} · {t("db.awaitingAssignment")}
+                {t("db.noticesSent")} {reportClaim.noticeTargets.length} · {t("db.awaitingAssignment")}
               </p>
               <p className="data mt-3 text-[14px] text-ink-faint">
-                {new Date(anonymousClaim.filedAt).toLocaleString()}
+                {new Date(reportClaim.filedAt).toLocaleString()}
               </p>
             </Card>
           ) : null}
 
-          {searchedCode && !anonymousClaim ? (
+          {effectiveSearch && financialCase ? (
+            <Card className="mt-4 border-secondary-border bg-secondary-soft">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="data text-[16px] font-semibold text-ink-soft">
+                  {financialCase.id}
+                </span>
+                <Chip tone="held">{t("rp.reportOpen")}</Chip>
+              </div>
+              <p className="mt-3 text-[20px] font-bold text-ink">
+                {formatPaise(financialCase.transaction?.amountPaise ?? 0)} reported
+              </p>
+              <Button href={`/case/${financialCase.id}`} className="mt-4">
+                {t("rp.trackIt")}
+              </Button>
+            </Card>
+          ) : null}
+
+          {effectiveSearch && !found ? (
             <p role="alert" className="mt-4 rounded-[10px] border border-danger/30 bg-danger-soft p-4 text-[16px] text-ink">
               {t("db.codeNotFound")}
             </p>
@@ -165,15 +198,14 @@ export default function DashboardPage() {
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <span className="text-[19px] font-semibold text-ink">
-                      {formatPaise(l.amountPaise)} on hold
+                      {formatPaise(l.amountPaise)} {t("db.onHold")}
                     </span>
                     <Chip tone={l.liftedAt ? "held" : "pending"}>
                       {l.liftedAt ? t("db.lifted") : t("db.actionAvailable")}
                     </Chip>
                   </div>
                   <p className="mt-1 text-[16px] text-ink-soft">
-                    {formatPaise(l.balancePaise)} of your balance is unaffected
-                    and fully usable.
+                    {formatPaise(l.balancePaise)} {t("db.unaffected")}
                   </p>
                   <p className="data mt-2 text-[15px] text-ink-faint">
                     {l.accountMask} · {l.institutionName}

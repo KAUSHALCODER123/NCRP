@@ -147,11 +147,19 @@ export default function FreezePage() {
       : undefined,
   );
 
-  const canDispatch = amountCheck.ok && bank.trim().length > 0;
+  const canDispatch =
+    amountCheck.ok && bank.trim().length > 0 && mobileCheck.ok;
 
   /* ---- Dispatch: freeze first, verify alongside -------------------- */
   function dispatch() {
-    if (!canDispatch || caseId) return;
+    if (caseId) return;
+
+    if (duplicate) {
+      router.push(`/case/${duplicate.id}#add-details`);
+      return;
+    }
+
+    if (!canDispatch) return;
 
     const txRail: TxRail = nonBank ? "wallet" : (rail as TxRail);
     const c = createCase({
@@ -530,8 +538,8 @@ export default function FreezePage() {
                 <p className="mt-1 text-[16px] text-ink-soft">
                   Reference {utrCheck.value} is on case{" "}
                   <strong className="data">{duplicate.id}</strong>. Anything you
-                  add here will be merged into that case rather than starting a
-                  second one — duplicate freeze requests slow the bank down.
+                  add here belongs on that case. We will open it instead of
+                  sending a second freeze request to the bank.
                 </p>
                 <Button href={`/case/${duplicate.id}`} variant="secondary" className="mt-3">
                   Open that case
@@ -539,7 +547,7 @@ export default function FreezePage() {
               </Card>
             ) : null}
 
-            <Card>
+            {!duplicate ? <Card>
               <div className="mb-4">
                 <label
                   htmlFor="mobile"
@@ -574,14 +582,31 @@ export default function FreezePage() {
                     {mobileCheck.error}
                   </p>
                 ) : null}
+                <div className="mt-3 rounded-lg border border-primary/20 bg-primary-soft p-3">
+                  <p className="text-[15px] leading-relaxed text-ink-soft">
+                    Demo only — do not enter a real phone number. No SMS is sent
+                    and this number never leaves your browser.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setMobile("9876543210")}
+                    className="mt-2 min-h-[44px] rounded-lg border border-line-strong bg-surface px-4 text-[15px] font-semibold text-primary-text"
+                  >
+                    Use demo number 98765 43210
+                  </button>
+                </div>
               </div>
               <p className="text-[16px] text-ink-soft">{t("fz.mobileSub")}</p>
-            </Card>
+            </Card> : null}
 
-            <Button className="w-full" disabled={!canDispatch} onClick={dispatch}>
-              {canDispatch
-                ? `${t("fz.submit")} · ${formatPaise(amountCheck.paise ?? 0)}`
-                : t("fz.submitBlocked")}
+            <Button className="w-full" disabled={!duplicate && !canDispatch} onClick={dispatch}>
+              {duplicate
+                ? "Open existing case — no second freeze"
+                : canDispatch
+                  ? `${t("fz.submit")} · ${formatPaise(amountCheck.paise ?? 0)}`
+                  : amountCheck.ok && bank.trim().length > 0
+                    ? "Enter the demo mobile number to continue"
+                    : t("fz.submitBlocked")}
             </Button>
           </div>
         ) : null}
